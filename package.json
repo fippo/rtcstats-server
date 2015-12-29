@@ -1,0 +1,23 @@
+{
+  "name": "snoop-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "websocket.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opentok/snoop-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/opentok/snoop-server/issues"
+  },
+  "homepage": "https://github.com/opentok/snoop-server#readme",
+  "dependencies": {
+    "pem": "^1.8.1",
+    "ws": "^0.8.1"
+  }
+}
