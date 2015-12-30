@@ -1,5 +1,8 @@
 var pem = require('pem');
 var fs = require('fs');
+var config = require('config');
+
+console.log(config)
 
 var WebSocketServer = require('ws').Server;
 
