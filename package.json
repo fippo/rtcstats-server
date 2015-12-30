@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/opentok/snoop-server#readme",
   "dependencies": {
+    "aws-sdk": "^2.2.26",
     "config": "^1.17.1",
     "js-yaml": "^3.4.6",
     "pem": "^1.8.1",

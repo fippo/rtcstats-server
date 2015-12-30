@@ -1,8 +1,11 @@
 server:
-    port: 3000
+    port: 3002
 
 s3:
-
+    accessKeyId: AKIAJDZALGBMGIYPVPAQ
+    secretAccessKey: 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
+    region: us-west-2
+    bucket: snoop-data
 
 appenders:
     - type: file

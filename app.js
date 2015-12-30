@@ -2,7 +2,9 @@ var pem = require('pem');
 var fs = require('fs');
 var config = require('config');
 
-console.log(config)
+var Store = require('./store')({
+  s3: config.get('s3')
+});
 
 var WebSocketServer = require('ws').Server;
 
@@ -19,7 +21,7 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
         key: keys.serviceKey,
         cert: keys.certificate
     });
-    server.listen(3000);
+    server.listen(config.get('server').port);
     wss = new WebSocketServer({ server: server });
 
     wss.on('connection', function(client) {
@@ -42,7 +44,6 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
             switch(data[0]) {
             case 'getStats':
                 console.log(clientid, 'getStats', data[1]);
-                //fs.writeFileSync('stats.json', JSON.stringify(data[2]));
                 break;
             case 'getUserMedia':
             case 'navigator.mediaDevices.getUserMedia':
@@ -61,6 +62,13 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
                 });
                 break;
             }
+        });
+
+        client.on('close', function() {
+          console.log('closed');
+
+          Store.put(clientid, JSON.stringify(db[referer][clientid]));
+          delete db[referer][clientid];
         });
     });
 });
