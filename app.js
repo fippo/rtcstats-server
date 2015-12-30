@@ -11,6 +11,22 @@ var WebSocketServer = require('ws').Server;
 var server = null;
 var wss = null;
 
+// dumps all peerconnections to Store
+function dump(url, clientid) {
+    var fmt = {
+        PeerConnections: {},
+        url: url
+    };
+    Object.keys(db[url][clientid]).forEach(function(connid) {
+        var conn = client.peerConnections[connid];
+        fmt.PeerConnections[connid] = {
+            updateLog: conn.updateLog
+        };
+    });
+    Store.put(clientid, JSON.stringify(fmt));
+    delete db[url][clientid];
+}
+
 var db = {};
 pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
     if (err) {
@@ -25,7 +41,10 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
     wss = new WebSocketServer({ server: server });
 
     wss.on('connection', function(client) {
+        // the url the client is coming from
         var referer = client.upgradeReq.headers['origin'] + client.upgradeReq.url;
+        // TODO: check against known/valid urls
+
         var ua = client.upgradeReq.headers['user-agent'];
         var clientid = '1'; // FIXME
         // TODO: separate origin and pathname (url)
@@ -65,10 +84,8 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
         });
 
         client.on('close', function() {
-          console.log('closed');
-
-          Store.put(clientid, JSON.stringify(db[referer][clientid]));
-          delete db[referer][clientid];
+            console.log('closed');
+            dump(referer, clientid);
         });
     });
 });
