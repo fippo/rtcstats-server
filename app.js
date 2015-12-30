@@ -1,6 +1,7 @@
 var pem = require('pem');
 var fs = require('fs');
 var config = require('config');
+var uuid = require('uuid');
 
 var Store = require('./store')({
   s3: config.get('s3')
@@ -27,7 +28,7 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
     wss.on('connection', function(client) {
         var referer = client.upgradeReq.headers['origin'] + client.upgradeReq.url;
         var ua = client.upgradeReq.headers['user-agent'];
-        var clientid = '1'; // FIXME
+        var clientid = uuid.v4();
         // TODO: separate origin and pathname (url)
         console.log(referer);
 
