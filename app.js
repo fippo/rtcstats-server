@@ -18,7 +18,8 @@ function dump(url, clientid) {
         PeerConnections: {},
         url: url
     };
-    Object.keys(db[url][clientid]).forEach(function(connid) {
+    var client = db[url][clientid];
+    Object.keys(client.peerConnections).forEach(function(connid) {
         var conn = client.peerConnections[connid];
         fmt.PeerConnections[connid] = {
             updateLog: conn.updateLog
