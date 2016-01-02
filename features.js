@@ -49,6 +49,31 @@ function feature_ICEConnectedOrCompleted(peerConnectionLog) {
     }).length > 0;
 }
 
+// is the session using ICE lite?
+function feature_ICELite(peerConnectionLog) {
+    var usingIceLite = false;
+    peerConnectionLog.forEach(function(entry) {
+        if (!usingIceLite && event.type === 'setRemoteDescription') {
+            if (event.value.sdp && event.value.sdp.indexOf('\r\na=ice-lite\r\n') {
+                usingIceLite = true;
+                }
+        }
+    });
+    return usingIceLite;
+}
+
+function feature_ICERestart(peerConnectionLog) {
+    var iceRestart = false;
+    peerConnectionLog.forEach(function(entry) {
+        if (!iceRestart && event.type === 'createOffer') {
+            if (event.value.iceRestart) {
+                usingIceLite = true;
+            }
+        }
+    });
+    return false;
+}
+
 // was the signaling state stable at least once?
 function feature_SignalingStableAtLeastOnce(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
@@ -61,6 +86,16 @@ function feature_Multistream(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.type === 'onaddstream';
     }).length > 1;
+}
+
+// maximum number of concurrent streams
+function feature_MaxStreams(peerConnectionLog) {
+    var max = 0;
+    peerConnectionLog.forEach(function(entry) {
+        if (event.type === 'onaddstream') max++;
+        else if (event.type === 'onremovestream' && max > 0) max--;
+    });
+    return max;
 }
 
 // was there a peerconnection api failure?
