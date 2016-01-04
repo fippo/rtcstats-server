@@ -1,6 +1,6 @@
 // https://en.wikipedia.org/wiki/Feature_extraction for peerconnection API traces.
 module.exports = function(peerConnectionLog) {
-}
+};
 
 function filterIceConnectionStateChange(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
@@ -54,7 +54,7 @@ function feature_ICELite(peerConnectionLog) {
     var usingIceLite = false;
     peerConnectionLog.forEach(function(entry) {
         if (!usingIceLite && event.type === 'setRemoteDescription') {
-            if (event.value.sdp && event.value.sdp.indexOf('\r\na=ice-lite\r\n') {
+            if (event.value.sdp && event.value.sdp.indexOf('\r\na=ice-lite\r\n')) {
                 usingIceLite = true;
                 }
         }
@@ -115,4 +115,46 @@ function feature_PeerConnectionAddIceCandidateFailure(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.method === 'AddIceCandidateOnFailure';
     }).length > 0;
+}
+
+// how long does it take to establish the connection?
+// TODO: also figure out connection type so we don't lump relayed and non-relayed connections
+function connectionTime(peerConnectionLog) {
+    var first;
+    var second;
+    for (first = 0; first < peerConnectionLog.length; first++) {
+        if (peerConnectionLog[first].method === 'oniceconnectionstatechange' &&
+            peerConnectionLog[first].value === 'checking') break;
+    }
+    if (first < peerConnectionLog.length) {
+        for (second = first + 1; second < peerConnectionLog.length; second++) {
+            if (peerConnectionLog[second].method === 'oniceconnectionstatechange' &&
+                (peerConnectionLog[second].value === 'connected' || peerConnectionLog[second].value === 'completed')) break;
+        }
+        if (second < peerConnectionLog) {
+            return (new Date(peerConnectionLog[second].time).getTime() - 
+                new Date(peerConnectionLog[first].time).getTime());
+        }
+    }
+    return -1;
+}
+
+// how long does it take to create a local offer/answer (mostly DTLS key generation)
+function localCreateDelay(peerConnectionLog) {
+    var first;
+    var second;
+    for (first = 0; first < peerConnectionLog.length; first++) {
+        if (peerConnectionLog[first].method === 'CreateOffer' ||
+            peerConnectionLog[first].method === 'CreateAnswer') break;
+    }
+    if (first < peerConnectionLog.length) {
+        for (second = first + 1; second < peerConnectionLog.length; second++) {
+            if (peerConnectionLog[second].method === peerConnectionLog[first].method + 'OnSuccess') break;
+        }
+        if (second < peerConnectionLog) {
+            return (new Date(peerConnectionLog[second].time).getTime() - 
+                new Date(peerConnectionLog[first].time).getTime());
+        }
+    }
+    return -1;
 }
