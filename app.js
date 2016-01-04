@@ -13,6 +13,9 @@ var server = null;
 var wss = null;
 
 // dumps all peerconnections to Store
+// The format reensembles chrome://webrtc-internals (minus google names)
+// and can be imported again using tools like 
+// https://fippo.github.io/webrtc-dump-importer
 function dump(url, clientid) {
     var fmt = {
         PeerConnections: {},
@@ -79,7 +82,7 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
                 db[referer][clientid].peerConnections[data[1]].updateLog.push({
                     time: new Date(),
                     type: data[0],
-                    value: JSON.stringify(data[2])
+                    value: data[2]
                 });
                 break;
             }
