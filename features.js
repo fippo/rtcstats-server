@@ -15,7 +15,7 @@ module.exports = {
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
     feature_ICEGatheringComplete: function(peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'onicecandidate' && entry.value === 'null';
+            return entry.type === 'onicecandidate' && entry.value === null;
         }).length > 0;
     },
 
@@ -52,9 +52,9 @@ module.exports = {
         var usingIceLite = false;
         peerConnectionLog.forEach(function(entry) {
             if (!usingIceLite && entry.type === 'setRemoteDescription') {
-                if (entry.value.sdp && entry.value.sdp.indexOf('\r\na=ice-lite\r\n')) {
+                if (entry.value.sdp && entry.value.sdp.indexOf('\r\na=ice-lite\r\n') !== -1) {
                     usingIceLite = true;
-                    }
+                }
             }
         });
         return usingIceLite;
@@ -99,7 +99,7 @@ module.exports = {
     // was there a peerconnection api failure?
     feature_PeerConnectionSetDescriptionFailure: function(peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
-            switch(entry.method) {
+            switch(entry.type) {
                 case 'SetLocalDescriptionOnFailure':
                 case 'SetRemoteDescriptionOnFailure':
                     return true;
@@ -111,7 +111,7 @@ module.exports = {
     // was there an addIceCandidate failure
     feature_PeerConnectionAddIceCandidateFailure: function(peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
-            return entry.method === 'AddIceCandidateOnFailure';
+            return entry.type === 'AddIceCandidateOnFailure';
         }).length > 0;
     },
 
@@ -121,15 +121,15 @@ module.exports = {
         var first;
         var second;
         for (first = 0; first < peerConnectionLog.length; first++) {
-            if (peerConnectionLog[first].method === 'oniceconnectionstatechange' &&
+            if (peerConnectionLog[first].type === 'oniceconnectionstatechange' &&
                 peerConnectionLog[first].value === 'checking') break;
         }
         if (first < peerConnectionLog.length) {
             for (second = first + 1; second < peerConnectionLog.length; second++) {
-                if (peerConnectionLog[second].method === 'oniceconnectionstatechange' &&
+                if (peerConnectionLog[second].type === 'oniceconnectionstatechange' &&
                     (peerConnectionLog[second].value === 'connected' || peerConnectionLog[second].value === 'completed')) break;
             }
-            if (second < peerConnectionLog) {
+            if (second < peerConnectionLog.length) {
                 return (new Date(peerConnectionLog[second].time).getTime() - 
                     new Date(peerConnectionLog[first].time).getTime());
             }
@@ -142,14 +142,14 @@ module.exports = {
         var first;
         var second;
         for (first = 0; first < peerConnectionLog.length; first++) {
-            if (peerConnectionLog[first].method === 'CreateOffer' ||
-                peerConnectionLog[first].method === 'CreateAnswer') break;
+            if (peerConnectionLog[first].type === 'createOffer' ||
+                peerConnectionLog[first].type === 'createAnswer') break;
         }
         if (first < peerConnectionLog.length) {
             for (second = first + 1; second < peerConnectionLog.length; second++) {
-                if (peerConnectionLog[second].method === peerConnectionLog[first].method + 'OnSuccess') break;
+                if (peerConnectionLog[second].type === peerConnectionLog[first].type + 'OnSuccess') break;
             }
-            if (second < peerConnectionLog) {
+            if (second < peerConnectionLog.length) {
                 return (new Date(peerConnectionLog[second].time).getTime() - 
                     new Date(peerConnectionLog[first].time).getTime());
             }
