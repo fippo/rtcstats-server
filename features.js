@@ -12,17 +12,17 @@ function filterSignalingStateChange(peerConnectionLog) {
 }
 
 module.exports = {
-    // was an ice failure detected.
-    feature_ICEFailure: function(peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
-        }).length > 0;
-    },
-
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
     feature_ICEGatheringComplete: function(peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'onicecandidate' && entry.value === 'null';
+        }).length > 0;
+    },
+
+    // was an ice failure detected.
+    feature_ICEFailure: function(peerConnectionLog) {
+        return peerConnectionLog.filter(function(entry) {
+            return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
         }).length > 0;
     },
 
