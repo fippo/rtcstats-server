@@ -48,7 +48,7 @@ module.exports = {
     },
 
     // is the session using ICE lite?
-    feature_ICELite: function(peerConnectionLog) {
+    feature_usingICELite: function(peerConnectionLog) {
         var usingIceLite = false;
         peerConnectionLog.forEach(function(entry) {
             if (!usingIceLite && entry.type === 'setRemoteDescription') {
@@ -58,6 +58,34 @@ module.exports = {
             }
         });
         return usingIceLite;
+    },
+
+    // is the session using rtcp-mux?
+    feature_usingRTCPMux: function(peerConnectionLog) {
+        var usingRTCPMux = false;
+        // search for SLD/SRD with type = answer and look for a=rtcp-mux
+        peerConnectionLog.forEach(function(entry) {
+            if (!usingRTCPMux && (entry.type === 'setRemoteDescription' || entry.type === 'setLocalDescription')) {
+                if (entry.value.type === 'answer' && entry.value.sdp && entry.value.sdp.indexOf('\r\na=rtcp-mux\r\n') !== -1) {
+                    usingRTCPMux = true;
+                }
+            }
+        });
+        return usingRTCPMux;
+    },
+
+    // is the session using BUNDLE?
+    feature_usingBundle: function(peerConnectionLog) {
+        var usingBundle = false;
+        // search for SLD/SRD with type = answer and look for a=GROUP
+        peerConnectionLog.forEach(function(entry) {
+            if (!usingRTCPMux && (entry.type === 'setRemoteDescription' || entry.type === 'setLocalDescription')) {
+                if (entry.value.type === 'answer' && entry.value.sdp && entry.value.sdp.indexOf('\r\na=group:BUNDLE ') !== -1) {
+                    usingBundle = true;
+                }
+            }
+        });
+        return usingBundle;
     },
 
     feature_ICERestart: function(peerConnectionLog) {
