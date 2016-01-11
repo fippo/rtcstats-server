@@ -229,4 +229,27 @@ module.exports = {
         }
         return -1;
     },
+    // determine media types used in session.
+    feature_mediaTypes: function(peerConnectionLog) {
+        // looking for SRD/SLD is easier than tracking createDataChannel + addStreams
+        // TODO: also look for value.type=answer and handle rejected m-lines?
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'setLocalDescription' ||
+                peerConnectionLog[i].type === 'setRemoteDescription') break;
+        }
+        if (i < peerConnectionLog.length) {
+            var desc = peerConnectionLog[i].value;
+            if (desc && desc.sdp) {
+                var mediaTypes = {};
+                var lines = desc.sdp.split('\n').filter(function(line) {
+                    return line.indexOf('m=') === 0;
+                });
+                lines.forEach(function(line) {
+                    mediaTypes[line.split(' ', 1)[0].substr(2)] = true;
+                });
+                return Object.keys(mediaTypes).sort().join(';');
+            }
+        }
+        return 'unknown';
+    }
 };
