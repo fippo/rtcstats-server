@@ -252,12 +252,15 @@ module.exports = {
         }
         return 'unknown';
     },
+
+    // mean audio level sent. Between 0 and 1
     feature_statsMeanAudioLevel: function(peerConnectionLog, stats) {
         var audioLevels = {};
-        stats.forEach(function(statsReport) {
+        stats.forEach(function(entry) {
+            var statsReport = entry.value;
             // look for type track, remoteSource: false, audioLevel (0..1)
-            Object.keys(statsReport.value).forEach(function(id) {
-                var report = statsReport.value[id];
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
                 if (report.type === 'track' && report.remoteSource === false && report.audioLevel !== undefined) {
                     if (!audioLevels[id]) audioLevels[id] = [];
                     audioLevels[id].push(report.audioLevel);
@@ -273,6 +276,76 @@ module.exports = {
         if (means.length) {
             return means[0];
         }
+        return 0;
+    },
+
+    // how did the selected candidate pair change? Could happen e.g. because of an ice restart
+    // so there should be a strong correlation.
+    feature_numberOfCandidatePairChanges: function(peerConnectionLog, stats) {
+        var selectedCandidatePairList = [null];
+        for (var i = 0; i < stats.length; i++) {
+            var statsReport = stats[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    var pair = report.localCandidateId + ' ' + report.remoteCandidateId;
+                    if (pair !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
+                        selectedCandidatePairList.push(pair);
+                    }
+                    /* this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
+                     * receiver during  ice restart but that is not what we are looking for.
+                    if (report.id !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
+                        selectedCandidatePairList.push(report.id);
+                        console.log('candidate pair change', i, stats[i].time, report.id);
+                        console.log('local', statsReport[report.localCandidateId].ipAddress,
+                            statsReport[report.localCandidateId].portNumber,
+                            'remote', statsReport[report.remoteCandidateId].ipAddress,
+                            statsReport[report.remoteCandidateId].portNumber);
+                    }
+                    */
+                }
+            });
+        }
+        /*
+        peerConnectionLog.forEach(function(entry) {
+            if (entry.type === 'createOffer') {
+                if (entry.value && entry.value.iceRestart) {
+                    console.log('icerestart', entry.time);
+                }
+            }
+        });
+        */
+        return selectedCandidatePairList.length - 1;
+    },
+
+    // experimental fippo feature, don't use this
+    feature_flakyActive: function(peerConnectionLog, stats) {
+        var selectedCandidatePairList = [null];
+        for (var i = 0; i < stats.length; i++) {
+            var statsReport = stats[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    /* this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
+                     * receiver during  ice restart but that is not what we are looking for. */
+                    if (report.id !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
+                        selectedCandidatePairList.push(report.id);
+                        console.log('candidate pair change', i, stats[i].time, report.id);
+                        console.log('local', statsReport[report.localCandidateId].ipAddress,
+                            statsReport[report.localCandidateId].portNumber,
+                            'remote', statsReport[report.remoteCandidateId].ipAddress,
+                            statsReport[report.remoteCandidateId].portNumber);
+                    }
+                }
+            });
+        }
+        peerConnectionLog.forEach(function(entry) {
+            if (entry.type === 'createOffer') {
+                if (entry.value && entry.value.iceRestart) {
+                    console.log('icerestart', entry.time);
+                }
+            }
+        });
         return 0;
     }
 };
