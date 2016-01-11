@@ -13,21 +13,21 @@ function filterSignalingStateChange(peerConnectionLog) {
 
 module.exports = {
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
-    feature_ICEGatheringComplete: function(peerConnectionLog) {
+    feature_ICEGatheringComplete: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'onicecandidate' && entry.value === null;
         }).length > 0;
     },
 
     // was an ice failure detected.
-    feature_ICEFailure: function(peerConnectionLog) {
+    feature_ICEFailure: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
         }).length > 0;
     },
 
     // was an ice failure after a successful connection detected.
-    feature_ICEFailureSubsequent: function(peerConnectionLog) {
+    feature_ICEFailureSubsequent: function(peerConnectionLog, stats) {
         var log = filterIceConnectionStateChange(peerConnectionLog);
         var failures = log.filter(function(entry) {
             return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
@@ -41,14 +41,14 @@ module.exports = {
     },
 
     // did ice connect/complete?
-    feature_ICEConnectedOrCompleted: function(peerConnectionLog) {
+    feature_ICEConnectedOrCompleted: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed');
         }).length > 0;
     },
 
     // is the session using ICE lite?
-    feature_usingICELite: function(peerConnectionLog) {
+    feature_usingICELite: function(peerConnectionLog, stats) {
         var usingIceLite = false;
         peerConnectionLog.forEach(function(entry) {
             if (!usingIceLite && entry.type === 'setRemoteDescription') {
@@ -61,7 +61,7 @@ module.exports = {
     },
 
     // is the session using rtcp-mux?
-    feature_usingRTCPMux: function(peerConnectionLog) {
+    feature_usingRTCPMux: function(peerConnectionLog, stats) {
         var usingRTCPMux = false;
         // search for SLD/SRD with type = answer and look for a=rtcp-mux
         peerConnectionLog.forEach(function(entry) {
@@ -75,7 +75,7 @@ module.exports = {
     },
 
     // is the session using BUNDLE?
-    feature_usingBundle: function(peerConnectionLog) {
+    feature_usingBundle: function(peerConnectionLog, stats) {
         var usingBundle = false;
         // search for SLD/SRD with type = answer and look for a=GROUP
         peerConnectionLog.forEach(function(entry) {
@@ -88,7 +88,7 @@ module.exports = {
         return usingBundle;
     },
 
-    feature_ICERestart: function(peerConnectionLog) {
+    feature_ICERestart: function(peerConnectionLog, stats) {
         var iceRestart = false;
         peerConnectionLog.forEach(function(entry) {
             if (!iceRestart && entry.type === 'createOffer') {
@@ -101,21 +101,21 @@ module.exports = {
     },
 
     // was the signaling state stable at least once?
-    feature_SignalingStableAtLeastOnce: function(peerConnectionLog) {
+    feature_SignalingStableAtLeastOnce: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'onsignalingstatechange' && entry.value === 'stable';
         }).length > 0;
     },
 
     // was more than one remote stream added?
-    feature_Multistream: function(peerConnectionLog) {
+    feature_Multistream: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'onaddstream';
         }).length > 1;
     },
 
     // maximum number of concurrent streams
-    feature_MaxStreams: function(peerConnectionLog) {
+    feature_MaxStreams: function(peerConnectionLog, stats) {
         var max = 0;
         peerConnectionLog.forEach(function(entry) {
             if (entry.type === 'onaddstream') max++;
@@ -125,7 +125,7 @@ module.exports = {
     },
 
     // was there a peerconnection api failure?
-    feature_PeerConnectionSetDescriptionFailure: function(peerConnectionLog) {
+    feature_PeerConnectionSetDescriptionFailure: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             switch(entry.type) {
                 case 'SetLocalDescriptionOnFailure':
@@ -137,7 +137,7 @@ module.exports = {
     },
 
     // was there an addIceCandidate failure
-    feature_PeerConnectionAddIceCandidateFailure: function(peerConnectionLog) {
+    feature_PeerConnectionAddIceCandidateFailure: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'AddIceCandidateOnFailure';
         }).length > 0;
@@ -145,7 +145,7 @@ module.exports = {
 
     // how long does it take to establish the connection?
     // TODO: also figure out connection type so we don't lump relayed and non-relayed connections
-    feature_ConnectionTime: function(peerConnectionLog) {
+    feature_ConnectionTime: function(peerConnectionLog, stats) {
         var first;
         var second;
         for (first = 0; first < peerConnectionLog.length; first++) {
@@ -166,7 +166,7 @@ module.exports = {
     },
 
     // how long does it take to create a local offer/answer (mostly DTLS key generation)
-    feature_localCreateDelay: function(peerConnectionLog) {
+    feature_localCreateDelay: function(peerConnectionLog, stats) {
         var first;
         var second;
         for (first = 0; first < peerConnectionLog.length; first++) {
@@ -186,14 +186,14 @@ module.exports = {
     },
 
     // number of local ice candidates.
-    feature_numberOfLocalIceCandidates: function(peerConnectionLog) {
+    feature_numberOfLocalIceCandidates: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'onicecandidate' && entry.value;
         }).length;
     },
 
     // number of remote ice candidates.
-    feature_numberOfRemoteIceCandidates: function(peerConnectionLog) {
+    feature_numberOfRemoteIceCandidates: function(peerConnectionLog, stats) {
         var candsInSdp = -1;
         // needs sentinel to avoid adding candidates from subsequent generations.
         peerConnectionLog.forEach(function(entry) {
@@ -212,7 +212,7 @@ module.exports = {
     },
     
     // session duration, defined by ICE states.
-    feature_sessionDuration: function(peerConnectionLog) {
+    feature_sessionDuration: function(peerConnectionLog, stats) {
         var startTime = -1;
         var endTime = -1;
         peerConnectionLog.forEach(function(entry) {
@@ -230,7 +230,7 @@ module.exports = {
         return -1;
     },
     // determine media types used in session.
-    feature_mediaTypes: function(peerConnectionLog) {
+    feature_mediaTypes: function(peerConnectionLog, stats) {
         // looking for SRD/SLD is easier than tracking createDataChannel + addStreams
         // TODO: also look for value.type=answer and handle rejected m-lines?
         for (var i = 0; i < peerConnectionLog.length; i++) {
@@ -251,5 +251,28 @@ module.exports = {
             }
         }
         return 'unknown';
+    },
+    feature_statsMeanAudioLevel: function(peerConnectionLog, stats) {
+        var audioLevels = {};
+        stats.forEach(function(statsReport) {
+            // look for type track, remoteSource: false, audioLevel (0..1)
+            Object.keys(statsReport.value).forEach(function(id) {
+                var report = statsReport.value[id];
+                if (report.type === 'track' && report.remoteSource === false && report.audioLevel !== undefined) {
+                    if (!audioLevels[id]) audioLevels[id] = [];
+                    audioLevels[id].push(report.audioLevel);
+                }
+            });
+        });
+        var means = Object.keys(audioLevels).map(function(id) {
+            return audioLevels[id].reduce(function(a, b) {
+                return a + b;
+            }, 0) / audioLevels[id].length;
+        });
+        // TODO: support multiple local streams?
+        if (means.length) {
+            return means[0];
+        }
+        return 0;
     }
 };
