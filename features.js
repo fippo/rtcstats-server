@@ -79,7 +79,7 @@ module.exports = {
         var usingBundle = false;
         // search for SLD/SRD with type = answer and look for a=GROUP
         peerConnectionLog.forEach(function(entry) {
-            if (!usingRTCPMux && (entry.type === 'setRemoteDescription' || entry.type === 'setLocalDescription')) {
+            if (!usingBundle && (entry.type === 'setRemoteDescription' || entry.type === 'setLocalDescription')) {
                 if (entry.value.type === 'answer' && entry.value.sdp && entry.value.sdp.indexOf('\r\na=group:BUNDLE ') !== -1) {
                     usingBundle = true;
                 }
@@ -183,5 +183,50 @@ module.exports = {
             }
         }
         return -1;
-    }
+    },
+
+    // number of local ice candidates.
+    feature_numberOfLocalIceCandidates: function(peerConnectionLog) {
+        return peerConnectionLog.filter(function(entry) {
+            return entry.type === 'onicecandidate' && entry.value;
+        }).length;
+    },
+
+    // number of remote ice candidates.
+    feature_numberOfRemoteIceCandidates: function(peerConnectionLog) {
+        var candsInSdp = -1;
+        // needs sentinel to avoid adding candidates from subsequent generations.
+        peerConnectionLog.forEach(function(entry) {
+            if (candsInSdp === -1 && entry.type === 'setRemoteDescription') {
+                if (entry.value.sdp) {
+                    candsInSdp = entry.value.sdp.split('\n').filter(function (line) {
+                        return line.indexOf('a=candidate:') === 0;
+                    }).length;
+                }
+            }
+        });
+        if (candsInSdp === -1) candsInSdp = 0;
+        return candsInSdp + peerConnectionLog.filter(function(entry) {
+            return entry.type === 'addIceCandidate';
+        }).length;
+    },
+    
+    // session duration, defined by ICE states.
+    feature_sessionDuration: function(peerConnectionLog) {
+        var startTime = -1;
+        var endTime = -1;
+        peerConnectionLog.forEach(function(entry) {
+            if (entry.type === 'oniceconnectionstatechange') {
+                if (entry.value === 'checking') {
+                    startTime = new Date(entry.time).getTime();
+                } else if (entry.value === 'closed') {
+                    endTime = new Date(entry.time).getTime();
+                }
+            }
+        });
+        if (startTime > 0 && endTime > 0) {
+            return endTime - startTime;
+        }
+        return -1;
+    },
 };
