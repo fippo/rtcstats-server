@@ -279,6 +279,24 @@ module.exports = {
         return 0;
     },
 
+    // mean RTT of the selected candidate pair.
+    feature_statsMeanRoundTripTime: function(peerConnectionLog, stats) {
+        var rtts = [];
+        stats.forEach(function(entry) {
+            var statsReport = entry.value;
+            // look for type track, remoteSource: false, audioLevel (0..1)
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    rtts.push(report.roundTripTime);
+                }
+            });
+        });
+        return Math.floor(rtts.reduce(function(a, b) {
+            return a + b;
+        }, 0) / rtts.length);
+    },
+
     // how did the selected candidate pair change? Could happen e.g. because of an ice restart
     // so there should be a strong correlation.
     feature_numberOfCandidatePairChanges: function(peerConnectionLog, stats) {
