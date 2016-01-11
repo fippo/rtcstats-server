@@ -310,29 +310,9 @@ module.exports = {
                     if (pair !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
                         selectedCandidatePairList.push(pair);
                     }
-                    /* this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
-                     * receiver during  ice restart but that is not what we are looking for.
-                    if (report.id !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
-                        selectedCandidatePairList.push(report.id);
-                        console.log('candidate pair change', i, stats[i].time, report.id);
-                        console.log('local', statsReport[report.localCandidateId].ipAddress,
-                            statsReport[report.localCandidateId].portNumber,
-                            'remote', statsReport[report.remoteCandidateId].ipAddress,
-                            statsReport[report.remoteCandidateId].portNumber);
-                    }
-                    */
                 }
             });
         }
-        /*
-        peerConnectionLog.forEach(function(entry) {
-            if (entry.type === 'createOffer') {
-                if (entry.value && entry.value.iceRestart) {
-                    console.log('icerestart', entry.time);
-                }
-            }
-        });
-        */
         return selectedCandidatePairList.length - 1;
     },
 
