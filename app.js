@@ -24,7 +24,8 @@ function dump(url, clientid) {
     Object.keys(client.peerConnections).forEach(function(connid) {
         var conn = client.peerConnections[connid];
         fmt.PeerConnections[connid] = {
-            updateLog: conn.updateLog
+            updateLog: conn.updateLog,
+            stats: conn.stats
         };
     });
     Store.put(clientid, JSON.stringify(fmt));
@@ -62,9 +63,6 @@ function run(keys) {
             var data = JSON.parse(msg);
             console.log(data);
             switch(data[0]) {
-            case 'getStats':
-                console.log(clientid, 'getStats', data[1]);
-                break;
             case 'getUserMedia':
             case 'navigator.mediaDevices.getUserMedia':
                 break;
@@ -72,14 +70,22 @@ function run(keys) {
                 console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = {
-                        updateLog: []
+                        updateLog: [],
+                        stats: []
                     };
                 }
-                db[referer][clientid].peerConnections[data[1]].updateLog.push({
-                    time: new Date(),
-                    type: data[0],
-                    value: data[2]
-                });
+                if (data[0] === 'getStats') {
+                    db[referer][clientid].peerConnections[data[1]].stats.push({
+                        time: new Date(),
+                        value: data[2]
+                    });
+                } else {
+                    db[referer][clientid].peerConnections[data[1]].updateLog.push({
+                        time: new Date(),
+                        type: data[0],
+                        value: data[2]
+                    });
+                }
                 break;
             }
         });
@@ -115,7 +121,8 @@ process.on('SIGINT', function() {
             Object.keys(client.peerConnections).forEach(function(connid) {
                 var conn = client.peerConnections[connid];
                 silly.PeerConnections[origin + '#' + clientid + '_' + connid] = {
-                    updateLog: conn.updateLog
+                    updateLog: conn.updateLog,
+                    stats: conn.stats
                 };
             });
         });
