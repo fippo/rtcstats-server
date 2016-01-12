@@ -297,6 +297,49 @@ module.exports = {
         }, 0) / rtts.length);
     },
 
+    // mean recv bitrate
+    // TODO: only when receiving tracks? not really interested in rtcp
+    feature_statsMeanReceivingBitrate: function(peerConnectionLog, stats) {
+        var bitrates = [];
+        for (var i = 1; i < stats.length; i++) {
+            var statsReport = stats[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    var bitrate = 8 * (report.bytesReceived - stats[i - 1].value[id].bytesReceived) / (stats[i].time - stats[i - 1].time);
+                    // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                    if (bitrate > 0) {
+                        bitrates.push(bitrate);
+                    }
+                }
+            });
+        }
+        return Math.floor(bitrates.reduce(function(a, b) {
+            return a + b;
+        }, 0) / bitrates.length);
+    },
+    // mean send bitrate
+    // TODO: only when sending tracks? not really interested in rtcp
+    feature_statsMeanSendingBitrate: function(peerConnectionLog, stats) {
+        var bitrates = [];
+        for (var i = 1; i < stats.length; i++) {
+            var statsReport = stats[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    var bitrate = 8 * (report.bytesSent - stats[i - 1].value[id].bytesSent) / (stats[i].time - stats[i - 1].time);
+                    // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                    if (bitrate > 0) {
+                        bitrates.push(bitrate);
+                    }
+                }
+            });
+        }
+        return Math.floor(bitrates.reduce(function(a, b) {
+            return a + b;
+        }, 0) / bitrates.length);
+    },
+
     // how did the selected candidate pair change? Could happen e.g. because of an ice restart
     // so there should be a strong correlation.
     feature_numberOfCandidatePairChanges: function(peerConnectionLog, stats) {
