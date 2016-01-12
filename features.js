@@ -387,7 +387,6 @@ module.exports = {
                 }
             }
         });
-        return 0;
     },
     // how often did the selected interface type change? e.g. a wifi->mobile transition
     // see https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/app/webrtc/statscollector.cc&q=statscollector&sq=package:chromium&l=53
@@ -400,7 +399,7 @@ module.exports = {
                 var report = statsReport[id];
                 if (report.type === 'candidatepair' && report.selected === true) {
                     var type = statsReport[report.localCandidateId].networkType;
-                    if (type !== interfaceTypesList[interfaceTypesList.length - 1]) {
+                    if (type && type !== interfaceTypesList[interfaceTypesList.length - 1]) {
                         interfaceTypesList.push(type);
                     }
                 }
@@ -409,4 +408,61 @@ module.exports = {
         interfaceTypesList.shift();
         return interfaceTypesList.join(';') || 'unknown';
     },
+
+    // count # of PLIs sent
+    // TODO: recv but that might be more difficult with multiple streams
+    feature_numberOfPLISent: function(peerConnectionLog, stats) {
+        if (!stats.length) return;
+        var statsReport = stats[stats.length - 1].value;
+        var count = undefined;
+        Object.keys(statsReport).forEach(function(id) {
+            // type outboundrtp && mediaType video
+            var report = statsReport[id];
+            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
+                count = report.pliCount;
+            }
+        });
+        return count;
+    },
+
+    // count # of FIRs sent
+    // TODO: recv but that might be more difficult with multiple streams
+    feature_numberOfFIRSent: function(peerConnectionLog, stats) {
+        if (!stats.length) return;
+        var statsReport = stats[stats.length - 1].value;
+        var count = undefined;
+        Object.keys(statsReport).forEach(function(id) {
+            // type outboundrtp && mediaType video
+            var report = statsReport[id];
+            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
+                count = report.firCount;
+            }
+        });
+        return count;
+    },
+
+    // count # of NACKs sent
+    // TODO: recv but that might be more difficult with multiple streams
+    feature_numberOfNACKSent: function(peerConnectionLog, stats) {
+        if (!stats.length) return;
+        var statsReport = stats[stats.length - 1].value;
+        var count = undefined;
+        Object.keys(statsReport).forEach(function(id) {
+            // type outboundrtp && mediaType video
+            var report = statsReport[id];
+            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
+                count = report.nackCount;
+            }
+        });
+        return count;
+    },
+    // TODO: packetsDiscardedOnSend
+    // TODO: is offerer/answerer
+    // TODO: jitter
+    // TODO: packets lost (audio and video separated)
+    // TODO: packets sent
+    // TODO: packets received
+    // TODO: goog aec thingies and typing noise states
+    // TODO: goog plc things
+    // TODO: goog limited things
 };
