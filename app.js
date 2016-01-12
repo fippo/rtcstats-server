@@ -21,6 +21,10 @@ function dump(url, clientid) {
         url: url
     };
     var client = db[url][clientid];
+
+    fmt.userAgent = client.userAgent;
+    fmt.getUserMedia = client.getUserMedia;
+
     Object.keys(client.peerConnections).forEach(function(connid) {
         var conn = client.peerConnections[connid];
         fmt.PeerConnections[connid] = {
@@ -55,6 +59,7 @@ function run(keys) {
         if (!db[referer]) db[referer] = {};
         db[referer][clientid] = {
             userAgent: ua,
+            getUserMedia: [],
             peerConnections: {}
         };
 
@@ -64,7 +69,16 @@ function run(keys) {
             console.log(data);
             switch(data[0]) {
             case 'getUserMedia':
+            case 'getUserMediaOnSuccess':
+            case 'getUserMediaOnFailure':
             case 'navigator.mediaDevices.getUserMedia':
+            case 'navigator.mediaDevices.getUserMediaOnSuccess':
+            case 'navigator.mediaDevices.getUserMediaOnFailure':
+                db[referer][clientid].getUserMedia.push({
+                    time: new Date(),
+                    type: data[0],
+                    value: data[2]
+                });
                 break;
             default:
                 console.log(clientid, data[0], data[1], data[2]);
