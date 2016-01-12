@@ -388,5 +388,25 @@ module.exports = {
             }
         });
         return 0;
-    }
+    },
+    // how often did the selected interface type change? e.g. a wifi->mobile transition
+    // see https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/app/webrtc/statscollector.cc&q=statscollector&sq=package:chromium&l=53
+    // TODO: check if this really allows detecting such transitions
+    feature_numberOfCandidatePairChanges: function(peerConnectionLog, stats) {
+        var interfaceTypesList = [null];
+        for (var i = 0; i < stats.length; i++) {
+            var statsReport = stats[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    var type = statsReport[report.localCandidateId].networkType;
+                    if (type !== interfaceTypesList[interfaceTypesList.length - 1]) {
+                        interfaceTypesList.push(type);
+                    }
+                }
+            });
+        }
+        interfaceTypesList.shift();
+        return interfaceTypesList.join(';') || 'unknown';
+    },
 };
