@@ -12,6 +12,34 @@ function filterSignalingStateChange(peerConnectionLog) {
 }
 
 module.exports = {
+    // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
+    // this likely has implications for number and types of candidates gathered.
+    feature_isInitiator(peerConnectionLog, stats) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'createOffer') return true;
+            if (peerConnectionLog[i].type === 'setRemoteDescription') return false;
+        }
+        return undefined;
+    },
+
+    // was STUN configured in the peerconnection config?
+    feature_configuredWithSTUN: function(peerConnectionLog, stats) {
+    },
+
+    // was TURN (any kind) configured in the peerconnection config?
+    feature_configuredWithTURN: function(peerConnectionLog, stats) {
+    },
+    // was TURN/UDP configured in the peerconnection config?
+    feature_configuredWithTURNUDP: function(peerConnectionLog, stats) {
+    },
+    // was TURN/TCP configured in the peerconnection config?
+    feature_configuredWithTURNTCP: function(peerConnectionLog, stats) {
+    },
+    // was TURN/TLS configured in the peerconnection config?
+    // TODO: do we also want the port for this?
+    feature_configuredWithTURNTLS: function(peerConnectionLog, stats) {
+    },
+
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
     feature_ICEGatheringComplete: function(peerConnectionLog, stats) {
         return peerConnectionLog.filter(function(entry) {
@@ -254,15 +282,6 @@ module.exports = {
         return 'unknown';
     },
 
-    // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
-    feature_isInitiator(peerConnectionLog, stats) {
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'createOffer') return true;
-            if (peerConnectionLog[i].type === 'setRemoteDescription') return false;
-        }
-        return undefined;
-    },
-
     // mean audio level sent. Between 0 and 1
     feature_statsMeanAudioLevel: function(peerConnectionLog, stats) {
         var audioLevels = {};
@@ -467,6 +486,7 @@ module.exports = {
         return count;
     },
 
+    // TODO: gum statistics (audio, video, number of tracks, errors, fail-to-acquire aka ended readyState)
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
