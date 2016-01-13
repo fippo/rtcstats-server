@@ -229,6 +229,7 @@ module.exports = {
         }
         return -1;
     },
+
     // determine media types used in session.
     feature_mediaTypes: function(peerConnectionLog, stats) {
         // looking for SRD/SLD is easier than tracking createDataChannel + addStreams
@@ -251,6 +252,15 @@ module.exports = {
             }
         }
         return 'unknown';
+    },
+
+    // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
+    feature_isInitiator(peerConnectionLog, stats) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'createOffer') return true;
+            if (peerConnectionLog[i].type === 'setRemoteDescription') return false;
+        }
+        return undefined;
     },
 
     // mean audio level sent. Between 0 and 1
@@ -414,7 +424,7 @@ module.exports = {
     feature_numberOfPLISent: function(peerConnectionLog, stats) {
         if (!stats.length) return;
         var statsReport = stats[stats.length - 1].value;
-        var count = undefined;
+        var count;
         Object.keys(statsReport).forEach(function(id) {
             // type outboundrtp && mediaType video
             var report = statsReport[id];
@@ -430,7 +440,7 @@ module.exports = {
     feature_numberOfFIRSent: function(peerConnectionLog, stats) {
         if (!stats.length) return;
         var statsReport = stats[stats.length - 1].value;
-        var count = undefined;
+        var count;
         Object.keys(statsReport).forEach(function(id) {
             // type outboundrtp && mediaType video
             var report = statsReport[id];
@@ -446,7 +456,7 @@ module.exports = {
     feature_numberOfNACKSent: function(peerConnectionLog, stats) {
         if (!stats.length) return;
         var statsReport = stats[stats.length - 1].value;
-        var count = undefined;
+        var count;
         Object.keys(statsReport).forEach(function(id) {
             // type outboundrtp && mediaType video
             var report = statsReport[id];
@@ -456,12 +466,13 @@ module.exports = {
         });
         return count;
     },
-    // TODO: packetsDiscardedOnSend
-    // TODO: is offerer/answerer
+
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
     // TODO: packets received
+    // TODO: goog things possibly discarded?
+    // TODO: packetsDiscardedOnSend 
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
     // TODO: goog limited things
