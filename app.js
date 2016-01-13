@@ -27,7 +27,9 @@ function dump(url, clientid) {
 
     Object.keys(client.peerConnections).forEach(function(connid) {
         var conn = client.peerConnections[connid];
+        // TODO: why don't we just do = conn?
         fmt.PeerConnections[connid] = {
+            config: conn.config,
             updateLog: conn.updateLog,
             stats: conn.stats
         };
@@ -84,16 +86,22 @@ function run(keys) {
                 console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = {
+                        config: {},
                         updateLog: [],
                         stats: []
                     };
                 }
-                if (data[0] === 'getStats') {
+                switch(data[0]) {
+                case 'getStats':
                     db[referer][clientid].peerConnections[data[1]].stats.push({
                         time: new Date(),
                         value: data[2]
                     });
-                } else {
+                    break;
+                case 'create':
+                    db[referer][clientid].peerConnections[data[1]].config = data[2];
+                    break;
+                default:
                     db[referer][clientid].peerConnections[data[1]].updateLog.push({
                         time: new Date(),
                         type: data[0],
@@ -135,6 +143,7 @@ process.on('SIGINT', function() {
             Object.keys(client.peerConnections).forEach(function(connid) {
                 var conn = client.peerConnections[connid];
                 silly.PeerConnections[origin + '#' + clientid + '_' + connid] = {
+                    config: conn.config,
                     updateLog: conn.updateLog,
                     stats: conn.stats
                 };
