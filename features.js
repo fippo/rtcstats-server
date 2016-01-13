@@ -22,6 +22,12 @@ module.exports = {
         return undefined;
     },
 
+    // were ice servers configured? Not sure whether this is useful and/or should check if any empty list
+    // was configured
+    feature_configuredWithICEServers: function(peerConnectionConfig, peerConnectionLog, stats) {
+        return peerConnectionConfig && peerConnectionConfig.iceServers; 
+    },
+
     // was STUN configured in the peerconnection config?
     feature_configuredWithSTUN: function(peerConnectionConfig, peerConnectionLog, stats) {
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
@@ -80,6 +86,23 @@ module.exports = {
                 }
             }
         }
+    },
+
+    // what bundle policy was supplied?
+    // TODO: return default or do we want to measure explicit configuration?
+    feature_configuredBundlePolicy: function(peerConnectionConfig, peerConnectionLog, stats) {
+        return peerConnectionConfig && peerConnectionConfig.bundlePolicy; // default: 'balanced'
+    },
+
+    // what rtcp-mux configuration was supplied?
+    // TODO: return default or do we want to measure explicit configuration?
+    feature_configuredRtcpMuxPolicy: function(peerConnectionConfig, peerConnectionLog, stats) {
+        return peerConnectionConfig && peerConnectionConfig.rtcpMuxPolicy; // default: 'require'
+    },
+    // what iceTransportPolicy configuration was supplied?
+    // TODO: return default or do we want to measure explicit configuration?
+    feature_configuredIceTransportPolicy: function(peerConnectionConfig, peerConnectionLog, stats) {
+        return peerConnectionConfig && peerConnectionConfig.iceTransportPolicy; // default: 'all'
     },
 
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
