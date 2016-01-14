@@ -11,6 +11,14 @@ function filterSignalingStateChange(peerConnectionLog) {
     });
 }
 
+function getPeerConnectionConfig(peerConnectionLog) {
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'create') {
+            return peerConnectionLog[i].value;
+        }
+    }
+}
+
 module.exports = {
     // TODO: feature for "were the promise-ified apis used or the legacy variants?"
 
@@ -27,13 +35,13 @@ module.exports = {
     // were ice servers configured? Not sure whether this is useful and/or should check if any empty list
     // was configured
     feature_configuredWithICEServers: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
-        return peerConnectionConfig && peerConnectionConfig.iceServers; 
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return !!(peerConnectionConfig && peerConnectionConfig.iceServers !== undefined)
     },
 
     // was STUN configured in the peerconnection config?
     feature_configuredWithSTUN: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
         for (var i = 0; i < peerConnectionConfig.iceServers.length; i++) {
             var urls = peerConnectionConfig.iceServers[i].urls || [];
@@ -45,7 +53,7 @@ module.exports = {
 
     // was TURN (any kind) configured in the peerconnection config?
     feature_configuredWithTURN: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
         for (var i = 0; i < peerConnectionConfig.iceServers.length; i++) {
             var urls = peerConnectionConfig.iceServers[i].urls || [];
@@ -69,7 +77,7 @@ module.exports = {
     },
     // was TURN/TCP configured in the peerconnection config?
     feature_configuredWithTURNTCP: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
         for (var i = 0; i < peerConnectionConfig.iceServers.length; i++) {
             var urls = peerConnectionConfig.iceServers[i].urls || [];
@@ -84,7 +92,7 @@ module.exports = {
     // TODO: do we also want the port for this? does it make a difference whether turns is
     //     run on 443?
     feature_configuredWithTURNTLS: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
         for (var i = 0; i < peerConnectionConfig.iceServers.length; i++) {
             var urls = peerConnectionConfig.iceServers[i].urls || [];
@@ -99,21 +107,21 @@ module.exports = {
     // what bundle policy was supplied?
     // TODO: return default or do we want to measure explicit configuration?
     feature_configuredBundlePolicy: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
-        return peerConnectionConfig && peerConnectionConfig.bundlePolicy; // default: 'balanced'
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig ? peerConnectionConfig.bundlePolicy !== undefined : false; // default: 'balanced'
     },
 
     // what rtcp-mux configuration was supplied?
     // TODO: return default or do we want to measure explicit configuration?
     feature_configuredRtcpMuxPolicy: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
-        return peerConnectionConfig && peerConnectionConfig.rtcpMuxPolicy; // default: 'require'
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig ? peerConnectionConfig.rtcpMuxPolicy !== undefined : false; // default: 'require'
     },
     // what iceTransportPolicy configuration was supplied?
     // TODO: return default or do we want to measure explicit configuration?
     feature_configuredIceTransportPolicy: function(client, peerConnectionLog) {
-        var peerConnectionConfig = client.config;
-        return peerConnectionConfig && peerConnectionConfig.iceTransportPolicy; // default: 'all'
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig ? peerConnectionConfig.iceTransportPolicy !== undefined : false; // default: 'all'
     },
 
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
@@ -482,7 +490,9 @@ module.exports = {
         return selectedCandidatePairList.length - 1;
     },
 
+
     // experimental fippo feature, don't use this
+    /*
     feature_flakyActive: function(client, peerConnectionLog) {
         var selectedCandidatePairList = [null];
         for (var i = 0; i < peerConnectionLog.length; i++) {
@@ -491,8 +501,8 @@ module.exports = {
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
                 if (report.type === 'candidatepair' && report.selected === true) {
-                    /* this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
-                     * receiver during  ice restart but that is not what we are looking for. */
+                    // this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
+                    // receiver during  ice restart but that is not what we are looking for.
                     if (report.id !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
                         selectedCandidatePairList.push(report.id);
                         console.log('candidate pair change', i, peerConnectionLog[i].time, report.id);
@@ -512,6 +522,8 @@ module.exports = {
             }
         });
     },
+    */
+
     // how often did the selected interface type change? e.g. a wifi->mobile transition
     // see https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/app/webrtc/statscollector.cc&q=statscollector&sq=package:chromium&l=53
     // TODO: check if this really allows detecting such transitions
