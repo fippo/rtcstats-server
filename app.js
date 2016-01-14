@@ -31,6 +31,7 @@ function dump(url, clientid) {
     Object.keys(client.peerConnections).forEach(function(connid) {
         var conn = client.peerConnections[connid];
         Object.keys(features).forEach(function (fname) {
+            // TODO: some features don't make sense for the null connection (which contains GUM)
             var feature = features[fname].apply(null, [client, conn]);
             if (feature !== undefined) {
                 console.log(connid, 'FEATURE', fname, '=>', feature);

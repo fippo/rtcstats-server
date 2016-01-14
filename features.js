@@ -20,6 +20,101 @@ function getPeerConnectionConfig(peerConnectionLog) {
 }
 
 module.exports = {
+    browserVersion: function(client) {
+        // parse client.userAgent and return something
+        // e.g. Firefox/43 or Chrome/48
+        // TODO
+    },
+
+    // did the page call getUserMedia at all?
+    calledGetUserMedia: function(client) {
+        return client.getUserMedia && client.getUserMedia.length > 0;
+    },
+
+    // did the page use the old getUserMedia?
+    calledLegacyGetUserMedia: function(client) {
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'getUserMedia') return true;
+        }
+        return false;
+    },
+
+    // did the page use the new navigator.mediaDevices.getUserMedia?
+    calledMediadevicesGetUserMedia: function(client) {
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia') return true;
+        }
+        return false;
+    },
+    // TODO: was enumerateDevices used? snoop does not hook this and I do not think
+    // that tracing every call would be useful but enumerating hardware once might
+    // be nice for features like numberOfMicrophones, numberOfCameras, ...
+
+    // was there at least one getUserMedia success?
+    getUserMediaSuccess: function(client) {
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    // was there at least one getUserMedia error? If so, what was the error?
+    getUserMediaError: function(client) {
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnFailure' || gum[i].type === 'getUserMediaOnFailure') {
+                return gum[i].value;
+            }
+        }
+        return false;
+    },
+
+    // did the client ever request audio?
+    calledGetUserMediaRequestingAudio: function(client) {
+        var gum = client.getUserMedia || [];
+        var requested = false;
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
+                var options = gum[i].value;
+                if (options.audio && options.audio !== false) requested = true;
+            }
+        }
+        return requested;
+    },
+
+    // did the client ever request video (not screenshare)?
+    // screensharing is defined as
+    //      mozMediaSource || mediaSource in FF (look for window || screen?)
+    //      mandatory.chromeMediaSource: desktop in chrome
+    calledGetUserMediaRequestingVideo: function(client) {
+        var gum = client.getUserMedia || [];
+        var requested = false;
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
+                var options = gum[i].value;
+            }
+        }
+        return requested;
+    },
+
+    // did the client ever request the screen?
+    calledGetUserMediaRequestingScreen: function(client) {
+        var gum = client.getUserMedia || [];
+        var requested = false;
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
+                var options = gum[i].value;
+            }
+        }
+        return requested;
+    },
+    // TODO: resolution, framerate
+    // TODO: special goog constraints?
     // TODO: feature for "were the promise-ified apis used or the legacy variants?"
 
     // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
