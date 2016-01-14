@@ -1,4 +1,3 @@
-var pem = require('pem');
 var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
@@ -43,11 +42,8 @@ function dump(url, clientid) {
 }
 
 var db = {};
-pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
-    if (err) {
-        console.err('error creating cert', err);
-        return;
-    }
+
+function run(keys) {
     server = require('https').Server({
         key: keys.serviceKey,
         cert: keys.certificate
@@ -108,4 +104,38 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
             dump(referer, clientid);
         });
     });
+}
+
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+    run();
+} else {
+    // on localhost, dynamically generate certificates. Enable #allow-insecure-localhost
+    // in chrome://flags for ease of development.
+    require('pem').createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
+        if (err) {
+            console.err('error creating cert', err);
+            return;
+        } else {
+            run(keys);
+        }
+    });
+}
+
+process.on('SIGINT', function() {
+    var silly = {
+        PeerConnections: {}
+    };
+    Object.keys(db).forEach(function(origin) {
+        Object.keys(db[origin]).forEach(function(clientid) {
+            var client = db[origin][clientid];
+            Object.keys(client.peerConnections).forEach(function(connid) {
+                var conn = client.peerConnections[connid];
+                silly.PeerConnections[origin + '#' + clientid + '_' + connid] = {
+                    updateLog: conn.updateLog
+                };
+            });
+        });
+    });
+    fs.writeFileSync('dump.json', JSON.stringify(silly));
+    process.exit();
 });
