@@ -13,9 +13,6 @@ var server = null;
 var wss = null;
 
 // dumps all peerconnections to Store
-// The format reensembles chrome://webrtc-internals (minus google names)
-// and can be imported again using tools like 
-// https://fippo.github.io/webrtc-dump-importer
 function dump(url, clientid) {
     var fmt = {
         PeerConnections: {},
@@ -25,7 +22,7 @@ function dump(url, clientid) {
 
     fmt.userAgent = client.userAgent;
     fmt.getUserMedia = client.getUserMedia;
-    fmt.peerConnection = client.peerConnections;
+    fmt.peerConnections = client.peerConnections;
 
     Object.keys(features).forEach(function (fname) {
         if (features[fname].length === 1) {

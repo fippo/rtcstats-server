@@ -120,6 +120,11 @@ module.exports = {
     // TODO: special goog constraints?
     // TODO: feature for "were the promise-ified apis used or the legacy variants?"
 
+    // number of peerConnections created
+    numberOfPeerConnections: function(client) {
+        return client.peerConnections.length;
+    },
+
     // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
     // this likely has implications for number and types of candidates gathered.
     feature_isInitiator(client, peerConnectionLog) {
