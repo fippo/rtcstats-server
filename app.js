@@ -120,22 +120,3 @@ if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
         }
     });
 }
-
-process.on('SIGINT', function() {
-    var silly = {
-        PeerConnections: {}
-    };
-    Object.keys(db).forEach(function(origin) {
-        Object.keys(db[origin]).forEach(function(clientid) {
-            var client = db[origin][clientid];
-            Object.keys(client.peerConnections).forEach(function(connid) {
-                var conn = client.peerConnections[connid];
-                silly.PeerConnections[origin + '#' + clientid + '_' + connid] = {
-                    updateLog: conn.updateLog
-                };
-            });
-        });
-    });
-    fs.writeFileSync('dump.json', JSON.stringify(silly));
-    process.exit();
-});
