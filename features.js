@@ -19,6 +19,9 @@ function getPeerConnectionConfig(peerConnectionLog) {
     }
 }
 
+// there are two types of features
+// 1) features which only take the client as argument. E.g. extracting the browser version
+// 2) features which take the client and a connection argument. Those do something with the connection.
 module.exports = {
     browserVersion: function(client) {
         // parse client.userAgent and return something
@@ -712,9 +715,12 @@ module.exports = {
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
     // TODO: packets received
-    // TODO: goog things possibly discarded?
+    // TODO: goog things possibly discarded by snoop?
     // TODO: packetsDiscardedOnSend 
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
-    // TODO: goog limited things
+    // TODO: googMinPlayoutDelayMs -- may be used to detect desync between audio and video
+    //          Minimum playout delay (used for lip-sync). This is the minimum delay required
+    //          to sync with audio. Not included in  VideoCodingModule::Delay()
+    //          Defaults to 0 ms.
 };

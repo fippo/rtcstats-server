@@ -27,13 +27,23 @@ function dump(url, clientid) {
     fmt.getUserMedia = client.getUserMedia;
     fmt.peerConnection = client.peerConnections;
 
+    Object.keys(features).forEach(function (fname) {
+        if (features[fname].length === 1) {
+            var feature = features[fname].apply(null, [client]);
+            if (feature !== undefined) {
+                console.log('PAGE', 'FEATURE', fname, '=>', feature);
+            }
+        }
+    });
     Object.keys(client.peerConnections).forEach(function(connid) {
+        if (connid === 'null') return; // ignore the null connid
         var conn = client.peerConnections[connid];
         Object.keys(features).forEach(function (fname) {
-            // TODO: some features don't make sense for the null connection (which contains GUM)
-            var feature = features[fname].apply(null, [client, conn]);
-            if (feature !== undefined) {
-                console.log(connid, 'FEATURE', fname, '=>', feature);
+            if (features[fname].length === 2) {
+                var feature = features[fname].apply(null, [client, conn]);
+                if (feature !== undefined) {
+                    console.log(connid, 'FEATURE', fname, '=>', feature);
+                }
             }
         });
     });
