@@ -7,24 +7,41 @@ var Store = require('./store')({
 });
 
 var WebSocketServer = require('ws').Server;
+var features = require('./features');
 
 var wss = null;
 
 // dumps all peerconnections to Store
-// The format reensembles chrome://webrtc-internals (minus google names)
-// and can be imported again using tools like
-// https://fippo.github.io/webrtc-dump-importer
 function dump(url, clientid) {
     var fmt = {
         PeerConnections: {},
         url: url
     };
     var client = db[url][clientid];
+
+    fmt.userAgent = client.userAgent;
+    fmt.getUserMedia = client.getUserMedia;
+    fmt.peerConnections = client.peerConnections;
+
+    Object.keys(features).forEach(function (fname) {
+        if (features[fname].length === 1) {
+            var feature = features[fname].apply(null, [client]);
+            if (feature !== undefined) {
+                console.log('PAGE', 'FEATURE', fname, '=>', feature);
+            }
+        }
+    });
     Object.keys(client.peerConnections).forEach(function(connid) {
+        if (connid === 'null') return; // ignore the null connid
         var conn = client.peerConnections[connid];
-        fmt.PeerConnections[connid] = {
-            updateLog: conn.updateLog
-        };
+        Object.keys(features).forEach(function (fname) {
+            if (features[fname].length === 2) {
+                var feature = features[fname].apply(null, [client, conn]);
+                if (feature !== undefined) {
+                    console.log(connid, 'FEATURE', fname, '=>', feature);
+                }
+            }
+        });
     });
     Store.put(clientid, JSON.stringify(fmt));
     delete db[url][clientid];
@@ -57,6 +74,7 @@ function run(keys) {
 
         if (!db[referer]) db[referer] = {};
         db[referer][clientid] = {
+            getUserMedia: [],
             userAgent: ua,
             peerConnections: {}
         };
@@ -66,20 +84,24 @@ function run(keys) {
             var data = JSON.parse(msg);
             console.log(data);
             switch(data[0]) {
-            case 'getStats':
-                console.log(clientid, 'getStats', data[1]);
-                break;
             case 'getUserMedia':
+            case 'getUserMediaOnSuccess':
+            case 'getUserMediaOnFailure':
             case 'navigator.mediaDevices.getUserMedia':
+            case 'navigator.mediaDevices.getUserMediaOnSuccess':
+            case 'navigator.mediaDevices.getUserMediaOnFailure':
+                db[referer][clientid].getUserMedia.push({
+                    time: new Date(),
+                    type: data[0],
+                    value: data[2]
+                });
                 break;
             default:
                 console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
-                    db[referer][clientid].peerConnections[data[1]] = {
-                        updateLog: []
-                    };
+                    db[referer][clientid].peerConnections[data[1]] = [];
                 }
-                db[referer][clientid].peerConnections[data[1]].updateLog.push({
+                db[referer][clientid].peerConnections[data[1]].push({
                     time: new Date(),
                     type: data[0],
                     value: data[2]
@@ -95,8 +117,8 @@ function run(keys) {
     });
 }
 
-if (process.env.NODE_ENV === 'production') {
-  run();
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+    run();
 } else {
     // on localhost, dynamically generate certificates. Enable #allow-insecure-localhost
     // in chrome://flags for ease of development.
@@ -109,22 +131,3 @@ if (process.env.NODE_ENV === 'production') {
         }
     });
 }
-
-process.on('SIGINT', function() {
-    var silly = {
-        PeerConnections: {}
-    };
-    Object.keys(db).forEach(function(origin) {
-        Object.keys(db[origin]).forEach(function(clientid) {
-            var client = db[origin][clientid];
-            Object.keys(client.peerConnections).forEach(function(connid) {
-                var conn = client.peerConnections[connid];
-                silly.PeerConnections[origin + '#' + clientid + '_' + connid] = {
-                    updateLog: conn.updateLog
-                };
-            });
-        });
-    });
-    fs.writeFileSync('dump.json', JSON.stringify(silly));
-    process.exit();
-});
