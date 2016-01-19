@@ -206,6 +206,9 @@ module.exports = {
             }
         }
     },
+    // TODO: how long did it take to gather the respective candidates?
+    // we need to know the browsertype to figure out the correct local type preference
+    // since those differ in FF and Chrome
 
     // what bundle policy was supplied?
     // TODO: return default or do we want to measure explicit configuration?
@@ -356,6 +359,26 @@ module.exports = {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'AddIceCandidateOnFailure';
         }).length > 0;
+    },
+
+
+    feature_GatheringTime: function(client, peerConnectionLog) {
+        var first;
+        var second;
+        for (first = 0; first < peerConnectionLog.length; first++) {
+            // TODO: is setLocalDescriptionOnSuccess better?
+            if (peerConnectionLog[first].type === 'setLocalDescription') break;
+        }
+        if (first < peerConnectionLog.length) {
+            for (second = first + 1; second < peerConnectionLog.length; second++) {
+                if (peerConnectionLog[second].type === 'onicecandidate' && peerConnectionLog[second].value === null) break;
+            }
+            if (second < peerConnectionLog.length) {
+                return (new Date(peerConnectionLog[second].time).getTime() - 
+                    new Date(peerConnectionLog[first].time).getTime());
+            }
+        }
+        return -1;
     },
 
     // how long does it take to establish the connection?
