@@ -127,7 +127,7 @@ module.exports = {
 
     // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
     // this likely has implications for number and types of candidates gathered.
-    feature_isInitiator(client, peerConnectionLog) {
+    feature_isInitiator: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'createOffer') return true;
             if (peerConnectionLog[i].type === 'setRemoteDescription') return false;
