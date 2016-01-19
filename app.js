@@ -20,10 +20,17 @@ function dump(url, clientid) {
         url: url
     };
     var client = db[url][clientid];
+
+    fmt.userAgent = client.userAgent;
+    fmt.getUserMedia = client.getUserMedia;
+
     Object.keys(client.peerConnections).forEach(function(connid) {
         var conn = client.peerConnections[connid];
+        // TODO: why don't we just do = conn?
         fmt.PeerConnections[connid] = {
-            updateLog: conn.updateLog
+            config: conn.config,
+            updateLog: conn.updateLog,
+            stats: conn.stats
         };
     });
     Store.put(clientid, JSON.stringify(fmt));
@@ -58,6 +65,7 @@ function run(keys) {
         if (!db[referer]) db[referer] = {};
         db[referer][clientid] = {
             userAgent: ua,
+            getUserMedia: [],
             peerConnections: {}
         };
 
@@ -66,24 +74,44 @@ function run(keys) {
             var data = JSON.parse(msg);
             console.log(data);
             switch(data[0]) {
-            case 'getStats':
-                console.log(clientid, 'getStats', data[1]);
-                break;
             case 'getUserMedia':
+            case 'getUserMediaOnSuccess':
+            case 'getUserMediaOnFailure':
             case 'navigator.mediaDevices.getUserMedia':
+            case 'navigator.mediaDevices.getUserMediaOnSuccess':
+            case 'navigator.mediaDevices.getUserMediaOnFailure':
+                db[referer][clientid].getUserMedia.push({
+                    time: new Date(),
+                    type: data[0],
+                    value: data[2]
+                });
                 break;
             default:
                 console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = {
-                        updateLog: []
+                        config: {},
+                        updateLog: [],
+                        stats: []
                     };
                 }
-                db[referer][clientid].peerConnections[data[1]].updateLog.push({
-                    time: new Date(),
-                    type: data[0],
-                    value: data[2]
-                });
+                switch(data[0]) {
+                case 'getStats':
+                    db[referer][clientid].peerConnections[data[1]].stats.push({
+                        time: new Date(),
+                        value: data[2]
+                    });
+                    break;
+                case 'create':
+                    db[referer][clientid].peerConnections[data[1]].config = data[2];
+                    break;
+                default:
+                    db[referer][clientid].peerConnections[data[1]].updateLog.push({
+                        time: new Date(),
+                        type: data[0],
+                        value: data[2]
+                    });
+                }
                 break;
             }
         });
@@ -120,7 +148,9 @@ process.on('SIGINT', function() {
             Object.keys(client.peerConnections).forEach(function(connid) {
                 var conn = client.peerConnections[connid];
                 silly.PeerConnections[origin + '#' + clientid + '_' + connid] = {
-                    updateLog: conn.updateLog
+                    config: conn.config,
+                    updateLog: conn.updateLog,
+                    stats: conn.stats
                 };
             });
         });
