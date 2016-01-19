@@ -361,7 +361,7 @@ module.exports = {
         }).length > 0;
     },
 
-
+    // how long did it take to gather all ice candidates?
     feature_GatheringTime: function(client, peerConnectionLog) {
         var first;
         var second;
