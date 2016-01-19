@@ -15,4 +15,4 @@ RUN npm install
 USER $app
 VOLUME ["/var/log/$app"]
 EXPOSE 3000
-CMD ["node", "websocket.js"]
+CMD ["npm", "start"]

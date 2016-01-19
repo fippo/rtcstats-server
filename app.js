@@ -9,7 +9,6 @@ var Store = require('./store')({
 var WebSocketServer = require('ws').Server;
 var features = require('./features');
 
-var server = null;
 var wss = null;
 
 // dumps all peerconnections to Store
@@ -51,10 +50,15 @@ function dump(url, clientid) {
 var db = {};
 
 function run(keys) {
-    server = require('https').Server({
-        key: keys.serviceKey,
-        cert: keys.certificate
-    });
+    if (keys === undefined) {
+      var server = require('http').Server();
+    } else {
+      var server = require('https').Server({
+          key: keys.serviceKey,
+          cert: keys.certificate
+      });
+    }
+
     server.listen(config.get('server').port);
     wss = new WebSocketServer({ server: server });
 
