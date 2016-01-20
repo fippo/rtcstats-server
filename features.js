@@ -19,6 +19,40 @@ function getPeerConnectionConfig(peerConnectionLog) {
     }
 }
 
+function gatheringTimeTURN(protocol, client, peerConnectionLog) {
+    var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+    // TODO: for firefox the mapping is different
+    var typepref = {
+      udp: 2,
+      tcp: 1,
+      tls: 0
+    }[protocol];
+    var first;
+    var second;
+    for (first = 0; first < peerConnectionLog.length; first++) {
+        // TODO: is setLocalDescriptionOnSuccess better?
+        if (peerConnectionLog[first].type === 'setLocalDescription') break;
+    }
+    if (first < peerConnectionLog.length) {
+        for (second = first + 1; second < peerConnectionLog.length; second++) {
+            if (peerConnectionLog[second].type === 'onicecandidate') {
+                var cand = peerConnectionLog[second].value;
+                if (cand === null) return; // give up
+                if (cand && cand.candidate.indexOf('relay') !== -1) {
+                    var localTypePref = cand.candidate.split(' ')[3] >> 24;
+                    if (localTypePref === typepref) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (second < peerConnectionLog.length) {
+            return (new Date(peerConnectionLog[second].time).getTime() - 
+                new Date(peerConnectionLog[first].time).getTime());
+        }
+    }
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -362,7 +396,7 @@ module.exports = {
     },
 
     // how long did it take to gather all ice candidates?
-    feature_GatheringTime: function(client, peerConnectionLog) {
+    feature_gatheringTime: function(client, peerConnectionLog) {
         var first;
         var second;
         for (first = 0; first < peerConnectionLog.length; first++) {
@@ -378,7 +412,34 @@ module.exports = {
                     new Date(peerConnectionLog[first].time).getTime());
             }
         }
-        return -1;
+        return undefined;
+    },
+
+    // was a local TURN/UDP relay candidate gathered?
+    feature_gatheredTURNUDP: function(client, peerConnectionLog) {
+        return gatheringTimeTURN('udp', client, peerConnectionLog) !== undefined;
+    },
+    // how long did it take to gather a TURN/UDP relay candidate
+    feature_gatheringTimeTURNUDP: function(client, peerConnectionLog) {
+        return gatheringTimeTURN('udp', client, peerConnectionLog);
+    },
+
+    // was a local TURN/TCP relay candidate gathered?
+    feature_gatheredTURNTCP: function(client, peerConnectionLog) {
+        return gatheringTimeTURN('tcp', client, peerConnectionLog) !== undefined;
+    },
+    // how long did it take to gather a TURN/TCP relay candidate
+    feature_gatheringTimeTURNTCP: function(client, peerConnectionLog) {
+        return gatheringTimeTURN('tcp', client, peerConnectionLog);
+    },
+
+    // was a local TURN/TLS relay candidate gathered?
+    feature_gatheredTURNTLS: function(client, peerConnectionLog) {
+        return gatheringTimeTURN('tls', client, peerConnectionLog) !== undefined;
+    },
+    // how long did it take to gather a TURN/TLS relay candidate
+    feature_gatheringTimeTURNTLS: function(client, peerConnectionLog) {
+        return gatheringTimeTURN('tls', client, peerConnectionLog);
     },
 
     // how long does it take to establish the connection?
