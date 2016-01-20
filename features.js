@@ -728,4 +728,45 @@ module.exports = {
     //          Minimum playout delay (used for lip-sync). This is the minimum delay required
     //          to sync with audio. Not included in  VideoCodingModule::Delay()
     //          Defaults to 0 ms.
+
+    // statistics on windowed statistics... thanks STFT and kurtogram.
+    // not sure if this one makes much sense so might be more of a prototype
+    // for more advanced statistics
+    feature_windowedMaximumPacketLoss: function(client, peerConnectionLog) {
+        // find audio stream, look at packet loss (or something), then window (60s? currently 10)
+        // generate mean over window, return max/mean (min should be 0)
+        var win = [];
+        var start;
+        var streamid;
+        var statsReport;
+        for (var i = 0; i < peerConnectionLog.length && !streamid; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                statsReport = peerConnectionLog[i].value;
+                Object.keys(statsReport).forEach(function(id) {
+                    var report = statsReport[id];
+                    if (report.type === 'outboundrtp' && report.isRemote === true && report.associateStatsId && statsReport[report.associateStatsId]
+                            && statsReport[report.associateStatsId].mediaType === 'audio') {
+                        streamid = id;
+                        start = i;
+                    }
+                });
+                break;
+            }
+        }
+        var losses = [];
+        if (streamid) {
+            var lastReport = peerConnectionLog[start].value;
+            for (i = start + 1; i < peerConnectionLog.length; i++) {
+                if (peerConnectionLog[i].type !== 'getStats') return;
+                statsReport = peerConnectionLog[i].value;
+                if (peerConnectionLog[i].time - peerConnectionLog[start].time > 10000) {
+                    start = i;
+                    losses.push(win.reduce(function(a, b) { return a + b; }, 0) / win.length); // mean
+                    win = [];
+                }
+                win.push(statsReport[streamid].packetsLost - lastReport[streamid].packetsLost);
+            }
+            return losses.reduce(function(a, b) { return b > a ? b : a; }, 0); // maximum
+        }
+    },
 };
