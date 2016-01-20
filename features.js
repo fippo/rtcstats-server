@@ -441,6 +441,20 @@ module.exports = {
     feature_gatheringTimeTURNTLS: function(client, peerConnectionLog) {
         return gatheringTimeTURN('tls', client, peerConnectionLog);
     },
+    // was there a remote candidate TURN added?
+    // that is about as much as we can tell unless we snoop onto the
+    // peerconnection and determine remote browser.
+    feature_hadRemoteTURNCandidate(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'addIceCandidate') {
+                var cand = peerConnectionLog[second].value;
+                if (cand && cand.candidate.indexOf('relay') !== -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
 
     // how long does it take to establish the connection?
     // TODO: also figure out connection type so we don't lump relayed and non-relayed connections
