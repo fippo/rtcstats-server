@@ -445,6 +445,7 @@ module.exports = {
     // that is about as much as we can tell unless we snoop onto the
     // peerconnection and determine remote browser.
     feature_hadRemoteTURNCandidate(client, peerConnectionLog) {
+        // TODO: might be hiding in setRemoteDescription, too.
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'addIceCandidate') {
                 var cand = peerConnectionLog[second].value;
