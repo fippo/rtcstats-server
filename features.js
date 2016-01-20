@@ -415,6 +415,19 @@ module.exports = {
         return undefined;
     },
 
+    // was a local STUN candidate gathered?
+    // TODO: do we care about timing?
+    feature_gatheredSTUN: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onicecandidate') {
+                var cand = peerConnectionLog[second].value;
+                if (cand && cand.candidate.indexOf('srflx') !== -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
     // was a local TURN/UDP relay candidate gathered?
     feature_gatheredTURNUDP: function(client, peerConnectionLog) {
         return gatheringTimeTURN('udp', client, peerConnectionLog) !== undefined;
