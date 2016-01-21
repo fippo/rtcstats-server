@@ -134,6 +134,16 @@ module.exports = {
         for (var i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
                 var options = gum[i].value;
+                if (options.video === true) {
+                    requested = true;
+                    break;
+                }
+                if (options.video && typeof options.video === 'object') {
+                    if (!(options.video.mozMediaSource || options.video.mediaSource || options.video.chromeMediaSource)) {
+                        requested = true;
+                        break;
+                    }
+                }
             }
         }
         return requested;
@@ -146,10 +156,23 @@ module.exports = {
         for (var i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
                 var options = gum[i].value;
+                if (options.video && typeof options.video === 'object') {
+                    // Firefox
+                    if (options.video.mozMediaSource || options.video.mediaSource) {
+                        requested = true;
+                        break;
+                    }
+                    // Chrome
+                    if (options.video.chromeMediaSource) {
+                        requested = true;
+                        break;
+                    }
+                }
             }
         }
         return requested;
     },
+    // TODO: gum statistics (audio, video, number of tracks, errors, fail-to-acquire aka ended readyState)
     // TODO: resolution, framerate
     // TODO: special goog constraints?
     // TODO: feature for "were the promise-ified apis used or the legacy variants?"
@@ -827,7 +850,6 @@ module.exports = {
         return count;
     },
 
-    // TODO: gum statistics (audio, video, number of tracks, errors, fail-to-acquire aka ended readyState)
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
