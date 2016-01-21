@@ -480,7 +480,7 @@ module.exports = {
     // was there a remote candidate TURN added?
     // that is about as much as we can tell unless we snoop onto the
     // peerconnection and determine remote browser.
-    feature_hadRemoteTURNCandidate(client, peerConnectionLog) {
+    feature_hadRemoteTURNCandidate: function(client, peerConnectionLog) {
         // TODO: might be hiding in setRemoteDescription, too.
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'addIceCandidate') {
