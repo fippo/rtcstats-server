@@ -5,7 +5,8 @@
   "main": "websocket.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "NODE_ENV=production node app.js"
+    "start": "NODE_ENV=production node app.js",
+    "test": "eslint *.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +25,9 @@
     "pem": "^1.8.1",
     "uuid": "^2.0.1",
     "ws": "^0.8.1"
+  },
+  "devDependencies": {
+    "eslint": "^1.10.3",
+    "eslint-config-opentok": "^1.0.2"
   }
 }
