@@ -109,7 +109,7 @@ module.exports = {
                 var stream = gum[i].value;
                 var tracks = stream && stream.tracks || [];
                 for (var j = 0; j < tracks.length; j++) {
-                    if tracks[j].readyState === 'ended') {
+                    if (tracks[j].readyState === 'ended') {
                         return true;
                     }
                 }
