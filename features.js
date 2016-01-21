@@ -443,7 +443,7 @@ module.exports = {
     feature_gatheredSTUN: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'onicecandidate') {
-                var cand = peerConnectionLog[second].value;
+                var cand = peerConnectionLog[i].value;
                 if (cand && cand.candidate.indexOf('srflx') !== -1) {
                     return true;
                 }
