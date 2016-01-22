@@ -100,6 +100,24 @@ module.exports = {
         return false;
     },
 
+    // was there a getUserMedia error which was actually a getUserMediaFailure? Hi https://code.google.com/p/chromium/issues/detail?id=167160
+    // typically happens when another application is using the camera.
+    getUserMediaSuccessNotReally: function(client) {
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
+                var stream = gum[i].value;
+                var tracks = stream && stream.tracks || [];
+                for (var j = 0; j < tracks.length; j++) {
+                    if (tracks[j].readyState === 'ended') {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
+
     // was there at least one getUserMedia error? If so, what was the error?
     getUserMediaError: function(client) {
         var gum = client.getUserMedia || [];
