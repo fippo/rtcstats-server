@@ -4,9 +4,8 @@
   "description": "",
   "main": "websocket.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "NODE_ENV=production node app.js",
-    "test": "eslint *.js"
+    "test": "eslint *.js",
+    "start": "NODE_ENV=production node app.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +20,7 @@
   "dependencies": {
     "aws-sdk": "^2.2.26",
     "config": "^1.17.1",
+    "express": "^4.13.4",
     "js-yaml": "^3.4.6",
     "pem": "^1.8.1",
     "uuid": "^2.0.1",

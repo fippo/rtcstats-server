@@ -2,11 +2,12 @@ var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
 
+var WebSocketServer = require('ws').Server;
+var express = require('express');
+
 var Store = require('./store')({
   s3: config.get('s3')
 });
-
-var WebSocketServer = require('ws').Server;
 var features = require('./features');
 
 var wss = null;
@@ -50,13 +51,16 @@ function dump(url, clientid) {
 var db = {};
 
 function run(keys) {
+    var app = express();
+    app.use('/static', express.static(__dirname + '/static'));
+
     if (keys === undefined) {
-      var server = require('http').Server();
+      var server = require('http').Server(app);
     } else {
       var server = require('https').Server({
           key: keys.serviceKey,
           cert: keys.certificate
-      });
+      }, app);
     }
 
     server.listen(config.get('server').port);
