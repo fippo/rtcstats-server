@@ -11,6 +11,7 @@ RUN useradd $app \
 WORKDIR /$app
 COPY . /$app
 RUN npm install
+RUN curl https://raw.githubusercontent.com/opentok/snoop/master/snoop.js > static/snoop.js
 
 USER $app
 VOLUME ["/var/log/$app"]
