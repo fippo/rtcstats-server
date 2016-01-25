@@ -24,25 +24,33 @@ function dump(url, clientid) {
     fmt.getUserMedia = client.getUserMedia;
     fmt.peerConnections = client.peerConnections;
 
+    var pagefeatures = {};
     Object.keys(features).forEach(function (fname) {
         if (features[fname].length === 1) {
             var feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
+                pagefeatures[fname] = feature;
                 console.log('PAGE', 'FEATURE', fname, '=>', feature);
             }
         }
     });
+
+    // TODO: insert into db: url, clientid, <null>, pagefeatures
+
     Object.keys(client.peerConnections).forEach(function(connid) {
         if (connid === 'null') return; // ignore the null connid
         var conn = client.peerConnections[connid];
+        var connfeatures = {};
         Object.keys(features).forEach(function (fname) {
             if (features[fname].length === 2) {
                 var feature = features[fname].apply(null, [client, conn]);
                 if (feature !== undefined) {
                     console.log(connid, 'FEATURE', fname, '=>', feature);
+                    connfeatures[fname] = feature;
                 }
             }
         });
+        // TODO: insert into db: url, clientid, connid, features
     });
     Store.put(clientid, JSON.stringify(fmt));
     delete db[url][clientid];
@@ -86,7 +94,7 @@ function run(keys) {
         console.log('connected', ua, referer);
         client.on('message', function (msg) {
             var data = JSON.parse(msg);
-            console.log(data);
+            //console.log(data);
             switch(data[0]) {
             case 'getUserMedia':
             case 'getUserMediaOnSuccess':
@@ -101,7 +109,7 @@ function run(keys) {
                 });
                 break;
             default:
-                console.log(clientid, data[0], data[1], data[2]);
+                //console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = [];
                 }
