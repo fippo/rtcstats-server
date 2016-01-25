@@ -850,6 +850,28 @@ module.exports = {
         return count;
     },
 
+    // googMinPlayoutDelayMs -- may be used to detect desync between audio and video
+    //          Minimum playout delay (used for lip-sync). This is the minimum delay required
+    //          to sync with audio. Not included in  VideoCodingModule::Delay()
+    //          Defaults to 0 ms.
+    feature_MaxGoogMinPlayoutDelayMs: function(client, peerConnectionLog) {
+        var max = -1;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                var statsReport = peerConnectionLog[i].value;
+                Object.keys(statsReport).forEach(function(id) {
+                    // type outboundrtp && mediaType video
+                    var report = statsReport[id];
+                    if (report.type === 'ssrc' && report.googMinPlayoutDelayMs) {
+                        var t = parseInt(report.googMinPlayoutDelayMs, 10);
+                        max = Math.max(max, report.googMinPlayoutDelayMs);
+                    }
+                });
+            }
+        }
+        return max;
+    },
+
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
@@ -858,8 +880,4 @@ module.exports = {
     // TODO: packetsDiscardedOnSend 
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
-    // TODO: googMinPlayoutDelayMs -- may be used to detect desync between audio and video
-    //          Minimum playout delay (used for lip-sync). This is the minimum delay required
-    //          to sync with audio. Not included in  VideoCodingModule::Delay()
-    //          Defaults to 0 ms.
 };
