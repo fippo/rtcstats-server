@@ -1,6 +1,7 @@
 var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
+var statsMangler = require('./getstats-mangle');
 
 var WebSocketServer = require('ws').Server;
 var express = require('express');
@@ -46,6 +47,8 @@ function dump(url, clientid) {
     });
     Store.put(clientid, JSON.stringify(fmt));
     delete db[url][clientid];
+    console.log('dumping', clientid);
+    fs.writeFile(clientid, JSON.stringify(fmt, null, ' '));
 }
 
 var db = {};
@@ -104,6 +107,9 @@ function run(keys) {
                 console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = [];
+                }
+                if (data[0] === 'getStats') {
+                    data[2] = statsMangler(data[2]);
                 }
                 db[referer][clientid].peerConnections[data[1]].push({
                     time: new Date(),
