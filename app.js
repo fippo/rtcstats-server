@@ -38,7 +38,7 @@ function dump(url, client) {
             var feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
                 console.log('PAGE', 'FEATURE', fname, '=>', feature);
-                features[fname] = feature;
+                clientFeatures[fname] = feature;
             }
         }
     });
