@@ -7,9 +7,12 @@ module.exports = function(config) {
 
   return {
     put: function(clientId, connectionId, clientFeatures, connectionFeatures) {
+      var d = new Date().getTime();
       var params = {
         TableName : config.dynamodb.table,
         Item: {
+          Date: d - (d % (86400 * 1000)), // just the UTC day
+          DateTime: d,
           ClientId: clientId,
           ConnectionId: connectionId,
           ClientFeatures: clientFeatures,

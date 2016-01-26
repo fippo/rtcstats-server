@@ -14,8 +14,6 @@ var Database = require('./database')({
 });
 
 
-Database.put("client1", "conn1", { "ab": "c" }, { "ab": "c" });
-
 var WebSocketServer = require('ws').Server;
 var features = require('./features');
 
