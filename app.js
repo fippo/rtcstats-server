@@ -9,46 +9,54 @@ var express = require('express');
 var Store = require('./store')({
   s3: config.get('s3')
 });
+var Database = require('./database')({
+  dynamodb: config.get('dynamodb')
+});
+
+
+var WebSocketServer = require('ws').Server;
 var features = require('./features');
 
 var wss = null;
 
 // dumps all peerconnections to Store
-function dump(url, clientid) {
+function dump(url, client) {
     var fmt = {
         PeerConnections: {},
         url: url
     };
-    var client = db[url][clientid];
 
     fmt.userAgent = client.userAgent;
     fmt.getUserMedia = client.getUserMedia;
     fmt.peerConnections = client.peerConnections;
 
+    var clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
         if (features[fname].length === 1) {
             var feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
                 console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                clientFeatures[fname] = feature;
             }
         }
     });
     Object.keys(client.peerConnections).forEach(function(connid) {
         if (connid === 'null') return; // ignore the null connid
         var conn = client.peerConnections[connid];
+        var connectionFeatures = {};
         Object.keys(features).forEach(function (fname) {
             if (features[fname].length === 2) {
                 var feature = features[fname].apply(null, [client, conn]);
                 if (feature !== undefined) {
                     console.log(connid, 'FEATURE', fname, '=>', feature);
+                    connectionFeatures[fname] = feature;
                 }
             }
         });
+        Database.put(clientid, connid, clientFeatures, connectionFeatures);
     });
+
     Store.put(clientid, JSON.stringify(fmt));
-    delete db[url][clientid];
-    console.log('dumping', clientid);
-    fs.writeFile(clientid, JSON.stringify(fmt, null, ' '));
 }
 
 var db = {};
@@ -122,7 +130,10 @@ function run(keys) {
 
         client.on('close', function() {
             console.log('closed');
-            dump(referer, clientid);
+
+            var client = db[url][clientid];
+            dump(referer, client);
+            delete db[url][clientid];
         });
     });
 }

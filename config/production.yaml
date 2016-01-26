@@ -7,6 +7,12 @@ s3:
     region: us-west-2
     bucket: snoop-data
 
+dynamodb:
+    accessKeyId: AKIAJDZALGBMGIYPVPAQ
+    secretAccessKey: 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
+    region: us-west-2
+    table: Snoop
+
 appenders:
     - type: file
       layout:
