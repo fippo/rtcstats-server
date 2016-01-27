@@ -69,7 +69,27 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     }
 }
 
-function extractMaxFrameRateStat(peerConnectionLog, type) {
+function extractLastVideoStat(peerConnectionLog, type) {
+    var statsReport;
+    for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            statsReport = peerConnectionLog[i].value;
+            break;
+        }
+    }
+    if (!statsReport) return;
+    var count;
+    Object.keys(statsReport).forEach(function(id) {
+        // type outboundrtp && mediaType video
+        var report = statsReport[id];
+        if (report.type === 'outboundrtp' && report.mediaType === 'video') {
+            count = report[type];
+        }
+    });
+    return count;
+}
+
+function extractMaxVideoStat(peerConnectionLog, type) {
     var max = -1;
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
@@ -844,67 +864,19 @@ module.exports = {
     // count # of PLIs sent
     // TODO: recv but that might be more difficult with multiple streams
     numberOfPLISent: function(client, peerConnectionLog) {
-        var statsReport;
-        for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                statsReport = peerConnectionLog[i].value;
-                break;
-            }
-        }
-        if (!statsReport) return;
-        var count;
-        Object.keys(statsReport).forEach(function(id) {
-            // type outboundrtp && mediaType video
-            var report = statsReport[id];
-            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
-                count = report.pliCount;
-            }
-        });
-        return count;
+        return extractLastVideoStat(peerConnectionLog, 'pliCount');
     },
 
     // count # of FIRs sent
     // TODO: recv but that might be more difficult with multiple streams
     numberOfFIRSent: function(client, peerConnectionLog) {
-        var statsReport;
-        for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                statsReport = peerConnectionLog[i].value;
-                break;
-            }
-        }
-        if (!statsReport) return;
-        var count;
-        Object.keys(statsReport).forEach(function(id) {
-            // type outboundrtp && mediaType video
-            var report = statsReport[id];
-            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
-                count = report.firCount;
-            }
-        });
-        return count;
+        return extractLastVideoStat(peerConnectionLog, 'firCount');
     },
 
     // count # of NACKs sent
     // TODO: recv but that might be more difficult with multiple streams
     numberOfNACKSent: function(client, peerConnectionLog) {
-        var statsReport;
-        for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                statsReport = peerConnectionLog[i].value;
-                break;
-            }
-        }
-        if (!statsReport) return;
-        var count;
-        Object.keys(statsReport).forEach(function(id) {
-            // type outboundrtp && mediaType video
-            var report = statsReport[id];
-            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
-                count = report.nackCount;
-            }
-        });
-        return count;
+        return extractLastVideoStat(peerConnectionLog, 'nackCount');
     },
 
     // googMinPlayoutDelayMs -- may be used to detect desync between audio and video
@@ -912,41 +884,27 @@ module.exports = {
     //          to sync with audio. Not included in  VideoCodingModule::Delay()
     //          Defaults to 0 ms.
     maxGoogMinPlayoutDelayMs: function(client, peerConnectionLog) {
-        var max = -1;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
-                    // type outboundrtp && mediaType video
-                    var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.googMinPlayoutDelayMs) {
-                        var t = parseInt(report.googMinPlayoutDelayMs, 10);
-                        max = Math.max(max, t);
-                    }
-                });
-            }
-        }
-        return max;
+        return extractMaxVideoStat('googMinPlayoutDelayMs');
     },
 
     // maximum frame rate input.
     maxGoogFrameRateInput: function(client, peerConnectionLog) {
-        return extractMaxFrameRateStat('googFrameRateInput');
+        return extractMaxVideoStat('googFrameRateInput');
     },
 
     // maximum frame rate sent.
     maxGoogFrameRateSent: function(client, peerConnectionLog) {
-        return extractMaxFrameRateStat('googFrameRateSent');
+        return extractMaxVideoStat('googFrameRateSent');
     },
 
     // maximum frame rate received.
     maxGoogFrameRateReceived: function(client, peerConnectionLog) {
-        return extractMaxFrameRateStat('googFrameRateReceived');
+        return extractMaxVideoStat('googFrameRateReceived');
     },
 
     // maximum frame rate output.
     maxGoogFrameRateOutput: function(client, peerConnectionLog) {
-        return extractMaxFrameRateStat('googFrameRateOutput');
+        return extractMaxVideoStat('googFrameRateOutput');
     },
 
     // TODO: jitter
