@@ -75,6 +75,8 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
 module.exports = {
+    // the webrtc platform type -- webkit or moz
+    // TODO: edge, mobile platforms?
     browserType: function(client) {
         var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         return peerConnectionConfig.browserType || 'unknown';
@@ -89,6 +91,19 @@ module.exports = {
     },
     browserOS: function(client) {
         return platform.parse(client.userAgent).os;
+    },
+
+    browserNameVersion: function(client) {
+        var ua = platform.parse(client.userAgent);
+        return ua.name + '/' + ua.version;
+    },
+    browserNameOS: function(client) {
+        var ua = platform.parse(client.userAgent);
+        return ua.name + '/' + ua.os;
+    },
+    browserNameVersionOS: function(client) {
+        var ua = platform.parse(client.userAgent);
+        return ua.name + '/' + ua.version + '/' + ua.os;
     },
 
     // did the page call getUserMedia at all?
