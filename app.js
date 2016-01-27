@@ -30,6 +30,8 @@ function dump(url, client) {
     fmt.getUserMedia = client.getUserMedia;
     fmt.peerConnections = client.peerConnections;
 
+    // clientFeatures are the same for all peerconnections but are saved together 
+    // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
         if (features[fname].length === 1) {
@@ -53,7 +55,7 @@ function dump(url, client) {
                 }
             }
         });
-        Database.put(clientid, connid, clientFeatures, connectionFeatures);
+        Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
     });
 
     Store.put(clientid, JSON.stringify(fmt));
