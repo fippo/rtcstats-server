@@ -1,6 +1,8 @@
 // https://en.wikipedia.org/wiki/Feature_extraction for peerconnection
 // API traces and getStats data.
 
+var platform = require('platform');
+
 function filterIceConnectionStateChange(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.type === 'oniceconnectionstatechange';
@@ -78,10 +80,15 @@ module.exports = {
         return peerConnectionConfig.browserType || 'unknown';
     },
 
+    browserName: function(client) {
+        return platform.parse(client.userAgent).name;
+    },
+
     browserVersion: function(client) {
-        // parse client.userAgent and return something
-        // e.g. Firefox/43 or Chrome/48
-        // TODO
+        return platform.parse(client.userAgent).version;
+    },
+    browserOS: function(client) {
+        return platform.parse(client.userAgent).os;
     },
 
     // did the page call getUserMedia at all?
