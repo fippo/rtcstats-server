@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "eslint": "^1.10.3",
-    "eslint-config-opentok": "^1.0.2"
+    "eslint-config-opentok": "^1.0.2",
+    "uglify-js": "^2.6.1"
   }
 }
