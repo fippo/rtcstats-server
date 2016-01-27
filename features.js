@@ -253,6 +253,12 @@ module.exports = {
         return undefined;
     },
 
+    // was the peerconnection configured properly?
+    configured: function(client, peerConnectionLog) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return config && config.nullConfig === true;
+    },
+
     // were ice servers configured? Not sure whether this is useful and/or should check if any empty list
     // was configured
     configuredWithICEServers: function(client, peerConnectionLog) {
