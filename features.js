@@ -69,6 +69,24 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     }
 }
 
+function extractMaxFrameRateStat(peerConnectionLog, type) {
+    var max = -1;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                // type outboundrtp && mediaType video
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    max = Math.max(max, t);
+                }
+            });
+        }
+    }
+    return max !== -1 ? max : undefined;
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -913,78 +931,22 @@ module.exports = {
 
     // maximum frame rate input.
     maxGoogFrameRateInput: function(client, peerConnectionLog) {
-        var max = -1;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
-                    // type outboundrtp && mediaType video
-                    var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.googFrameRateInput) {
-                        var t = parseInt(report.googFrameRateInput, 10);
-                        max = Math.max(max, t);
-                    }
-                });
-            }
-        }
-        return max !== -1 ? max : undefined;
+        return extractMaxFrameRateStat('googFrameRateInput');
     },
 
     // maximum frame rate sent.
     maxGoogFrameRateSent: function(client, peerConnectionLog) {
-        var max = -1;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
-                    // type outboundrtp && mediaType video
-                    var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.googFrameRateSent) {
-                        var t = parseInt(report.googFrameRateSent, 10);
-                        max = Math.max(max, t);
-                    }
-                });
-            }
-        }
-        return max !== -1 ? max : undefined;
+        return extractMaxFrameRateStat('googFrameRateSent');
     },
 
     // maximum frame rate received.
     maxGoogFrameRateReceived: function(client, peerConnectionLog) {
-        var max = -1;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
-                    // type outboundrtp && mediaType video
-                    var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.googFrameRateReceived) {
-                        var t = parseInt(report.googFrameRateReceived, 10);
-                        max = Math.max(max, t);
-                    }
-                });
-            }
-        }
-        return max !== -1 ? max : undefined;
+        return extractMaxFrameRateStat('googFrameRateReceived');
     },
 
     // maximum frame rate output.
     maxGoogFrameRateOutput: function(client, peerConnectionLog) {
-        var max = -1;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
-                    // type outboundrtp && mediaType video
-                    var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.googFrameRateOutput) {
-                        var t = parseInt(report.googFrameRateOutput, 10);
-                        max = Math.max(max, t);
-                    }
-                });
-            }
-        }
-        return max !== -1 ? max : undefined;
+        return extractMaxFrameRateStat('googFrameRateOutput');
     },
 
     // TODO: jitter
