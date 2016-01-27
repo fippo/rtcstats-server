@@ -354,6 +354,13 @@ module.exports = {
         return peerConnectionConfig ? peerConnectionConfig.iceTransportPolicy !== undefined : false; // default: 'all'
     },
 
+
+    // was the peerconnection created with a RTCCertificate
+    configuredCertificate: function(client, peerConnectionLog) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig ? peerConnectionConfig.certificates !== undefined : false; 
+    },
+
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
     ICEGatheringComplete: function(client, peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
