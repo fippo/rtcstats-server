@@ -1,4 +1,6 @@
-// https://en.wikipedia.org/wiki/Feature_extraction for peerconnection API traces.
+// https://en.wikipedia.org/wiki/Feature_extraction for peerconnection
+// API traces and getStats data.
+
 function filterIceConnectionStateChange(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.type === 'oniceconnectionstatechange';
@@ -21,12 +23,26 @@ function getPeerConnectionConfig(peerConnectionLog) {
 
 function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
-    // TODO: for firefox the mapping is different
-    var typepref = {
-      udp: 2,
-      tcp: 1,
-      tls: 0
-    }[protocol];
+    var typepref;
+    switch(peerConnectionConfig.browserType) {
+    case 'webkit':
+        typepref = {
+            udp: 2,
+            tcp: 1,
+            tls: 0
+        }[protocol];
+        break;
+    case 'moz':
+        typepref = {
+            udp: 5,
+            tcp: 0
+        }[protocol];
+        break;
+    default:
+        typepref = 'unknown';
+        break;
+    }
+
     var first;
     var second;
     for (first = 0; first < peerConnectionLog.length; first++) {
@@ -57,6 +73,11 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
 module.exports = {
+    browserType: function(client) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig.browserType || 'unknown';
+    },
+
     browserVersion: function(client) {
         // parse client.userAgent and return something
         // e.g. Firefox/43 or Chrome/48
