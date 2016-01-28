@@ -4,7 +4,7 @@
   "description": "",
   "main": "websocket.js",
   "scripts": {
-    "test": "eslint *.js",
+    "test": "eslint *.js && node test/client.js",
     "start": "NODE_ENV=production node app.js"
   },
   "repository": {
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "eslint": "^1.10.3",
-    "eslint-config-opentok": "^1.0.2"
+    "eslint-config-opentok": "^1.0.2",
+    "ws": "^0.8.1"
   }
 }
