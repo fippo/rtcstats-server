@@ -146,6 +146,24 @@ function extractMeanVideoStat(peerConnectionLog, type) {
     return count > 0 ? Math.round(sum / count) : undefined;
 }
 
+function wasVideoStatEverTrue(peerConnectionLog, type) {
+    var found = false;
+    var wasTrue = false;
+    for (var i = 0; i < peerConnectionLog.length && !wasTrue; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    found = true;
+                    if (report[type] === 'true') wasTrue = true;
+                }
+            });
+        }
+    }
+    return found ? wasTrue : undefined;
+}
+
 // mode, better suited for things with discrete distributions like
 // frame width/height
 function extractMostCommonVideoStat(peerConnectionLog, type) {
@@ -1014,6 +1032,13 @@ module.exports = {
         return extractMostCommonVideoStat(peerConnectionLog, stat);
     };
 });
+
+['googCpuLimitedResolution', 'googViewLimitedResolution', 'googBandwidthLimitedResolution'].forEach(function(stat) {
+    module.exports['was' + stat[0].toUpperCase() + stat.substr(1) + 'EverTrue'] = function(client, peerConnectionLog) {
+        return wasVideoStatEverTrue(peerConnectionLog, stat);
+    };
+});
+
 
 if (require.main === module) {
     console.log(Object.keys(module.exports).length + ' features implemented.');

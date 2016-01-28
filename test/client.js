@@ -8,6 +8,7 @@ var url = data.url;
 var origin = url.split('/').splice(0, 3).join('/');
 var path = url.split('/').splice(3).join('/');
 
+// using setTimeout here is bad obviously. This should wait for the server to listen
 setTimeout(function() {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore self-signed cert
     var ws = new WebSocket('wss://localhost:' + config.get('server').port + '/' + path, {
@@ -35,4 +36,4 @@ setTimeout(function() {
       };
       process();
     });
-}, 1000);
+}, 2000);
