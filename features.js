@@ -123,6 +123,27 @@ function extractMinVideoStat(peerConnectionLog, type) {
     return min !== -1 ? min : undefined;
 }
 
+// might not be useful for things like frameWidth/Height which
+// have discrete values. modus might be better
+function extractMeanVideoStat(peerConnectionLog, type) {
+    var sum = 0;
+    var count = 0;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    sum += t;
+                    count++;
+                }
+            });
+        }
+    }
+    return count > 0 ? Math.round(sum / count) : undefined;
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -903,86 +924,6 @@ module.exports = {
         return extractMaxVideoStat(peerConnectionLog, 'googMinPlayoutDelayMs');
     },
 
-    // frame rate input.
-    maxGoogFrameRateInput: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateInput');
-    },
-    minGoogFrameRateInput: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameRateInput');
-    },
-
-    // frame rate sent.
-    maxGoogFrameRateSent: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateSent');
-    },
-    minGoogFrameRateSent: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameRateSent');
-    },
-
-    // frame rate received.
-    maxGoogFrameRateReceived: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateReceived');
-    },
-    minGoogFrameRateReceived: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameRateReceived');
-    },
-
-    // frame rate output.
-    maxGoogFrameRateOutput: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateOutput');
-    },
-    minGoogFrameRateOutput: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameRateOutput');
-    },
-
-    // frame height input
-    maxGoogFrameHeightInput: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameHeightInput');
-    },
-    minGoogFrameHeightInput: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameHeightInput');
-    },
-
-    // frame height sent
-    maxGoogFrameHeightSent: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameHeightSent');
-    },
-    minGoogFrameHeightSent: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameHeightSent');
-    },
-
-    // frame width input
-    maxGoogFrameWidthInput: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameWidthInput');
-    },
-    minGoogFrameWidthInput: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameWidthInput');
-    },
-
-    // frame width sent
-    maxGoogFrameWidthSent: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameWidthSent');
-    },
-    minGoogFrameWidthSent: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameWidthSent');
-    },
-
-    // frame width received
-    maxGoogFrameHeightReceived: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameHeightReceived');
-    },
-    minGoogFrameHeightReceived: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameHeightReceived');
-    },
-
-    // frame height received
-    maxGoogFrameWidthReceived: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googFrameWidthReceived');
-    },
-    minGoogFrameWidthReceived: function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, 'googFrameWidthReceived');
-    },
-
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
@@ -992,3 +933,18 @@ module.exports = {
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
 };
+
+// boring frame statistics
+['googFrameRateInput', 'googFrameRateSent', 'googFrameRateReceived', 'googFrameRateOutput',
+   'googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
+   'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
+    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMeanVideoStat(peerConnectionLog, stat);
+    };
+});
