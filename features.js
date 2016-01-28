@@ -71,6 +71,109 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     }
 }
 
+function extractLastVideoStat(peerConnectionLog, type) {
+    var statsReport;
+    for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            statsReport = peerConnectionLog[i].value;
+            break;
+        }
+    }
+    if (!statsReport) return;
+    var count;
+    Object.keys(statsReport).forEach(function(id) {
+        // type outboundrtp && mediaType video
+        var report = statsReport[id];
+        if (report.type === 'outboundrtp' && report.mediaType === 'video') {
+            count = report[type];
+        }
+    });
+    return count;
+}
+
+function extractMaxVideoStat(peerConnectionLog, type) {
+    var max = -1;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    max = Math.max(max, t);
+                }
+            });
+        }
+    }
+    return max !== -1 ? max : undefined;
+}
+
+function extractMinVideoStat(peerConnectionLog, type) {
+    var min = -1;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    min = Math.min(max, t);
+                }
+            });
+        }
+    }
+    return min !== -1 ? min : undefined;
+}
+
+// might not be useful for things like frameWidth/Height which
+// have discrete values. mode might be better.
+function extractMeanVideoStat(peerConnectionLog, type) {
+    var sum = 0;
+    var count = 0;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    sum += t;
+                    count++;
+                }
+            });
+        }
+    }
+    return count > 0 ? Math.round(sum / count) : undefined;
+}
+
+// mode, better suited for things with discrete distributions like
+// frame width/height
+function extractMostCommonVideoStat(peerConnectionLog, type) {
+    var modes = {};
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    if (!modes[t]) modes[t] = 0;
+                    modes[t]++;
+                }
+            });
+        }
+    }
+    var mode = undefined;
+    var max = -1;
+    Object.keys(modes).forEach(function(key) {
+        if (modes[key] > max) {
+            max = modes[key];
+            mode = key;
+        }
+    });
+    return mode;
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -861,67 +964,19 @@ module.exports = {
     // count # of PLIs sent
     // TODO: recv but that might be more difficult with multiple streams
     numberOfPLISent: function(client, peerConnectionLog) {
-        var statsReport;
-        for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                statsReport = peerConnectionLog[i].value;
-                break;
-            }
-        }
-        if (!statsReport) return;
-        var count;
-        Object.keys(statsReport).forEach(function(id) {
-            // type outboundrtp && mediaType video
-            var report = statsReport[id];
-            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
-                count = report.pliCount;
-            }
-        });
-        return count;
+        return extractLastVideoStat(peerConnectionLog, 'pliCount');
     },
 
     // count # of FIRs sent
     // TODO: recv but that might be more difficult with multiple streams
     numberOfFIRSent: function(client, peerConnectionLog) {
-        var statsReport;
-        for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                statsReport = peerConnectionLog[i].value;
-                break;
-            }
-        }
-        if (!statsReport) return;
-        var count;
-        Object.keys(statsReport).forEach(function(id) {
-            // type outboundrtp && mediaType video
-            var report = statsReport[id];
-            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
-                count = report.firCount;
-            }
-        });
-        return count;
+        return extractLastVideoStat(peerConnectionLog, 'firCount');
     },
 
     // count # of NACKs sent
     // TODO: recv but that might be more difficult with multiple streams
     numberOfNACKSent: function(client, peerConnectionLog) {
-        var statsReport;
-        for (var i = peerConnectionLog.length - 1; i >= 0; i--) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                statsReport = peerConnectionLog[i].value;
-                break;
-            }
-        }
-        if (!statsReport) return;
-        var count;
-        Object.keys(statsReport).forEach(function(id) {
-            // type outboundrtp && mediaType video
-            var report = statsReport[id];
-            if (report.type === 'outboundrtp' && report.mediaType === 'video') {
-                count = report.nackCount;
-            }
-        });
-        return count;
+        return extractLastVideoStat(peerConnectionLog, 'nackCount');
     },
 
     // googMinPlayoutDelayMs -- may be used to detect desync between audio and video
@@ -929,21 +984,7 @@ module.exports = {
     //          to sync with audio. Not included in  VideoCodingModule::Delay()
     //          Defaults to 0 ms.
     maxGoogMinPlayoutDelayMs: function(client, peerConnectionLog) {
-        var max = -1;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
-                    // type outboundrtp && mediaType video
-                    var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.googMinPlayoutDelayMs) {
-                        var t = parseInt(report.googMinPlayoutDelayMs, 10);
-                        max = Math.max(max, report.googMinPlayoutDelayMs);
-                    }
-                });
-            }
-        }
-        return max;
+        return extractMaxVideoStat(peerConnectionLog, 'googMinPlayoutDelayMs');
     },
 
     // TODO: jitter
@@ -955,3 +996,21 @@ module.exports = {
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
 };
+
+// boring frame statistics
+['googFrameRateInput', 'googFrameRateSent', 'googFrameRateReceived', 'googFrameRateOutput',
+   'googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
+   'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
+    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMeanVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['mode' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMostCommonVideoStat(peerConnectionLog, stat);
+    };
+});
