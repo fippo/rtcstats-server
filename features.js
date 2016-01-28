@@ -1014,3 +1014,7 @@ module.exports = {
         return extractMostCommonVideoStat(peerConnectionLog, stat);
     };
 });
+
+if (require.main === module) {
+    console.log(Object.keys(module.exports).length + ' features implemented.');
+}
