@@ -131,9 +131,9 @@ function run(keys) {
         client.on('close', function() {
             console.log('closed');
 
-            var client = db[url][clientid];
+            var client = db[referer][clientid];
             dump(referer, client);
-            delete db[url][clientid];
+            delete db[referer][clientid];
         });
     });
 }
