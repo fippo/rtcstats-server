@@ -6,7 +6,7 @@ module.exports = function(config) {
   var docClient = new AWS.DynamoDB.DocumentClient();
 
   return {
-    put: function(clientId, connectionId, clientFeatures, connectionFeatures) {
+    put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures) {
       var d = new Date().getTime();
       var params = {
         TableName : config.dynamodb.table,
@@ -15,6 +15,7 @@ module.exports = function(config) {
           DateTime: d,
           ClientId: clientId,
           ConnectionId: connectionId,
+          PageUrl: pageUrl,
           ClientFeatures: clientFeatures,
           ConnectionFeatures: connectionFeatures,
         }
