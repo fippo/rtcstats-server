@@ -1,6 +1,8 @@
 // https://en.wikipedia.org/wiki/Feature_extraction for peerconnection
 // API traces and getStats data.
 
+var platform = require('platform');
+
 function filterIceConnectionStateChange(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.type === 'oniceconnectionstatechange';
@@ -73,15 +75,28 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
 module.exports = {
-    browserType: function(client) {
-        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
-        return peerConnectionConfig.browserType || 'unknown';
+    browserName: function(client) {
+        return platform.parse(client.userAgent).name;
     },
 
     browserVersion: function(client) {
-        // parse client.userAgent and return something
-        // e.g. Firefox/43 or Chrome/48
-        // TODO
+        return platform.parse(client.userAgent).version;
+    },
+    browserOS: function(client) {
+        return platform.parse(client.userAgent).os;
+    },
+
+    browserNameVersion: function(client) {
+        var ua = platform.parse(client.userAgent);
+        return ua.name + '/' + ua.version;
+    },
+    browserNameOS: function(client) {
+        var ua = platform.parse(client.userAgent);
+        return ua.name + '/' + ua.os;
+    },
+    browserNameVersionOS: function(client) {
+        var ua = platform.parse(client.userAgent);
+        return ua.name + '/' + ua.version + '/' + ua.os;
     },
 
     // did the page call getUserMedia at all?
@@ -221,6 +236,13 @@ module.exports = {
         return client.peerConnections.length;
     },
 
+    // the webrtc platform type -- webkit or moz
+    // TODO: edge, mobile platforms?
+    browserType: function(client, peerConnectionLog) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig.browserType || 'unknown';
+    },
+
     // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
     // this likely has implications for number and types of candidates gathered.
     isInitiator: function(client, peerConnectionLog) {
@@ -229,6 +251,12 @@ module.exports = {
             if (peerConnectionLog[i].type === 'setRemoteDescription') return false;
         }
         return undefined;
+    },
+
+    // was the peerconnection configured properly?
+    configured: function(client, peerConnectionLog) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return config && config.nullConfig === true;
     },
 
     // were ice servers configured? Not sure whether this is useful and/or should check if any empty list
@@ -324,6 +352,13 @@ module.exports = {
     configuredIceTransportPolicy: function(client, peerConnectionLog) {
         var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         return peerConnectionConfig ? peerConnectionConfig.iceTransportPolicy !== undefined : false; // default: 'all'
+    },
+
+
+    // was the peerconnection created with a RTCCertificate
+    configuredCertificate: function(client, peerConnectionLog) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig ? peerConnectionConfig.certificates !== undefined : false; 
     },
 
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
