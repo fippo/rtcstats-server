@@ -20,7 +20,7 @@ var features = require('./features');
 var wss = null;
 
 // dumps all peerconnections to Store
-function dump(url, client) {
+function dump(url, client, clientid) {
     var fmt = {
         PeerConnections: {},
         url: url
@@ -134,7 +134,7 @@ function run(keys) {
             console.log('closed');
 
             var client = db[referer][clientid];
-            dump(referer, client);
+            dump(referer, client, clientid);
             delete db[referer][clientid];
         });
     });

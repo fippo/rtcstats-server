@@ -117,7 +117,7 @@ function extractMinVideoStat(peerConnectionLog, type) {
                 var report = statsReport[id];
                 if (report.type === 'ssrc' && report[type]) {
                     var t = parseInt(report[type], 10);
-                    min = Math.min(max, t);
+                    min = Math.min(min, t);
                 }
             });
         }
@@ -359,7 +359,7 @@ module.exports = {
     // was the peerconnection configured properly?
     configured: function(client, peerConnectionLog) {
         var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
-        return config && config.nullConfig === true;
+        return peerConnectionConfig && peerConnectionConfig.nullConfig === true;
     },
 
     // were ice servers configured? Not sure whether this is useful and/or should check if any empty list
@@ -661,7 +661,7 @@ module.exports = {
         // TODO: might be hiding in setRemoteDescription, too.
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'addIceCandidate') {
-                var cand = peerConnectionLog[second].value;
+                var cand = peerConnectionLog[i].value;
                 if (cand && cand.candidate.indexOf('relay') !== -1) {
                     return true;
                 }
