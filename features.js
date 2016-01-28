@@ -95,7 +95,6 @@ function extractMaxVideoStat(peerConnectionLog, type) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
-                // type outboundrtp && mediaType video
                 var report = statsReport[id];
                 if (report.type === 'ssrc' && report[type]) {
                     var t = parseInt(report[type], 10);
@@ -105,6 +104,23 @@ function extractMaxVideoStat(peerConnectionLog, type) {
         }
     }
     return max !== -1 ? max : undefined;
+}
+
+function extractMinVideoStat(peerConnectionLog, type) {
+    var min = -1;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    min = Math.min(max, t);
+                }
+            });
+        }
+    }
+    return min !== -1 ? min : undefined;
 }
 
 // there are two types of features
@@ -884,27 +900,87 @@ module.exports = {
     //          to sync with audio. Not included in  VideoCodingModule::Delay()
     //          Defaults to 0 ms.
     maxGoogMinPlayoutDelayMs: function(client, peerConnectionLog) {
-        return extractMaxVideoStat('googMinPlayoutDelayMs');
+        return extractMaxVideoStat(peerConnectionLog, 'googMinPlayoutDelayMs');
     },
 
-    // maximum frame rate input.
+    // frame rate input.
     maxGoogFrameRateInput: function(client, peerConnectionLog) {
-        return extractMaxVideoStat('googFrameRateInput');
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateInput');
+    },
+    minGoogFrameRateInput: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameRateInput');
     },
 
-    // maximum frame rate sent.
+    // frame rate sent.
     maxGoogFrameRateSent: function(client, peerConnectionLog) {
-        return extractMaxVideoStat('googFrameRateSent');
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateSent');
+    },
+    minGoogFrameRateSent: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameRateSent');
     },
 
-    // maximum frame rate received.
+    // frame rate received.
     maxGoogFrameRateReceived: function(client, peerConnectionLog) {
-        return extractMaxVideoStat('googFrameRateReceived');
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateReceived');
+    },
+    minGoogFrameRateReceived: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameRateReceived');
     },
 
-    // maximum frame rate output.
+    // frame rate output.
     maxGoogFrameRateOutput: function(client, peerConnectionLog) {
-        return extractMaxVideoStat('googFrameRateOutput');
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameRateOutput');
+    },
+    minGoogFrameRateOutput: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameRateOutput');
+    },
+
+    // frame height input
+    maxGoogFrameHeightInput: function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameHeightInput');
+    },
+    minGoogFrameHeightInput: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameHeightInput');
+    },
+
+    // frame height sent
+    maxGoogFrameHeightSent: function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameHeightSent');
+    },
+    minGoogFrameHeightSent: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameHeightSent');
+    },
+
+    // frame width input
+    maxGoogFrameWidthInput: function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameWidthInput');
+    },
+    minGoogFrameWidthInput: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameWidthInput');
+    },
+
+    // frame width sent
+    maxGoogFrameWidthSent: function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameWidthSent');
+    },
+    minGoogFrameWidthSent: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameWidthSent');
+    },
+
+    // frame width received
+    maxGoogFrameHeightReceived: function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameHeightReceived');
+    },
+    minGoogFrameHeightReceived: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameHeightReceived');
+    },
+
+    // frame height received
+    maxGoogFrameWidthReceived: function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, 'googFrameWidthReceived');
+    },
+    minGoogFrameWidthReceived: function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, 'googFrameWidthReceived');
     },
 
     // TODO: jitter
