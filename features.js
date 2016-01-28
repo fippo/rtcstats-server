@@ -98,7 +98,7 @@ function extractMaxVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
                     var t = parseInt(report[type], 10);
                     max = Math.max(max, t);
                 }
@@ -115,7 +115,7 @@ function extractMinVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
                     var t = parseInt(report[type], 10);
                     min = Math.min(min, t);
                 }
@@ -135,7 +135,7 @@ function extractMeanVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
                     var t = parseInt(report[type], 10);
                     sum += t;
                     count++;
