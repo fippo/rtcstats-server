@@ -186,7 +186,7 @@ module.exports = {
         return platform.parse(client.userAgent).version;
     },
     browserOS: function(client) {
-        return platform.parse(client.userAgent).os;
+        return platform.parse(client.userAgent).os.toString();
     },
 
     browserNameVersion: function(client) {
@@ -1014,3 +1014,7 @@ module.exports = {
         return extractMostCommonVideoStat(peerConnectionLog, stat);
     };
 });
+
+if (require.main === module) {
+    console.log(Object.keys(module.exports).length + ' features implemented.');
+}

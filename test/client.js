@@ -18,7 +18,6 @@ setTimeout(function() {
     });
      
     ws.on('open', function open() {
-      console.log('onopen');
       var events = data.getUserMedia;
       // TODO: handle multiple connections
       Object.keys(data.peerConnections).forEach(function(id) {
@@ -27,9 +26,7 @@ setTimeout(function() {
       var process = function() {
         var evt = events.shift();
         if (!evt) {
-          console.log('done');
           ws.close();
-          console.log(server);
           server.stop();
           return;
         }
