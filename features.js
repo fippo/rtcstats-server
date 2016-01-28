@@ -124,7 +124,7 @@ function extractMinVideoStat(peerConnectionLog, type) {
 }
 
 // might not be useful for things like frameWidth/Height which
-// have discrete values. modus might be better
+// have discrete values. mode might be better.
 function extractMeanVideoStat(peerConnectionLog, type) {
     var sum = 0;
     var count = 0;
@@ -142,6 +142,34 @@ function extractMeanVideoStat(peerConnectionLog, type) {
         }
     }
     return count > 0 ? Math.round(sum / count) : undefined;
+}
+
+// mode, better suited for things with discrete distributions like
+// frame width/height
+function extractMostCommonVideoStat(peerConnectionLog, type) {
+    var modes = {};
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report[type]) {
+                    var t = parseInt(report[type], 10);
+                    if (!modes[t]) modes[t] = 0;
+                    modes[t]++;
+                }
+            });
+        }
+    }
+    var mode = undefined;
+    var max = -1;
+    Object.keys(modes).forEach(function(key) {
+        if (modes[key] > max) {
+            max = modes[key];
+            mode = key;
+        }
+    });
+    return mode;
 }
 
 // there are two types of features
@@ -946,5 +974,8 @@ module.exports = {
     };
     module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractMeanVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['mode' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMostCommonVideoStat(peerConnectionLog, stat);
     };
 });
