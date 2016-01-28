@@ -186,7 +186,7 @@ module.exports = {
         return platform.parse(client.userAgent).version;
     },
     browserOS: function(client) {
-        return platform.parse(client.userAgent).os;
+        return platform.parse(client.userAgent).os.toString();
     },
 
     browserNameVersion: function(client) {
