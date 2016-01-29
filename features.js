@@ -98,7 +98,7 @@ function extractMaxVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
                     var t = parseInt(report[type], 10);
                     max = Math.max(max, t);
                 }
@@ -115,7 +115,7 @@ function extractMinVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
                     var t = parseInt(report[type], 10);
                     min = Math.min(min, t);
                 }
@@ -135,7 +135,7 @@ function extractMeanVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
                     var t = parseInt(report[type], 10);
                     sum += t;
                     count++;
@@ -997,14 +997,6 @@ module.exports = {
         return extractLastVideoStat(peerConnectionLog, 'nackCount');
     },
 
-    // googMinPlayoutDelayMs -- may be used to detect desync between audio and video
-    //          Minimum playout delay (used for lip-sync). This is the minimum delay required
-    //          to sync with audio. Not included in  VideoCodingModule::Delay()
-    //          Defaults to 0 ms.
-    maxGoogMinPlayoutDelayMs: function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, 'googMinPlayoutDelayMs');
-    },
-
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
@@ -1033,12 +1025,29 @@ module.exports = {
     };
 });
 
+// googMinPlayoutDelayMs -- may be used to detect desync between audio and video
+//          Minimum playout delay (used for lip-sync). This is the minimum delay required
+//          to sync with audio. Not included in  VideoCodingModule::Delay()
+//          Defaults to 0 ms.
+// for these stats, mode does not make sense
+['googCurrentDelayMs', 'googJitterBufferMs', 'googMinPlayoutDelayMs', 'googTargetDelayMs'].forEach(function(stat) {
+    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, stat);
+    };
+    // min seem to be 0?
+    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMeanVideoStat(peerConnectionLog, stat);
+    };
+});
+
 ['googCpuLimitedResolution', 'googViewLimitedResolution', 'googBandwidthLimitedResolution'].forEach(function(stat) {
     module.exports['was' + stat[0].toUpperCase() + stat.substr(1) + 'EverTrue'] = function(client, peerConnectionLog) {
         return wasVideoStatEverTrue(peerConnectionLog, stat);
     };
 });
-
 
 if (require.main === module) {
     console.log(Object.keys(module.exports).length + ' features implemented.');
