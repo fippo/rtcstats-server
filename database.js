@@ -1,4 +1,5 @@
 var AWS = require('aws-sdk');
+var _ = require('lodash');
 
 module.exports = function(config) {
   AWS.config = config.dynamodb;
@@ -14,12 +15,17 @@ module.exports = function(config) {
           Date: d - (d % (86400 * 1000)), // just the UTC day
           DateTime: d,
           ClientId: clientId,
-          ConnectionId: connectionId,
+          ConnectionId: clientId + '_' + connectionId,
           PageUrl: pageUrl,
-          ClientFeatures: clientFeatures,
-          ConnectionFeatures: connectionFeatures,
         }
       };
+
+      _.forEach(clientFeatures, function(value, key) {
+        params.Item[key] = value;
+      });
+      _.forEach(connectionFeatures, function(value, key) {
+        params.Item[key] = value;
+      });
 
       docClient.put(params, function(err, data) {
         if (err) {
