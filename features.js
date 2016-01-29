@@ -91,15 +91,15 @@ function extractLastVideoStat(peerConnectionLog, type) {
     return count;
 }
 
-function extractMaxVideoStat(peerConnectionLog, type) {
+function extractMaxVideoStat(peerConnectionLog, statName) {
     var max = -1;
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
-                    var t = parseInt(report[type], 10);
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                    var t = parseInt(report[statName], 10);
                     max = Math.max(max, t);
                 }
             });
@@ -108,26 +108,26 @@ function extractMaxVideoStat(peerConnectionLog, type) {
     return max !== -1 ? max : undefined;
 }
 
-function extractMinVideoStat(peerConnectionLog, type) {
-    var min = -1;
+function extractMinVideoStat(peerConnectionLog, statName) {
+    var min = Number.MAX_VALUE;
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
-                    var t = parseInt(report[type], 10);
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                    var t = parseInt(report[statName], 10);
                     min = Math.min(min, t);
                 }
             });
         }
     }
-    return min !== -1 ? min : undefined;
+    return min !== Number.MAX_VALUE ? min : undefined;
 }
 
 // might not be useful for things like frameWidth/Height which
 // have discrete values. mode might be better.
-function extractMeanVideoStat(peerConnectionLog, type) {
+function extractMeanVideoStat(peerConnectionLog, statName) {
     var sum = 0;
     var count = 0;
     for (var i = 0; i < peerConnectionLog.length; i++) {
@@ -135,8 +135,8 @@ function extractMeanVideoStat(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[type]) {
-                    var t = parseInt(report[type], 10);
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                    var t = parseInt(report[statName], 10);
                     sum += t;
                     count++;
                 }
@@ -146,7 +146,7 @@ function extractMeanVideoStat(peerConnectionLog, type) {
     return count > 0 ? Math.round(sum / count) : undefined;
 }
 
-function wasVideoStatEverTrue(peerConnectionLog, type) {
+function wasVideoStatEverTrue(peerConnectionLog, statName) {
     var found = false;
     var wasTrue = false;
     for (var i = 0; i < peerConnectionLog.length && !wasTrue; i++) {
@@ -154,9 +154,9 @@ function wasVideoStatEverTrue(peerConnectionLog, type) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
+                if (report.type === 'ssrc' && report[statName]) {
                     found = true;
-                    if (report[type] === 'true') wasTrue = true;
+                    if (report[statName] === 'true') wasTrue = true;
                 }
             });
         }
@@ -166,15 +166,15 @@ function wasVideoStatEverTrue(peerConnectionLog, type) {
 
 // mode, better suited for things with discrete distributions like
 // frame width/height
-function extractMostCommonVideoStat(peerConnectionLog, type) {
+function extractMostCommonVideoStat(peerConnectionLog, statName) {
     var modes = {};
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report[type]) {
-                    var t = parseInt(report[type], 10);
+                if (report.type === 'ssrc' && report[statName]) {
+                    var t = parseInt(report[statName], 10);
                     if (!modes[t]) modes[t] = 0;
                     modes[t]++;
                 }
