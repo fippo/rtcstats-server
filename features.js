@@ -186,7 +186,7 @@ function extractMostCommonVideoStat(peerConnectionLog, statName) {
     Object.keys(modes).forEach(function(key) {
         if (modes[key] > max) {
             max = modes[key];
-            mode = key;
+            mode = parseInt(key, 10);
         }
     });
     return mode;
