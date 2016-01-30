@@ -65,7 +65,7 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
             }
         }
         if (second < peerConnectionLog.length) {
-            return (new Date(peerConnectionLog[second].time).getTime() - 
+            return (new Date(peerConnectionLog[second].time).getTime() -
                 new Date(peerConnectionLog[first].time).getTime());
         }
     }
@@ -479,7 +479,7 @@ module.exports = {
     // was the peerconnection created with a RTCCertificate
     configuredCertificate: function(client, peerConnectionLog) {
         var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
-        return peerConnectionConfig ? peerConnectionConfig.certificates !== undefined : false; 
+        return peerConnectionConfig ? peerConnectionConfig.certificates !== undefined : false;
     },
 
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
@@ -501,7 +501,7 @@ module.exports = {
         var log = filterIceConnectionStateChange(peerConnectionLog);
         var failures = log.filter(function(entry) {
             return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
-        }).length; 
+        }).length;
         if (failures > 0) {
             return log.filter(function(entry) {
                 return entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed');
@@ -626,7 +626,7 @@ module.exports = {
                 if (peerConnectionLog[second].type === 'onicecandidate' && peerConnectionLog[second].value === null) break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() - 
+                return (new Date(peerConnectionLog[second].time).getTime() -
                     new Date(peerConnectionLog[first].time).getTime());
             }
         }
@@ -703,7 +703,7 @@ module.exports = {
                     (peerConnectionLog[second].value === 'connected' || peerConnectionLog[second].value === 'completed')) break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() - 
+                return (new Date(peerConnectionLog[second].time).getTime() -
                     new Date(peerConnectionLog[first].time).getTime());
             }
         }
@@ -723,7 +723,7 @@ module.exports = {
                 if (peerConnectionLog[second].type === peerConnectionLog[first].type + 'OnSuccess') break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() - 
+                return (new Date(peerConnectionLog[second].time).getTime() -
                     new Date(peerConnectionLog[first].time).getTime());
             }
         }
@@ -755,7 +755,7 @@ module.exports = {
             return entry.type === 'addIceCandidate';
         }).length;
     },
-    
+
     // session duration, defined by ICE states.
     sessionDuration: function(client, peerConnectionLog) {
         var startTime = -1;
@@ -817,7 +817,7 @@ module.exports = {
         var means = Object.keys(audioLevels).map(function(id) {
             return audioLevels[id].reduce(function(a, b) {
                 return a + b;
-            }, 0) / audioLevels[id].length;
+            }, 0) / (audioLevels[id].length || 1);
         });
         // TODO: support multiple local streams?
         if (means.length) {
@@ -842,7 +842,7 @@ module.exports = {
         });
         return Math.floor(rtts.reduce(function(a, b) {
             return a + b;
-        }, 0) / rtts.length);
+        }, 0) / (rtts.length || 1));
     },
 
     // mean recv bitrate
@@ -871,7 +871,7 @@ module.exports = {
         }
         return Math.floor(bitrates.reduce(function(a, b) {
             return a + b;
-        }, 0) / bitrates.length);
+        }, 0) / (bitrates.length || 1));
     },
 
     // mean send bitrate
@@ -900,7 +900,7 @@ module.exports = {
         }
         return Math.floor(bitrates.reduce(function(a, b) {
             return a + b;
-        }, 0) / bitrates.length);
+        }, 0) / (bitrates.length || 1));
     },
 
     // how did the selected candidate pair change? Could happen e.g. because of an ice restart
@@ -1002,7 +1002,7 @@ module.exports = {
     // TODO: packets sent
     // TODO: packets received
     // TODO: goog things possibly discarded by snoop?
-    // TODO: packetsDiscardedOnSend 
+    // TODO: packetsDiscardedOnSend
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
 };
