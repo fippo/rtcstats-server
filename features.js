@@ -633,13 +633,30 @@ module.exports = {
         return undefined;
     },
 
+    // was a local host candidate gathered. This should always be true.
+    // And yet I saw a pig flying with Firefox 46 on Windows which did
+    // not like a teredo interface and did not gather candidates.
+    gatheredHost: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onicecandidate') {
+                var cand = peerConnectionLog[i].value;
+                if (cand === null) return false; // gathering finished so we have seen all candidates.
+                if (cand.candidate.indexOf('host') !== -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
+
     // was a local STUN candidate gathered?
     // TODO: do we care about timing?
     gatheredSTUN: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'onicecandidate') {
                 var cand = peerConnectionLog[i].value;
-                if (cand && cand.candidate.indexOf('srflx') !== -1) {
+                if (cand === null) return false; // gathering finished so we have seen all candidates.
+                if (cand.candidate.indexOf('srflx') !== -1) {
                     return true;
                 }
             }
