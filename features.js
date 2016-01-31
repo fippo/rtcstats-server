@@ -1078,7 +1078,7 @@ module.exports = {
 });
 
 // calculate central moment of jitter, assmuning it is a random variable.
-['googJitterBufferMs'].forEach(function(stat) {
+['googJitterBufferMs', 'googRtt'].forEach(function(stat) {
     module.exports['variance' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 2);
     };
