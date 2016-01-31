@@ -192,6 +192,34 @@ function extractMostCommonVideoStat(peerConnectionLog, statName) {
     return mode;
 }
 
+// Calculate standardized moment.
+// order=1: 0
+// order=2: variance
+// order=3: skewness
+// order=4: kurtosis
+function standardizedMoment(series, order) {
+    var len = series.length || 1;
+    var mean = series.reduce(function(a, b) { return a + b; }, 0) / len;
+    return series.reduce(function(a, b) { return a + Math.pow(b - mean, order); }, 0) / len;
+}
+
+// extracts the central moment from video statistics.
+function extractCentralMomentFromVideoStat(peerConnectionLog, statName, order) {
+    var series = [];
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                    series.push(parseInt(report[statName], 10));
+                }
+            });
+        }
+    }
+    return series.length ? standardizedMoment(series, order) : undefined;
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -1046,6 +1074,19 @@ module.exports = {
 ['googCpuLimitedResolution', 'googViewLimitedResolution', 'googBandwidthLimitedResolution'].forEach(function(stat) {
     module.exports['was' + stat[0].toUpperCase() + stat.substr(1) + 'EverTrue'] = function(client, peerConnectionLog) {
         return wasVideoStatEverTrue(peerConnectionLog, stat);
+    };
+});
+
+// calculate central moment of jitter, assmuning it is a random variable.
+['googJitterBufferMs'].forEach(function(stat) {
+    module.exports['variance' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 2);
+    };
+    module.exports['skewness' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 3);
+    };
+    module.exports['kurtosis' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 4);
     };
 });
 
