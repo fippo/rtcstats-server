@@ -1040,10 +1040,10 @@ module.exports = {
     },
     */
 
-    // how often did the selected interface type change? e.g. a wifi->mobile transition
+    // how did the selected interface type change? e.g. a wifi->mobile transition
     // see https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/app/webrtc/statscollector.cc&q=statscollector&sq=package:chromium&l=53
     // TODO: check if this really allows detecting such transitions
-    numberOfCandidatePairChanges: function(client, peerConnectionLog) {
+    candidatePairChangeInterfaceTypes: function(client, peerConnectionLog) {
         var interfaceTypesList = [null];
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
