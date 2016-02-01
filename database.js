@@ -1,4 +1,5 @@
 var AWS = require('aws-sdk');
+var _ = require('lodash');
 
 module.exports = function(config) {
   AWS.config = config.dynamodb;
@@ -6,7 +7,7 @@ module.exports = function(config) {
   var docClient = new AWS.DynamoDB.DocumentClient();
 
   return {
-    put: function(clientId, connectionId, clientFeatures, connectionFeatures) {
+    put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures) {
       var d = new Date().getTime();
       var params = {
         TableName : config.dynamodb.table,
@@ -14,11 +15,17 @@ module.exports = function(config) {
           Date: d - (d % (86400 * 1000)), // just the UTC day
           DateTime: d,
           ClientId: clientId,
-          ConnectionId: connectionId,
-          ClientFeatures: clientFeatures,
-          ConnectionFeatures: connectionFeatures,
+          ConnectionId: clientId + '_' + connectionId,
+          PageUrl: pageUrl,
         }
       };
+
+      _.forEach(clientFeatures, function(value, key) {
+        params.Item[key] = value;
+      });
+      _.forEach(connectionFeatures, function(value, key) {
+        params.Item[key] = value;
+      });
 
       docClient.put(params, function(err, data) {
         if (err) {

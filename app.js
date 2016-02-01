@@ -13,6 +13,7 @@ var Database = require('./database')({
   dynamodb: config.get('dynamodb')
 });
 
+var isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 var WebSocketServer = require('ws').Server;
 var features = require('./features');
@@ -20,7 +21,7 @@ var features = require('./features');
 var wss = null;
 
 // dumps all peerconnections to Store
-function dump(url, client) {
+function dump(url, client, clientid) {
     var fmt = {
         PeerConnections: {},
         url: url
@@ -30,6 +31,8 @@ function dump(url, client) {
     fmt.getUserMedia = client.getUserMedia;
     fmt.peerConnections = client.peerConnections;
 
+    // clientFeatures are the same for all peerconnections but are saved together 
+    // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
         if (features[fname].length === 1) {
@@ -53,22 +56,27 @@ function dump(url, client) {
                 }
             }
         });
-        Database.put(clientid, connid, clientFeatures, connectionFeatures);
+        if (isProduction) {
+            Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
+        }
     });
 
-    Store.put(clientid, JSON.stringify(fmt));
+    if (isProduction) {
+        Store.put(clientid, JSON.stringify(fmt));
+    }
 }
 
 var db = {};
+var server;
 
 function run(keys) {
     var app = express();
     app.use('/static', express.static(__dirname + '/static'));
 
     if (keys === undefined) {
-      var server = require('http').Server(app);
+      server = require('http').Server(app);
     } else {
-      var server = require('https').Server({
+      server = require('https').Server({
           key: keys.serviceKey,
           cert: keys.certificate
       }, app);
@@ -85,7 +93,6 @@ function run(keys) {
         var ua = client.upgradeReq.headers['user-agent'];
         var clientid = uuid.v4();
         // TODO: separate origin and pathname (url)
-        console.log(referer);
 
         if (!db[referer]) db[referer] = {};
         db[referer][clientid] = {
@@ -97,7 +104,6 @@ function run(keys) {
         console.log('connected', ua, referer);
         client.on('message', function (msg) {
             var data = JSON.parse(msg);
-            console.log(data);
             switch(data[0]) {
             case 'getUserMedia':
             case 'getUserMediaOnSuccess':
@@ -112,7 +118,6 @@ function run(keys) {
                 });
                 break;
             default:
-                console.log(clientid, data[0], data[1], data[2]);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = [];
                 }
@@ -131,14 +136,20 @@ function run(keys) {
         client.on('close', function() {
             console.log('closed');
 
-            var client = db[url][clientid];
-            dump(referer, client);
-            delete db[url][clientid];
+            var client = db[referer][clientid];
+            dump(referer, client, clientid);
+            delete db[referer][clientid];
         });
     });
 }
 
-if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+function stop() {
+    if (server) {
+        server.close();
+    }
+}
+
+if (isProduction) {
     run();
 } else {
     // on localhost, dynamically generate certificates. Enable #allow-insecure-localhost
@@ -152,3 +163,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
         }
     });
 }
+
+module.exports = {
+    stop: stop
+};
