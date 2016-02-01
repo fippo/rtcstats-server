@@ -844,6 +844,39 @@ module.exports = {
         return 'unknown';
     },
 
+    // dlts cipher suite used
+    // TODO: what is the standard thing for that?
+    dtlsCipherSuite: function(client, peerConnectionLog) {
+        var dtlsCipher;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'googComponent' && report.dtlsCipher) {
+                    dtlsCipher = report.dtlsCipher;
+                }
+            });
+            if (dtlsCipher) return dtlsCipher;
+        }
+    },
+
+    // srtp cipher suite used
+    srtpCipherSuite: function(client, peerConnectionLog) {
+        var srtpCipher;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'googComponent' && report.srtpCipher) {
+                    srtpCipher = report.srtpCipher;
+                }
+            });
+            if (srtpCipher) return srtpCipher;
+        }
+    },
+
     // mean audio level sent. Between 0 and 1
     statsMeanAudioLevel: function(client, peerConnectionLog) {
         var audioLevels = {};
