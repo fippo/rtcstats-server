@@ -231,6 +231,11 @@ module.exports = {
     browserVersion: function(client) {
         return platform.parse(client.userAgent).version;
     },
+
+    browserMajorVersion: function(client) {
+        return platform.parse(client.userAgent).version.split('.')[0];
+    },
+
     browserOS: function(client) {
         return platform.parse(client.userAgent).os.toString();
     },
