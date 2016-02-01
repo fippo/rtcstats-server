@@ -12,7 +12,7 @@ WORKDIR /$app
 COPY . /$app
 RUN npm install
 RUN mkdir static
-RUN curl https://raw.githubusercontent.com/opentok/snoop/master/snoop.js > static/snoop.js
+RUN curl https://raw.githubusercontent.com/opentok/snoop/master/snoop.js -o static/snoop.js && node_modules/.bin/uglifyjs static/snoop.js -o static/snoop.min.js
 
 USER $app
 VOLUME ["/var/log/$app"]
