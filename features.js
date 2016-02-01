@@ -997,6 +997,25 @@ module.exports = {
         return extractLastVideoStat(peerConnectionLog, 'nackCount');
     },
 
+    // the ssrc rtt is based on rtcp and requires audio input sent.
+    // We suspect this correlates to the getUserMediaSuccessNotReally bug.
+    sendAudioRTTNeverGreaterZero: function(client, peerConnectionLog) {
+        var value = -2;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                var statsReport = peerConnectionLog[i].value;
+                Object.keys(statsReport).forEach(function(id) {
+                    var report = statsReport[id];
+                    if (report.type === 'ssrc' && report.mediaType === 'audio' && report.audioInputLevel && report.googRtt) {
+                        value = parseInt(report.googRtt, 10);
+                    }
+                });
+                if (value > 0) return false;
+            }
+        }
+        return value === -1 ? true : undefined;
+    },
+
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
