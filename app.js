@@ -31,6 +31,9 @@ function dump(url, client, clientid) {
     fmt.getUserMedia = client.getUserMedia;
     fmt.peerConnections = client.peerConnections;
 
+    // ignore connections that never send getUserMedia or peerconnection events.
+    if (fmt.getUserMedia.length === 0 && Object.keys(fmt.peerConnections).length === 0) return;
+
     // clientFeatures are the same for all peerconnections but are saved together 
     // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
