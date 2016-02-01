@@ -1109,10 +1109,8 @@ module.exports = {
     // TODO: goog plc things
 };
 
-// boring frame statistics
-['googFrameRateInput', 'googFrameRateSent', 'googFrameRateReceived', 'googFrameRateOutput',
-   'googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
-   'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
+// frame rate is not discrete, so mode does not make sense.
+['googFrameRateInput', 'googFrameRateSent', 'googFrameRateReceived', 'googFrameRateOutput'].forEach(function(stat) {
     module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractMaxVideoStat(peerConnectionLog, stat);
     };
@@ -1121,6 +1119,17 @@ module.exports = {
     };
     module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractMeanVideoStat(peerConnectionLog, stat);
+    };
+});
+
+// discrete values, mean does not make sense but mode does
+['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
+   'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
+    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMaxVideoStat(peerConnectionLog, stat);
+    };
+    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMinVideoStat(peerConnectionLog, stat);
     };
     module.exports['mode' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractMostCommonVideoStat(peerConnectionLog, stat);
