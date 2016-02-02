@@ -34,6 +34,11 @@ function dump(url, client, clientid) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (fmt.getUserMedia.length === 0 && Object.keys(fmt.peerConnections).length === 0) return;
 
+    if (isProduction) {
+        Store.put(clientid, JSON.stringify(fmt));
+    }
+
+    // Feature generation
     // clientFeatures are the same for all peerconnections but are saved together 
     // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
@@ -64,9 +69,6 @@ function dump(url, client, clientid) {
         }
     });
 
-    if (isProduction) {
-        Store.put(clientid, JSON.stringify(fmt));
-    }
 }
 
 var db = {};
