@@ -47,6 +47,8 @@ function dump(url, client, clientid) {
             var feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
                 console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                if (feature === false) feature = 0;
+                if (feature === true) feature = 1;
                 clientFeatures[fname] = feature;
             }
         }
@@ -60,6 +62,8 @@ function dump(url, client, clientid) {
                 var feature = features[fname].apply(null, [client, conn]);
                 if (feature !== undefined) {
                     console.log(connid, 'FEATURE', fname, '=>', feature);
+                    if (feature === false) feature = 0;
+                    if (feature === true) feature = 1;
                     connectionFeatures[fname] = feature;
                 }
             }
