@@ -940,7 +940,7 @@ module.exports = {
             if (lastStatsReport) {
                 Object.keys(statsReport).forEach(function(id) {
                     var report = statsReport[id];
-                    if (report.type === 'candidatepair' && report.selected === true) {
+                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
                         var bitrate = 8 * (report.bytesReceived - lastStatsReport[id].bytesReceived) / (peerConnectionLog[i].time - lastTime);
                         // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
                         if (bitrate > 0) {
@@ -969,7 +969,7 @@ module.exports = {
             if (lastStatsReport) {
                 Object.keys(statsReport).forEach(function(id) {
                     var report = statsReport[id];
-                    if (report.type === 'candidatepair' && report.selected === true) {
+                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
                         var bitrate = 8 * (report.bytesSent - lastStatsReport[id].bytesSent) / (peerConnectionLog[i].time - lastTime);
                         // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
                         if (bitrate > 0) {
