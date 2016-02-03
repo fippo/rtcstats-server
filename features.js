@@ -380,6 +380,39 @@ module.exports = {
         }
         return requested;
     },
+
+    // return the label of the first audio device
+    firstAudioTrackLabel: function(client) {
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
+                var stream = gum[i].value;
+                var tracks = stream && stream.tracks || [];
+                for (var j = 0; j < tracks.length; j++) {
+                    if (tracks[j].kind === 'audio') {
+                        return tracks[j].label;
+                    }
+                }
+            }
+        }
+    },
+
+    // return the label of the first video device
+    firstVideoTrackLabel: function(client) {
+        var gum = client.getUserMedia || [];
+        var gum = client.getUserMedia || [];
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
+                var stream = gum[i].value;
+                var tracks = stream && stream.tracks || [];
+                for (var j = 0; j < tracks.length; j++) {
+                    if (tracks[j].kind === 'video') {
+                        return tracks[j].label;
+                    }
+                }
+            }
+        }
+    },
     // TODO: gum statistics (audio, video, number of tracks, errors, fail-to-acquire aka ended readyState)
     // TODO: resolution, framerate
     // TODO: special goog constraints?
