@@ -986,6 +986,29 @@ module.exports = {
         }, 0) / (bitrates.length || 1));
     },
 
+
+    firstCandidatePairType: function(client, peerConnectionLog) {
+        // search for first getStats after iceconnection->connected
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
+                (peerConnectionLog[i].value=== 'connected'
+                || peerConnectionLog[i].value === 'completed')) break;
+        }
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            var pair = null;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'candidatepair' && report.selected === true) {
+                    pair = statsReport[report.localCandidateId].candidateType +
+                        ';' + statsReport[report.remoteCandidateId].candidateType;
+                }
+            });
+            if (pair) return pair;
+        }
+    },
+
     // how did the selected candidate pair change? Could happen e.g. because of an ice restart
     // so there should be a strong correlation.
     numberOfCandidatePairChanges: function(client, peerConnectionLog) {
