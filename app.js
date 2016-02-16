@@ -23,7 +23,6 @@ var wss = null;
 // dumps all peerconnections to Store
 function dump(url, client, clientid) {
     var fmt = {
-        PeerConnections: {},
         url: url
     };
 
