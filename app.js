@@ -2,9 +2,10 @@ var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
 var statsMangler = require('./getstats-mangle');
+var express = require('express');
 
 var WebSocketServer = require('ws').Server;
-var express = require('express');
+var app = require('./web/server')();
 
 var Store = require('./store')({
   s3: config.get('s3')
@@ -39,7 +40,8 @@ function dump(url, client, clientid) {
     }
 
     // Feature generation
-    // clientFeatures are the same for all peerconnections but are saved together 
+    // clientFeatures are the same for all peerconnections but are saved together
+
     // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
@@ -79,7 +81,6 @@ var db = {};
 var server;
 
 function run(keys) {
-    var app = express();
     app.use('/static', express.static(__dirname + '/static'));
 
     if (keys === undefined) {
@@ -87,7 +88,7 @@ function run(keys) {
     } else {
       server = require('https').Server({
           key: keys.serviceKey,
-          cert: keys.certificate
+          cert: keys.certificate,
       }, app);
     }
 
