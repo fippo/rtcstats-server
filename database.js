@@ -35,5 +35,16 @@ module.exports = function(config) {
         }
       });
     },
+
+    get: function(clientId, connectionId, callback) {
+      
+     var params = {
+        TableName : 'Snoop',
+        Key: {
+          ConnectionId: clientId + '_' + connectionId,
+        }
+      };
+      docClient.get(params, callback);
+    }
   }
 }
