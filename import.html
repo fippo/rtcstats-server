@@ -158,6 +158,7 @@ function importUpdatesAndStats(data) {
                     Object.keys(stats[id]).forEach(function(name) {
                         if (name === 'timestamp') return;
                         if (name === 'ssrc') return;
+                        if (name === 'googMinPlayoutDelayMs') stats[id][name] = parseInt(stats[id][name], 10);
                         if (typeof stats[id][name] === 'number') {
                             if (!series[id]) series[id] = {};
                             if (!series[id][name]) series[id][name] = [];
@@ -181,9 +182,9 @@ function importUpdatesAndStats(data) {
             d.id = 'chart_' + Date.now();
             document.getElementById('container').appendChild(d);
             console.log(reportname, series[reportname]);
-            var data = [];
+            var da = [];
             Object.keys(series[reportname]).forEach(function(name) {
-                data.push({
+                da.push({
                     name: name,
                     data: series[reportname][name]
                 });
@@ -204,7 +205,7 @@ function importUpdatesAndStats(data) {
                     zoomType: 'x',
                     renderTo : d.id
                 },
-                series: data
+                series: da
             });
             graphs[connid][reportname] = graph;
         }
