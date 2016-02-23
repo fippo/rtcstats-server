@@ -1,6 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var passport = require('passport');
 var routes = require('./routes');
 
 function Server() {
@@ -9,17 +11,15 @@ function Server() {
     // Remove x-powered-by header (doesn't let clients know we are using Express)
     app.disable('x-powered-by');
 
-    app.set('view engine', 'ejs');
+    app.set('view engine', 'jade');
 
-
-    // Returns middleware that parses both json and urlencoded.
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({
-        extended: true
-    }));
-
-    // Returns middleware that parses cookies
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.use(cookieParser());
+
+    app.use(session({ secret: 'snoopsessionpwd' }));
+    app.use(passport.initialize());
+    app.use(passport.session());
 
     routes(app);
 

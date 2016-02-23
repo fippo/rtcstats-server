@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  section
+    .container
+       each project in user.Projects
+        h2 Project: #{project.Name}
+        p Your API Key is #{project.Id}
+        p Some stats here

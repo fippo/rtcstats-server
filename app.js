@@ -4,15 +4,15 @@ var uuid = require('uuid');
 var statsMangler = require('./getstats-mangle');
 var express = require('express');
 
-var WebSocketServer = require('ws').Server;
-var app = require('./web/server')();
-
 var Store = require('./store')({
   s3: config.get('s3')
 });
 var Database = require('./database')({
   dynamodb: config.get('dynamodb')
 });
+
+var WebSocketServer = require('ws').Server;
+var app = require('./web/server')();
 
 var isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
@@ -158,20 +158,22 @@ function stop() {
     }
 }
 
-if (isProduction) {
-    run();
-} else {
-    // on localhost, dynamically generate certificates. Enable #allow-insecure-localhost
-    // in chrome://flags for ease of development.
-    require('pem').createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
-        if (err) {
-            console.err('error creating cert', err);
-            return;
-        } else {
-            run(keys);
-        }
-    });
-}
+run();
+
+// if (isProduction) {
+//     run();
+// } else {
+//     // on localhost, dynamically generate certificates. Enable #allow-insecure-localhost
+//     // in chrome://flags for ease of development.
+//     require('pem').createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
+//         if (err) {
+//             console.err('error creating cert', err);
+//             return;
+//         } else {
+//             run(keys);
+//         }
+//     });
+// }
 
 module.exports = {
     stop: stop
