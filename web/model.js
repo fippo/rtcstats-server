@@ -5,6 +5,7 @@ var Promise = require("bluebird");
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 var pgp = require('pg-promise')({
+  promiseLib: Promise
 });
 var connString = "postgres://skunkworks:G~z^MaSuh3!E9S>@snoop-cluster.cqf3sr8w0afh.us-west-2.redshift.amazonaws.com:5439/snoop";
 var db = pgp(connString);
