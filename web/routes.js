@@ -2,14 +2,19 @@ var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 var User = require('./model').User;
 var Project = require('./model').Project;
+var Summary = require('./model').Summary;
 
 const GITHUB_CLIENT_ID = 'c2ac848b3cfc250c56f3';
 const GITHUB_CLIENT_SECRET = '124b5616a6608731936f5050f8874e3321c0b1ee';
+const CALLBACK_URL = "https://snoop.tokbox.com/auth/github/callback";
+//const GITHUB_CLIENT_ID = 'c2ac848b3cfc250c56f3';
+//const GITHUB_CLIENT_SECRET = '124b5616a6608731936f5050f8874e3321c0b1ee';
+//const CALLBACK_URL = "http://127.0.0.1:3000/auth/github/callback";
 
 passport.use(new GitHubStrategy({
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
+    callbackURL: CALLBACK_URL
   },
   function(accessToken, refreshToken, profile, cb) {
     User.findOrCreate({
@@ -33,8 +38,8 @@ passport.deserializeUser(function(user, done) {
 
 function requireAuth(req, res, next) {
   if (req.isAuthenticated()) {
-    // req.user is available for use here
-    return next(); }
+    return next();
+  }
 
   // denied. redirect to login
   res.redirect('/')
@@ -46,14 +51,15 @@ module.exports = function(server) {
     });
 
     server.get('/dashboard', requireAuth, function(req, res) {
-      res.render('dashboard', { user: req.user });
+      Summary.find('', function(err, summary) {
+        res.render('dashboard', { user: req.user, summary: summary });
+      });
     });
 
     server.get('/project/:id', requireAuth, function(req, res) {
-      var project = Project.find(req.id);
-      var summary = Summary.find(req.id);
-      var connections = Features.findByProject(req.id);
-      res.render('project', { project: project });
+      Summary.find('', function(err, summary) {
+        res.render('project', { summary: summary });
+      });
     });
 
     server.get('/project/:projectId/connection/:id', requireAuth, function(req, res) {
@@ -80,7 +86,7 @@ module.exports = function(server) {
     server.get('/auth/github/callback',
       passport.authenticate('github', { failureRedirect: '/' }),
       function(req, res) {
-        res.redirect('/');
+        res.redirect('/dashboard');
       }
     );
 };
