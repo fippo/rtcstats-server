@@ -1155,6 +1155,46 @@ module.exports = {
         return value === -1 ? true : undefined;
     },
 
+    // determine maximum number of frame size (w/h) changes in 60 second window
+    framesizeChanges: function(client, peerConnectionLog) {
+        var windowLength = 60 * 1000;
+        var trackid;
+        var i;
+        for (i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                var statsReport = peerConnectionLog[i].value;
+                Object.keys(statsReport).forEach(function(id) {
+                    var report = statsReport[id];
+                    if (report.type === 'ssrc' && report.mediaType === 'video' && report.googFrameWidthReceived) {
+                        trackid = id;
+                    }
+                });
+                if (trackid) break;
+            }
+        }
+        if (!trackid) return;
+        var width = '-1';
+        var numChanges = 0;
+        var allChanges = [];
+        var lastTime;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                var statsReport = peerConnectionLog[i].value;
+                var report = statsReport[trackid];
+                if (!lastTime) lastTime = report.timestamp;
+                if (report.timestamp - lastTime > windowLength) {
+                    allChanges.push(numChanges);
+                    numChanges = 0;
+                }
+                if (report && report.googFrameWidthReceived !== width) {
+                    width = report.googFrameWidthReceived;
+                    numChanges++;
+                }
+            }
+        }
+        console.log(allChanges);
+        return Math.max.apply(null, allChanges);;
+    },
     // TODO: jitter
     // TODO: packets lost (audio and video separated)
     // TODO: packets sent
