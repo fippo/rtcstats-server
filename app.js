@@ -23,6 +23,8 @@ var wss = null;
 
 // dumps all peerconnections to Store
 function dump(url, client, clientid) {
+    // ignore connections that never send getUserMedia or peerconnection events.
+    if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
     var fmt = {
         url: url
     };
@@ -37,10 +39,14 @@ function dump(url, client, clientid) {
     if (isProduction) {
         Store.put(clientid, JSON.stringify(fmt));
     }
+}
 
-    // Feature generation
+// Feature generation
+function generateFeatures(url, client, clientid) {
+    // ignore connections that never send getUserMedia or peerconnection events.
+    if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
+
     // clientFeatures are the same for all peerconnections but are saved together
-
     // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
@@ -73,7 +79,6 @@ function dump(url, client, clientid) {
             Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
         }
     });
-
 }
 
 var db = {};
@@ -147,6 +152,7 @@ function run(keys) {
 
             var client = db[referer][clientid];
             dump(referer, client, clientid);
+            generateFeatures(referer, client, clientid);
             delete db[referer][clientid];
         });
     });
