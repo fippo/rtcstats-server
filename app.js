@@ -25,19 +25,8 @@ var wss = null;
 function dump(url, client, clientid) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
-    var fmt = {
-        url: url
-    };
-
-    fmt.userAgent = client.userAgent;
-    fmt.getUserMedia = client.getUserMedia;
-    fmt.peerConnections = client.peerConnections;
-
-    // ignore connections that never send getUserMedia or peerconnection events.
-    if (fmt.getUserMedia.length === 0 && Object.keys(fmt.peerConnections).length === 0) return;
-
     if (isProduction) {
-        Store.put(clientid, JSON.stringify(fmt));
+        Store.put(clientid, JSON.stringify(client));
     }
 }
 
@@ -106,13 +95,15 @@ function run(keys) {
 
         var ua = client.upgradeReq.headers['user-agent'];
         var clientid = uuid.v4();
-        // TODO: separate origin and pathname (url)
 
         if (!db[referer]) db[referer] = {};
         db[referer][clientid] = {
             getUserMedia: [],
-            userAgent: ua,
-            peerConnections: {}
+            path: client.upgradeReq.url,
+            peerConnections: {},
+            origin: client.upgradeReq.headers['origin'],
+            url: referer,
+            userAgent: ua
         };
 
         console.log('connected', ua, referer);
