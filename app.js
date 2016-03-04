@@ -23,24 +23,19 @@ var wss = null;
 
 // dumps all peerconnections to Store
 function dump(url, client, clientid) {
-    var fmt = {
-        url: url
-    };
-
-    fmt.userAgent = client.userAgent;
-    fmt.getUserMedia = client.getUserMedia;
-    fmt.peerConnections = client.peerConnections;
-
     // ignore connections that never send getUserMedia or peerconnection events.
-    if (fmt.getUserMedia.length === 0 && Object.keys(fmt.peerConnections).length === 0) return;
-
+    if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
     if (isProduction) {
-        Store.put(clientid, JSON.stringify(fmt));
+        Store.put(clientid, JSON.stringify(client));
     }
+}
 
-    // Feature generation
+// Feature generation
+function generateFeatures(url, client, clientid) {
+    // ignore connections that never send getUserMedia or peerconnection events.
+    if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
+
     // clientFeatures are the same for all peerconnections but are saved together
-
     // with each peerconnection anyway to make correlation easier.
     var clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
@@ -73,7 +68,6 @@ function dump(url, client, clientid) {
             Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
         }
     });
-
 }
 
 var db = {};
@@ -101,13 +95,15 @@ function run(keys) {
 
         var ua = client.upgradeReq.headers['user-agent'];
         var clientid = uuid.v4();
-        // TODO: separate origin and pathname (url)
 
         if (!db[referer]) db[referer] = {};
         db[referer][clientid] = {
             getUserMedia: [],
-            userAgent: ua,
-            peerConnections: {}
+            path: client.upgradeReq.url,
+            peerConnections: {},
+            origin: client.upgradeReq.headers['origin'],
+            url: referer,
+            userAgent: ua
         };
 
         console.log('connected', ua, referer);
@@ -147,6 +143,7 @@ function run(keys) {
 
             var client = db[referer][clientid];
             dump(referer, client, clientid);
+            generateFeatures(referer, client, clientid);
             delete db[referer][clientid];
         });
     });
