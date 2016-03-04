@@ -11,13 +11,12 @@ var path = url.split('/').splice(3).join('/');
 // using setTimeout here is bad obviously. This should wait for the server to listen
 setTimeout(function() {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore self-signed cert
-    var ws = new WebSocket('wss://localhost:' + config.get('server').port + '/' + path, {
+    var ws = new WebSocket('ws://localhost:' + config.get('server').port + '/' + path, {
         headers: {
             "User-Agent": data.userAgent,
         },
         origin: origin
     });
-     
     ws.on('open', function open() {
       var events = data.getUserMedia;
       // TODO: handle multiple connections
