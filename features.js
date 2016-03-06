@@ -91,14 +91,14 @@ function extractLastVideoStat(peerConnectionLog, type) {
     return count;
 }
 
-function extractMaxVideoStat(peerConnectionLog, statName) {
+function extractMaxSsrcStat(peerConnectionLog, statName, mediaType) {
     var max = -1;
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
                     var t = parseInt(report[statName], 10);
                     max = Math.max(max, t);
                 }
@@ -108,14 +108,22 @@ function extractMaxVideoStat(peerConnectionLog, statName) {
     return max !== -1 ? max : undefined;
 }
 
-function extractMinVideoStat(peerConnectionLog, statName) {
+function extractMaxVideoStat(peerConnectionLog, statName) {
+    return extractMaxSsrcStat(peerConnectionLog, statName, 'video'); 
+}
+
+function extractMaxAudioStat(peerConnectionLog, statName) {
+    return extractMaxSsrcStat(peerConnectionLog, statName, 'audio'); 
+}
+
+function extractMinSsrcStat(peerConnectionLog, statName, mediaType) {
     var min = Number.MAX_VALUE;
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
                     var t = parseInt(report[statName], 10);
                     min = Math.min(min, t);
                 }
@@ -125,9 +133,17 @@ function extractMinVideoStat(peerConnectionLog, statName) {
     return min !== Number.MAX_VALUE ? min : undefined;
 }
 
+function extractMinVideoStat(peerConnectionLog, statName) {
+    return extractMinSsrcStat(peerConnectionLog, statName, 'video'); 
+}
+
+function extractMinAudioStat(peerConnectionLog, statName) {
+    return extractMinSsrcStat(peerConnectionLog, statName, 'audio'); 
+}
+
 // might not be useful for things like frameWidth/Height which
 // have discrete values. mode might be better.
-function extractMeanVideoStat(peerConnectionLog, statName) {
+function extractMeanSsrcStat(peerConnectionLog, statName, mediaType) {
     var sum = 0;
     var count = 0;
     for (var i = 0; i < peerConnectionLog.length; i++) {
@@ -135,7 +151,7 @@ function extractMeanVideoStat(peerConnectionLog, statName) {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
                     var t = parseInt(report[statName], 10);
                     sum += t;
                     count++;
@@ -144,6 +160,14 @@ function extractMeanVideoStat(peerConnectionLog, statName) {
         }
     }
     return count > 0 ? Math.round(sum / count) : undefined;
+}
+
+function extractMeanVideoStat(peerConnectionLog, statName) {
+    return extractMeanSsrcStat(peerConnectionLog, statName, 'video');
+}
+
+function extractMeanAudioStat(peerConnectionLog, statName) {
+    return extractMeanSsrcStat(peerConnectionLog, statName, '');
 }
 
 function wasVideoStatEverTrue(peerConnectionLog, statName) {
@@ -204,20 +228,28 @@ function standardizedMoment(series, order) {
 }
 
 // extracts the central moment from video statistics.
-function extractCentralMomentFromVideoStat(peerConnectionLog, statName, order) {
+function extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, mediaType) {
     var series = [];
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report[statName]) {
+                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
                     series.push(parseInt(report[statName], 10));
                 }
             });
         }
     }
     return series.length ? standardizedMoment(series, order) : undefined;
+}
+
+function extractCentralMomentFromVideoStat(peerConnectionLog, statName, order) {
+    return extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, 'video');
+}
+
+function extractCentralMomentFromAudioStat(peerConnectionLog, statName, order) {
+    return extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, 'audio');
 }
 
 // there are two types of features
@@ -1256,7 +1288,7 @@ module.exports = {
     };
 });
 
-// calculate central moment of jitter, assmuning it is a random variable.
+// calculate central moment of video jitter, assmuning it is a random variable.
 ['googJitterBufferMs', 'googRtt'].forEach(function(stat) {
     module.exports['variance' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 2);
@@ -1266,6 +1298,31 @@ module.exports = {
     };
     module.exports['kurtosis' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 4);
+    };
+});
+
+// calculate central moment of audio jitter, assmuning it is a random variable.
+// receiver-side stats!
+['googJitterBufferMs', 'googJitterReceived', 'googPreferredJitterBufferMs'].forEach(function(stat) {
+    module.exports['maxAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMaxAudioStat(peerConnectionLog, stat);
+    };
+    // min seem to be 0?
+    module.exports['minAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMinAudioStat(peerConnectionLog, stat);
+    };
+    module.exports['meanAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractMeanAudioStat(peerConnectionLog, stat);
+    };
+
+    module.exports['varianceAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 2);
+    };
+    module.exports['skewnessAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 3);
+    };
+    module.exports['kurtosisAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
+        return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 4);
     };
 });
 
