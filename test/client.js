@@ -2,6 +2,7 @@ var WebSocket = require('ws');
 var fs = require('fs');
 var config = require('config');
 var server = require('../app');
+var statsCompressor = require('../getstats-deltacompression').compress;
 
 var data = JSON.parse(fs.readFileSync('test/clienttest.json'));
 var url = data.url;
@@ -23,12 +24,20 @@ setTimeout(function() {
       Object.keys(data.peerConnections).forEach(function(id) {
         events = events.concat(data.peerConnections[id]);
       });
+      var prev = {}
       var process = function() {
         var evt = events.shift();
         if (!evt) {
           ws.close();
           server.stop();
           return;
+        }
+        if (evt.type === 'getStats') {
+          evt.type = 'getstats';
+          var base = JSON.parse(JSON.stringify(evt.value)); // our new prev
+          evt.value = statsCompressor(prev, evt.value);
+          //console.log(JSON.stringify(base).length, 'reduced to', JSON.stringify(evt.value).length);
+          prev = base;
         }
         ws.send(JSON.stringify([evt.type, 'testid', evt.value]));
         setTimeout(process, 10);
