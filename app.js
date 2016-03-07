@@ -2,7 +2,7 @@ var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
 var statsMangler = require('./getstats-mangle');
-var statsDecompressor = require('./getstats-deltacompression');
+var statsDecompressor = require('./getstats-deltacompression').decompress;
 var express = require('express');
 
 var Store = require('./store')({
