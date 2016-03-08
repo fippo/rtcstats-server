@@ -316,7 +316,7 @@ module.exports = {
                 return gum[i].value;
             }
         }
-        return false;
+        return undefined;
     },
 
     // did the client ever request audio?

@@ -50,6 +50,7 @@ function dump(url, client, clientid) {
                 console.log('PAGE', 'FEATURE', fname, '=>', feature);
                 if (feature === false) feature = 0;
                 if (feature === true) feature = 1;
+                if (typeof feature !== 'string' && typeof feature != 'number') feature = feature.toString();
                 clientFeatures[fname] = feature;
             }
         }
@@ -65,6 +66,7 @@ function dump(url, client, clientid) {
                     console.log(connid, 'FEATURE', fname, '=>', feature);
                     if (feature === false) feature = 0;
                     if (feature === true) feature = 1;
+                    if (typeof feature !== 'string' && typeof feature != 'number') feature = feature.toString();
                     connectionFeatures[fname] = feature;
                 }
             }
