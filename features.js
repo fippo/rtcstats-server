@@ -167,7 +167,7 @@ function extractMeanVideoStat(peerConnectionLog, statName) {
 }
 
 function extractMeanAudioStat(peerConnectionLog, statName) {
-    return extractMeanSsrcStat(peerConnectionLog, statName, '');
+    return extractMeanSsrcStat(peerConnectionLog, statName, 'audio');
 }
 
 function wasVideoStatEverTrue(peerConnectionLog, statName) {
@@ -1224,7 +1224,7 @@ module.exports = {
                 }
             }
         }
-        console.log(allChanges);
+        if (allChanges.length === 0) return;
         return Math.max.apply(null, allChanges);;
     },
     // TODO: jitter
