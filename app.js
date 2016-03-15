@@ -2,6 +2,7 @@ var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
 var statsMangler = require('./getstats-mangle');
+var statsDecompressor = require('./getstats-deltacompression').decompress;
 var express = require('express');
 
 var Store = require('./store')({
@@ -106,6 +107,8 @@ function run(keys) {
             userAgent: ua
         };
 
+        var baseStats = {};
+
         console.log('connected', ua, referer);
         client.on('message', function (msg) {
             var data = JSON.parse(msg);
@@ -125,8 +128,12 @@ function run(keys) {
             default:
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = [];
+                    baseStats[data[1]] = {};
                 }
-                if (data[0] === 'getStats') {
+                if (data[0] === 'getstats') { // delta-compressed
+                    data[2] = baseStats[data[1]] = statsDecompressor(baseStats[data[1]], data[2]);
+                }
+                if (data[0] === 'getStats' || data[0] === 'getstats') {
                     data[2] = statsMangler(data[2]);
                 }
                 db[referer][clientid].peerConnections[data[1]].push({
