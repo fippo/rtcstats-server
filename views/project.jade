@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  section
+    .container
+      h1 Project
+      p Number of connections today #{summary.today.count} (Failed: #{summary.today.count - summary.today.successful })
+      p Total number of connections  #{summary.total.count} (Failed: #{summary.total.count - summary.total.successful })

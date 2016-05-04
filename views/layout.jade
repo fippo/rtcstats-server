@@ -1,0 +1,40 @@
+doctype html
+html
+  head
+    title Snoop
+    meta(charset="utf-8")
+    meta(name="description", content="")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+
+    link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+    link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css")
+    script(src="https://code.jquery.com/jquery-1.12.1.min.js")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
+
+    link(rel="stylesheet", href="/static/css/main.css")
+    script(src="/static/js/main.js")
+
+  body
+    nav.navbar.navbar-default
+      .container
+        .navbar-header
+          button.navbar-toggle.collapsed(type="button", data-toggle="collapse", data-target="#navbar-inverse", aria-expanded="false", aria-controls="navbar")
+              span.sr-only Toggle navigation
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+          a.navbar-brand(href="#") Snoop
+        #navbar.collapse.navbar-collapse
+          ul#nav-list.nav.navbar-nav.navbar-right
+            li.active
+              a(href="#") Home
+            if user
+              li
+                a(href="/dashboard")= user.Username
+              li
+                a(href="/logout") Logout
+            else
+              li
+                a(href="#") Contact
+
+    block content

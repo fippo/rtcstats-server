@@ -1,0 +1,29 @@
+server:
+    port: 3000
+
+s3:
+    accessKeyId:
+    secretAccessKey:
+    region:
+    bucket:
+
+dynamodb:
+    accessKeyId:
+    secretAccessKey:
+    region:
+    table:
+
+appenders:
+    - type: file
+      layout:
+          type: pattern
+          pattern: "%d{ISO8601}   %5p [%t]    %m"
+      filename: rtcstats-server_access
+    - type: logLevelFilter
+      level: ERROR
+      appender:
+          type: file
+          layout:
+              type: pattern
+              pattern: "%d{ISO8601}   %5p [%t]    %m"
+          filename: rtcstats-server_error

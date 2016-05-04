@@ -1,0 +1,14 @@
+.project {
+  border: 1px solid #aaaaaa;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #eeeeee;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.project:hover {
+  background-color: #dddddd;
+  cursor: pointer;
+}
