@@ -27,3 +27,8 @@ appenders:
               type: pattern
               pattern: "%d{ISO8601}   %5p [%t]    %m"
           filename: rtcstats-server_error
+
+github:
+    client_id:
+    client_secret:
+    callback_url:
