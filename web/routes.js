@@ -1,20 +1,14 @@
+var config = require('config');
 var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 var User = require('./model').User;
 var Project = require('./model').Project;
 var Summary = require('./model').Summary;
 
-const GITHUB_CLIENT_ID = '';
-const GITHUB_CLIENT_SECRET = '';
-const CALLBACK_URL = "https://rtcstats.tokbox.com/auth/github/callback";
-//const GITHUB_CLIENT_ID = 'c2ac848b3cfc250c56f3';
-//const GITHUB_CLIENT_SECRET = '124b5616a6608731936f5050f8874e3321c0b1ee';
-//const CALLBACK_URL = "http://127.0.0.1:3000/auth/github/callback";
-
 passport.use(new GitHubStrategy({
-    clientID: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: CALLBACK_URL
+    clientID: config.github.client_id,
+    clientSecret: config.github.client_secret,
+    callbackURL: config.github.callback_url
   },
   function(accessToken, refreshToken, profile, cb) {
     User.findOrCreate({
