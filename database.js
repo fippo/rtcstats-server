@@ -39,7 +39,7 @@ module.exports = function(config) {
     get: function(clientId, connectionId, callback) {
       
      var params = {
-        TableName : 'Snoop',
+        TableName : config.dynamodb.table,
         Key: {
           ConnectionId: clientId + '_' + connectionId,
         }
