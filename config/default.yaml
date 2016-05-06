@@ -29,6 +29,6 @@ appenders:
           filename: rtcstats-server_error
 
 github:
-    client_id:
-    client_secret:
-    callback_url:
+    client_id: GITHUB_CLIENT_ID
+    client_secret: GITHUB_SECRET
+    callback_url: GITHUB_CALLBACK_URL
