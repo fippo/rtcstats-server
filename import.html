@@ -95,7 +95,7 @@ function processTraceEvent(table, event) {
     details.appendChild(el);
 
     el = document.createElement('pre');
-    el.innerText = event.value;
+    el.innerText = JSON.stringify(event.value, null, ' ');
     details.appendChild(el);
 
     el = document.createElement('td');
