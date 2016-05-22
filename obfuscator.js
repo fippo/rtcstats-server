@@ -21,13 +21,36 @@ function obfuscateCandidate(candidate) {
     return SDPUtils.writeCandidate(cand);
 }
 
+function obfuscateSDP(sdp) {
+    var lines = SDPUtils.splitLines(sdp);
+    return lines.map(function(line) {
+        // obfuscate a=candidate, c= and a=rtcp
+        if (line.indexOf('a=candidate:') === 0) {
+            return obfuscateCandidate(line);
+        } else if (line.indexOf('c=') === 0) {
+            return 'c=IN IP4 0.0.0.0';
+        } else if (line.indexOf('a=rtcp:') === 0) {
+            return 'a=rtcp:9 IN IP4 0.0.0.0';
+        } else {
+            return line;
+        }
+    }).join('\r\n').trim() + '\r\n';
+}
+
 module.exports = function(data) {
-    var lines;
     switch(data[0]) {
     case 'addIceCandidate':
     case 'onicecandidate':
         if (data[2] && data[2].candidate) {
             data[2].candidate = obfuscateCandidate(data[2].candidate);
+        }
+        break;
+    case 'setLocalDescription':
+    case 'setRemoteDescription':
+    case 'createOfferOnSuccess':
+    case 'createAnswerOnSuccess':
+        if (data[2] && data[2].sdp) {
+            data[2].sdp = obfuscateSDP(data[2].sdp);
         }
         break;
     }
