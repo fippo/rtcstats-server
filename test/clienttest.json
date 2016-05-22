@@ -98,7 +98,7 @@
     "time": "2016-01-28T18:24:20.304Z",
     "type": "onicecandidate",
     "value": {
-     "candidate": "candidate:1608896916 1 udp 2122194687 10.1.5.92 47183 typ host generation 0",
+     "candidate": "candidate:1608896916 1 udp 2122194687 10.1.5.92 47183 typ srflx raddr 1.2.3.4 rport 47183 generation 0",
      "sdpMid": "audio",
      "sdpMLineIndex": 0
     }
@@ -107,7 +107,7 @@
     "time": "2016-01-28T18:24:20.308Z",
     "type": "onicecandidate",
     "value": {
-     "candidate": "candidate:211962667 2 udp 2122260222 10.0.3.1 52923 typ host generation 0",
+     "candidate": "candidate:211962667 2 udp 2122260222 10.0.3.1 52923 typ relay raddr 1.2.3.4 rport 52923 generation 0",
      "sdpMid": "audio",
      "sdpMLineIndex": 0
     }
