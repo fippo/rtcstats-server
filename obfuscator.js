@@ -3,9 +3,19 @@
 var SDPUtils = require('sdp');
 
 // obfuscate ip, keeping address family intact.
-// TODO: keep private addresses and only strip certain parts?
 function obfuscateIP(ip) {
-    return ip.indexOf(':') === -1 ? '0.0.0.0' : '::1';
+    if (ip.indexOf('[') === 0) { // IPv6
+        return '::1';
+    }
+    if (ip.indexOf('192.168.') === 0) {
+        return '192.168.x.x';
+    } else if (ip.indexOf('172.16.') === 0) {
+        return '172.16.x.x';
+    } else if (ip.indexOf('10.') === 0) {
+        return '10.x.x.x';
+    } else {
+        return '0.0.0.0';
+    }
 }
 
 // obfuscate the ip in ice candidates. Does NOT obfuscate the ip of the TURN server to allow
@@ -37,6 +47,27 @@ function obfuscateSDP(sdp) {
     }).join('\r\n').trim() + '\r\n';
 }
 
+function obfuscateStats(stats) {
+    Object.keys(stats).forEach(function(id) {
+        var report = stats[id];
+        if (report.ipAddress) {
+            report.ipAddress = obfuscateIP(report.ipAddress);
+        }
+        ['googLocalAddress', 'googRemoteAddress'].forEach(function(name) {
+            // contains both address and port
+            var port;
+            if (report[name]) {
+                if (report[name][0] === '[') {
+                    port = report[name].substr(report[name].indexOf(']') + 2);
+                } else {
+                    port = report[name].substr(report[name].indexOf(':') + 1);
+                }
+                report[name] = obfuscateIP(report[name]) + ':' + port;
+            }
+        });
+    });
+}
+
 module.exports = function(data) {
     switch(data[0]) {
     case 'addIceCandidate':
@@ -52,6 +83,14 @@ module.exports = function(data) {
         if (data[2] && data[2].sdp) {
             data[2].sdp = obfuscateSDP(data[2].sdp);
         }
+        break;
+    case 'getStats':
+    case 'getstats':
+        if (data[2]) {
+            obfuscateStats(data[2]);
+        }
+        break;
+    default:
         break;
     }
 };
