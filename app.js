@@ -3,6 +3,7 @@ var config = require('config');
 var uuid = require('uuid');
 var statsMangler = require('./getstats-mangle');
 var statsDecompressor = require('./getstats-deltacompression').decompress;
+var obfuscate = require('./obfuscator');
 var express = require('express');
 
 var Store = require('./store')({
@@ -126,6 +127,7 @@ function run(keys) {
                 });
                 break;
             default:
+                obfuscate(data);
                 if (!db[referer][clientid].peerConnections[data[1]]) {
                     db[referer][clientid].peerConnections[data[1]] = [];
                     baseStats[data[1]] = {};
