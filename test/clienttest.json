@@ -44,6 +44,16 @@
     }
    },
    {
+    "time": "2016-01-28T18:24:20.210Z",
+    "type": "constraints",
+    "value": {"optional":
+      [
+        {"rtcStatsClientId": "the-clientid"},
+        {"rtcStatsConferenceId": "the-conferenceid"}
+      ]
+    }
+   },
+   {
     "time": "2016-01-28T18:24:20.216Z",
     "type": "addStream",
     "value": "fpoVjoHOgx78rR5eT56aNZYVMr6xRPntW1jC audio:a27f2fa9-5e05-4897-ab27-8d392875be18,video:178409c1-e7ba-4702-9bec-70e391e38747"

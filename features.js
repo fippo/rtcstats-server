@@ -23,6 +23,14 @@ function getPeerConnectionConfig(peerConnectionLog) {
     }
 }
 
+function getPeerConnectionConstraints(peerConnectionLog) {
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'constraints') {
+            return peerConnectionLog[i].value;
+        }
+    }
+}
+
 function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
     var typepref;
@@ -453,6 +461,29 @@ module.exports = {
     // number of peerConnections created
     numberOfPeerConnections: function(client) {
         return client.peerConnections.length;
+    },
+
+    // client and conference identifiers, specified as optional peerconnection constraints
+    // (which are not a thing any longer). See https://github.com/opentok/rtcstats/issues/28
+    clientIdentifier: function(client, peerConnectionLog) {
+        var constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        if (!constraints.optional) return;
+        constraints = constraints.optional;
+        for (var i = 0; i < constraints.length; i++) {
+            if (constraints[i].rtcStatsClientId) {
+                return constraints[i].rtcStatsClientId;
+            }
+        }
+    },
+    conferenceIdentifier: function(client, peerConnectionLog) {
+        var constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        if (!constraints.optional) return;
+        constraints = constraints.optional;
+        for (var i = 0; i < constraints.length; i++) {
+            if (constraints[i].rtcStatsConferenceId) {
+                return constraints[i].rtcStatsConferenceId;
+            }
+        }
     },
 
     // the webrtc platform type -- webkit or moz
