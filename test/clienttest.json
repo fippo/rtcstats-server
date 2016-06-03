@@ -49,6 +49,7 @@
     "value": {"optional":
       [
         {"rtcStatsClientId": "the-clientid"},
+        {"rtcStatsPeerId": "the-peer"},
         {"rtcStatsConferenceId": "the-conferenceid"}
       ]
     }

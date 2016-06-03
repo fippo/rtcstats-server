@@ -475,6 +475,16 @@ module.exports = {
             }
         }
     },
+    peerIdentifier: function(client, peerConnectionLog) {
+        var constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        if (!constraints.optional) return;
+        constraints = constraints.optional;
+        for (var i = 0; i < constraints.length; i++) {
+            if (constraints[i].rtcStatsPeerId) {
+                return constraints[i].rtcStatsPeerId;
+            }
+        }
+    },
     conferenceIdentifier: function(client, peerConnectionLog) {
         var constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
         if (!constraints.optional) return;
