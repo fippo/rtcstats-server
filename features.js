@@ -703,6 +703,16 @@ module.exports = {
             return false;
         }).length > 0;
     },
+    peerConnectionSetLocalDescriptionFailure: function(client, peerConnectionLog) {
+        return peerConnectionLog.filter(function(entry) {
+            return entry.type === 'SetLocalDescriptionOnFailure';
+        }).length > 0;
+    },
+    peerConnectionSetRemoteDescriptionFailure: function(client, peerConnectionLog) {
+        return peerConnectionLog.filter(function(entry) {
+            return entry.type === 'SetRemoteDescriptionOnFailure';
+        }).length > 0;
+    },
 
     // was there an addIceCandidate failure
     peerConnectionAddIceCandidateFailure: function(client, peerConnectionLog) {
