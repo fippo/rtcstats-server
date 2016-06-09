@@ -138,6 +138,7 @@ function run(keys) {
                 }
                 if (data[0] === 'getStats' || data[0] === 'getstats') {
                     data[2] = statsMangler(data[2]);
+                    data[0] = 'getStats';
                 }
                 db[referer][clientid].peerConnections[data[1]].push({
                     time: new Date(),
