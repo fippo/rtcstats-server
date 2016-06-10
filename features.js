@@ -846,7 +846,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'addIceCandidate') {
                 var cand = peerConnectionLog[i].value;
-                if (cand && cand.candidate.indexOf('relay') !== -1) {
+                if (cand && cand.candidate && cand.candidate.indexOf('relay') !== -1) {
                     return true;
                 }
             }
