@@ -503,6 +503,25 @@ module.exports = {
         return peerConnectionConfig.browserType || 'unknown';
     },
 
+    // the remote platform, extracted from the remote description.
+    // only works for firefox and edge (using adapter)
+    // returns webrtc.org when unknown.
+    remoteType: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            // TODO: is setLocalDescriptionOnSuccess better?
+            if (peerConnectionLog[i].type === 'setRemoteDescription') {
+                var sdp = peerConnectionLog[i].value.sdp;
+                if (sdp.indexOf('v=0\r\no=mozilla...THIS_IS_SDPARTA') === 0) {
+                    return 'moz';
+                } else if (sdp.indexOf('v=0\r\no=thisisadapterortc') === 0) {
+                    return 'edge';
+                } else {
+                    return 'webrtc.org'; // maybe?
+                }
+            }
+        }
+    },
+
     // check if we are initiator/receiver (i.e. first called createOffer or createAnswer)
     // this likely has implications for number and types of candidates gathered.
     isInitiator: function(client, peerConnectionLog) {
