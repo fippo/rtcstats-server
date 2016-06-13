@@ -947,15 +947,16 @@ module.exports = {
         var endTime = -1;
         peerConnectionLog.forEach(function(entry) {
             if (entry.type === 'oniceconnectionstatechange') {
-                if (entry.value === 'checking') {
+                if ((entry.value === 'checking' || entry.value === 'connected') && startTime === -1) {
                     startTime = new Date(entry.time).getTime();
-                } else if (entry.value === 'closed') {
-                    endTime = new Date(entry.time).getTime();
                 }
             }
         });
-        if (startTime > 0 && endTime > 0) {
-            return endTime - startTime;
+        if (startTime > 0) {
+            endTime = new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime();
+            if (endTime > 0) {
+                return endTime - startTime;
+            }
         }
         return -1;
     },
