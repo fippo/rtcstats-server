@@ -1017,6 +1017,38 @@ module.exports = {
         }
     },
 
+    // video codec used
+    videoCodec: function(client, peerConnectionLog) {
+        var codecName;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report.googCodecName) {
+                    codecName = report.googCodecName;
+                }
+            });
+            if (codecName) return codecName;
+        }
+    },
+
+    // audio codec used
+    audioCodec: function(client, peerConnectionLog) {
+        var codecName;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report.mediaType === 'audio' && report.googCodecName) {
+                    codecName = report.googCodecName;
+                }
+            });
+            if (codecName) return codecName;
+        }
+    },
+
     // mean audio level sent. Between 0 and 1
     statsMeanAudioLevel: function(client, peerConnectionLog) {
         var audioLevels = {};
