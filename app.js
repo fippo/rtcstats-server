@@ -133,10 +133,12 @@ function run(keys) {
                     baseStats[data[1]] = {};
                 }
                 if (data[0] === 'getstats') { // delta-compressed
-                    data[2] = baseStats[data[1]] = statsDecompressor(baseStats[data[1]], data[2]);
+                    data[2] = statsDecompressor(baseStats[data[1]], data[2]);
+                    baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
                 }
                 if (data[0] === 'getStats' || data[0] === 'getstats') {
                     data[2] = statsMangler(data[2]);
+                    data[0] = 'getStats';
                 }
                 db[referer][clientid].peerConnections[data[1]].push({
                     time: new Date(),
