@@ -50,7 +50,7 @@ function obfuscateSDP(sdp) {
 function obfuscateStats(stats) {
     Object.keys(stats).forEach(function(id) {
         var report = stats[id];
-        if (report.ipAddress) {
+        if (report.ipAddress && report.candidateType !== 'relayed') {
             report.ipAddress = obfuscateIP(report.ipAddress);
         }
         ['googLocalAddress', 'googRemoteAddress'].forEach(function(name) {
