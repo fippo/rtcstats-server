@@ -675,6 +675,41 @@ module.exports = {
         }).length > 0;
     },
 
+    // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
+    // This calculates the delay between SRD and addIceCandidate which should allow
+    // correlation with ICE failures caused by this.
+    // returns -1 if addIceCandidate is called before setRemoteDescription
+    timeBetweenSetRemoteDescriptionAndAddIceCandidate: function(client, peerConnectionLog) {
+        var srd;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'setRemoteDescription') {
+                srd = peerConnectionLog[i].time;
+            } else if (peerConnectionLog[i].type === 'addIceCandidate') {
+                if (srd) {
+                    return peerConnectionLog[i].time.getTime() - srd.getTime();
+                } else {
+                    return -1;
+                }
+            }
+        }
+    },
+
+    // This calculates the delay between SLD and onicecandidate.
+    timeBetweenSetLocalDescriptionAndOnIceCandidate: function(client, peerConnectionLog) {
+        var sld;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'setLocalDescription') {
+                sld = peerConnectionLog[i].time;
+            } else if (peerConnectionLog[i].type === 'onicecandidate') {
+                if (sld) {
+                    return peerConnectionLog[i].time.getTime() - sld.getTime();
+                } else {
+                    return -1; // should not happen but...
+                }
+            }
+        }
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
