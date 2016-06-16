@@ -29,7 +29,7 @@ module.exports = function(config) {
 
       docClient.put(params, function(err, data) {
         if (err) {
-          console.log("Error saving data: ", err);
+          console.log("Error saving data: ", err, JSON.stringify(params));
         } else {
           console.log("Successfully saved data");
         }
