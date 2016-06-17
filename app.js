@@ -168,7 +168,7 @@ function stop() {
     }
 }
 
-if (cluster.isMaster) {
+if (require.main === module && cluster.isMaster) {
     os.cpus().forEach(function() {
         cluster.fork()
     });
