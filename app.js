@@ -169,8 +169,10 @@ function stop() {
 }
 
 if (cluster.isMaster) {
-    os.cpus().forEach(() => cluster.fork());
-    cluster.on('exit', (worker, code, signal) => {
+    os.cpus().forEach(function() {
+        cluster.fork()
+    });
+    cluster.on('exit', function(worker, code, signal) {
         console.log('worker', worker.process.pid, 'died, restarting');
         cluster.fork();
     });
