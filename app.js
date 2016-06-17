@@ -169,11 +169,11 @@ function stop() {
 }
 
 if (cluster.isMaster) {
-    // Fork workers.
-    var cpus = os.cpus().length;
-    for (var i = 0; i < cpus; i++) {
+    os.cpus().forEach(() => cluster.fork());
+    cluster.on('exit', (worker, code, signal) => {
+        console.log('worker', worker.process.pid, 'died, restarting');
         cluster.fork();
-    }
+    });
 } else {
     run();
 }
