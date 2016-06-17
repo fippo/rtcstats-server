@@ -76,8 +76,14 @@ function generateFeatures(url, client, clientid) {
 
 var db = {};
 var server;
+var tempPath = 'temp' + (cluster.isWorker ? '-' + cluster.worker.process.pid: '');
 
 function run(keys) {
+    try {
+        fs.mkdirSync(tempPath);
+    } catch(e) {
+        console.log('work dir already exists');
+    }
     app.use('/static', express.static(__dirname + '/static'));
 
     if (keys === undefined) {
@@ -109,6 +115,7 @@ function run(keys) {
             url: referer,
             userAgent: ua
         };
+        var tempStream = fs.createWriteStream(tempPath + '/' + clientid);
 
         var baseStats = {};
 
@@ -142,22 +149,38 @@ function run(keys) {
                     data[2] = statsMangler(data[2]);
                     data[0] = 'getStats';
                 }
-                db[referer][clientid].peerConnections[data[1]].push({
-                    time: new Date(),
-                    type: data[0],
-                    value: data[2]
-                });
+                data.time = new Date().getTime();
+                tempStream.write(JSON.stringify(data) + '\n');
                 break;
             }
         });
 
         client.on('close', function() {
-            console.log('closed');
-
-            var client = db[referer][clientid];
-            dump(referer, client, clientid);
-            generateFeatures(referer, client, clientid);
-            delete db[referer][clientid];
+            tempStream.on('finish', function() {
+                fs.readFile(tempStream.path, {encoding: 'utf-8'}, function(err, data) {
+                    if (!err) {
+                        data.split('\n').forEach(function(line) {
+                            if (line.length) {
+                                var data = JSON.parse(line);
+                                db[referer][clientid].peerConnections[data[1]].push({
+                                    time: new Date(data.time),
+                                    type: data[0],
+                                    value: data[2]
+                                });
+                            }
+                        });
+                    }
+                    // we proceed even if there was an error.
+                    var client = db[referer][clientid];
+                    delete db[referer][clientid];
+                    fs.unlink(tempStream.path, function(err, data) {
+                        // we're good...
+                    });
+                    dump(referer, client, clientid);
+                    generateFeatures(referer, client, clientid);
+                });
+            });
+            tempStream.end();
         });
     });
 }
@@ -174,6 +197,10 @@ if (require.main === module && cluster.isMaster) {
     });
     cluster.on('exit', function(worker, code, signal) {
         console.log('worker', worker.process.pid, 'died, restarting');
+        // TODO: Possibly recover data. For now: throw it away.
+        fs.unlink('temp-' + worker.process.pid, function() {
+            console.log('removed temp-' + worker.process.pid);
+        });
         cluster.fork();
     });
 } else {
