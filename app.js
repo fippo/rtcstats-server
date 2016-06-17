@@ -5,6 +5,8 @@ var statsMangler = require('./getstats-mangle');
 var statsDecompressor = require('./getstats-deltacompression').decompress;
 var obfuscate = require('./obfuscator');
 var express = require('express');
+var cluster = require('cluster');
+var os = require('os');
 
 var Store = require('./store')({
   s3: config.get('s3')
@@ -166,22 +168,17 @@ function stop() {
     }
 }
 
-run();
-
-// if (isProduction) {
-//     run();
-// } else {
-//     // on localhost, dynamically generate certificates. Enable #allow-insecure-localhost
-//     // in chrome://flags for ease of development.
-//     require('pem').createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
-//         if (err) {
-//             console.err('error creating cert', err);
-//             return;
-//         } else {
-//             run(keys);
-//         }
-//     });
-// }
+if (require.main === module && cluster.isMaster) {
+    os.cpus().forEach(function() {
+        cluster.fork()
+    });
+    cluster.on('exit', function(worker, code, signal) {
+        console.log('worker', worker.process.pid, 'died, restarting');
+        cluster.fork();
+    });
+} else {
+    run();
+}
 
 module.exports = {
     stop: stop
