@@ -270,6 +270,32 @@ function extractCentralMomentFromAudioStat(peerConnectionLog, statName, order) {
     return extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, 'audio');
 }
 
+// extract the codec used. Has to happen after the connection is up and packets have
+// been received or sent.
+function getCodec(peerConnectionLog, mediaType, direction) { 
+    var codecName;
+    var connected = false;
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'oniceconnectionstatechange') {
+            if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                connected = true;
+            }
+        }
+        if (!connected) continue;
+        if (peerConnectionLog[i].type !== 'getStats') continue;
+        var statsReport = peerConnectionLog[i].value;
+        Object.keys(statsReport).forEach(function(id) {
+            var report = statsReport[id];
+            if (report.type === 'ssrc' && report.mediaType === mediaType &&
+              report.googCodecName && report.googCodecName.length
+              && id.indexOf(direction) !== -1) {
+                codecName = report.googCodecName;
+            }
+        });
+        if (codecName) return codecName;
+    }
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -1059,70 +1085,18 @@ module.exports = {
 
     // video codec used
     sendVideoCodec: function(client, peerConnectionLog) {
-        var codecName;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video'
-                  && report.googCodecName && report.googCodecName.length
-                  && id.indexOf('send') !== -1) {
-                    codecName = report.googCodecName;
-                }
-            });
-            if (codecName) return codecName;
-        }
+        return getCodec(peerConnectionLog, 'video', 'send');
     },
     recvVideoCodec: function(client, peerConnectionLog) {
-        var codecName;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video'
-                  && report.googCodecName && report.googCodecName.length
-                  && id.indexOf('recv') !== -1) {
-                    codecName = report.googCodecName;
-                }
-            });
-            if (codecName) return codecName;
-        }
+        return getCodec(peerConnectionLog, 'video', 'recv');
     },
 
     // audio codec used
     sendAudioCodec: function(client, peerConnectionLog) {
-        var codecName;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'audio' &&
-                  report.googCodecName && report.googCodecName.length
-                  && id.indexOf('send') !== -1) {
-                    codecName = report.googCodecName;
-                }
-            });
-            if (codecName) return codecName;
-        }
+        return getCodec(peerConnectionLog, 'audio', 'send');
     },
     recvAudioCodec: function(client, peerConnectionLog) {
-        var codecName;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'audio' &&
-                  report.googCodecName && report.googCodecName.length
-                  && id.indexOf('recv') !== -1) {
-                    codecName = report.googCodecName;
-                }
-            });
-            if (codecName) return codecName;
-        }
+        return getCodec(peerConnectionLog, 'audio', 'recv');
     },
 
     // mean audio level sent. Between 0 and 1
