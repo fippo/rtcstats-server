@@ -258,7 +258,7 @@ module.exports = function(stats) {
           mediaTrackId: 'mediatrack_' + report.id,
           transportId: report.transportId,
         };
-        if (report.googCodecName.length) {
+        if (report.googCodecName && report.googCodecName.length) {
           standardReport.codecId = 'codec_' + report.googCodecName
         }
         if (report.mediaType === 'video') {
