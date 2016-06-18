@@ -1065,7 +1065,7 @@ module.exports = {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report.googCodecName) {
+                if (report.type === 'ssrc' && report.mediaType === 'video' && report.googCodecName && report.googCodecName.length) {
                     codecName = report.googCodecName;
                 }
             });
@@ -1081,7 +1081,7 @@ module.exports = {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'audio' && report.googCodecName) {
+                if (report.type === 'ssrc' && report.mediaType === 'audio' && report.googCodecName && report.googCodecName.length) {
                     codecName = report.googCodecName;
                 }
             });
