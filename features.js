@@ -1243,7 +1243,8 @@ module.exports = {
             var pair = null;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true) {
+                if (report.type === 'candidatepair' && report.selected === true
+                  && statsReport[report.localCandidateId] && statsReport[report.remoteCandidateId]) {
                     pair = statsReport[report.localCandidateId].candidateType +
                         ';' + statsReport[report.remoteCandidateId].candidateType;
                 }
