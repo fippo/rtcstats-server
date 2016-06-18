@@ -137,18 +137,6 @@ function run(keys) {
                 break;
             default:
                 obfuscate(data);
-                if (!db[referer][clientid].peerConnections[data[1]]) {
-                    db[referer][clientid].peerConnections[data[1]] = [];
-                    baseStats[data[1]] = {};
-                }
-                if (data[0] === 'getstats') { // delta-compressed
-                    data[2] = statsDecompressor(baseStats[data[1]], data[2]);
-                    baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
-                }
-                if (data[0] === 'getStats' || data[0] === 'getstats') {
-                    data[2] = statsMangler(data[2]);
-                    data[0] = 'getStats';
-                }
                 data.time = new Date().getTime();
                 tempStream.write(JSON.stringify(data) + '\n');
                 break;
@@ -162,8 +150,22 @@ function run(keys) {
                         data.split('\n').forEach(function(line) {
                             if (line.length) {
                                 var data = JSON.parse(line);
+                                var time = new Date(data.time);
+                                delete data.time;
+                                if (!db[referer][clientid].peerConnections[data[1]]) {
+                                    db[referer][clientid].peerConnections[data[1]] = [];
+                                    baseStats[data[1]] = {};
+                                }
+                                if (data[0] === 'getstats') { // delta-compressed
+                                    data[2] = statsDecompressor(baseStats[data[1]], data[2]);
+                                    baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
+                                }
+                                if (data[0] === 'getStats' || data[0] === 'getstats') {
+                                    data[2] = statsMangler(data[2]);
+                                    data[0] = 'getStats';
+                                }
                                 db[referer][clientid].peerConnections[data[1]].push({
-                                    time: new Date(data.time),
+                                    time: time,
                                     type: data[0],
                                     value: data[2]
                                 });
