@@ -1058,14 +1058,32 @@ module.exports = {
     },
 
     // video codec used
-    videoCodec: function(client, peerConnectionLog) {
+    sendVideoCodec: function(client, peerConnectionLog) {
         var codecName;
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'video' && report.googCodecName) {
+                if (report.type === 'ssrc' && report.mediaType === 'video'
+                  && report.googCodecName && report.googCodecName.length
+                  && id.indexOf('send') !== -1) {
+                    codecName = report.googCodecName;
+                }
+            });
+            if (codecName) return codecName;
+        }
+    },
+    recvVideoCodec: function(client, peerConnectionLog) {
+        var codecName;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report.mediaType === 'video'
+                  && report.googCodecName && report.googCodecName.length
+                  && id.indexOf('recv') !== -1) {
                     codecName = report.googCodecName;
                 }
             });
@@ -1074,14 +1092,32 @@ module.exports = {
     },
 
     // audio codec used
-    audioCodec: function(client, peerConnectionLog) {
+    sendAudioCodec: function(client, peerConnectionLog) {
         var codecName;
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === 'audio' && report.googCodecName) {
+                if (report.type === 'ssrc' && report.mediaType === 'audio' &&
+                  report.googCodecName && report.googCodecName.length
+                  && id.indexOf('send') !== -1) {
+                    codecName = report.googCodecName;
+                }
+            });
+            if (codecName) return codecName;
+        }
+    },
+    recvAudioCodec: function(client, peerConnectionLog) {
+        var codecName;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report.mediaType === 'audio' &&
+                  report.googCodecName && report.googCodecName.length
+                  && id.indexOf('recv') !== -1) {
                     codecName = report.googCodecName;
                 }
             });

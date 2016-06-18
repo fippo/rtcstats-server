@@ -242,9 +242,11 @@ module.exports = function(stats) {
       case 'ssrc':
         newId = 'rtpstream_' + report.id;
         // Workaround for https://code.google.com/p/webrtc/issues/detail?id=4808 (fixed in M46)
+        /* it is not apparently. This can be set to the empty string.
         if (!report.googCodecName) {
           report.googCodecName = 'VP8';
         }
+        */
         standardReport[newId] = {
           //type: 'notastandalonething',
           timestamp: report.timestamp,
@@ -255,8 +257,10 @@ module.exports = function(stats) {
           isRemote: false,
           mediaTrackId: 'mediatrack_' + report.id,
           transportId: report.transportId,
-          codecId: 'codec_' + report.googCodecName
         };
+        if (report.googCodecName.length) {
+          standardReport.codecId = 'codec_' + report.googCodecName
+        }
         if (report.mediaType === 'video') {
           standardReport[newId].firCount = report.firCount;
           standardReport[newId].pliCount = report.pliCount;
