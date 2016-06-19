@@ -275,30 +275,37 @@ function extractCentralMomentFromAudioStat(peerConnectionLog, statName, order) {
 // 2) features which take the client and a connection argument. Those do something with the connection.
 module.exports = {
     browserName: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         return platform.parse(client.userAgent).name;
     },
 
     browserVersion: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         return platform.parse(client.userAgent).version;
     },
 
     browserMajorVersion: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         return platform.parse(client.userAgent).version.split('.')[0];
     },
 
     browserOS: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         return platform.parse(client.userAgent).os.toString();
     },
 
     browserNameVersion: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         var ua = platform.parse(client.userAgent);
         return ua.name + '/' + ua.version;
     },
     browserNameOS: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         var ua = platform.parse(client.userAgent);
         return ua.name + '/' + ua.os;
     },
     browserNameVersionOS: function(client) {
+        if (!(client.userAgent && client.userAgent.length)) return;
         var ua = platform.parse(client.userAgent);
         return ua.name + '/' + ua.version + '/' + ua.os;
     },
