@@ -200,8 +200,8 @@ if (require.main === module && cluster.isMaster) {
     cluster.on('exit', function(worker, code, signal) {
         console.log('worker', worker.process.pid, 'died, restarting');
         // TODO: Possibly recover data. For now: throw it away.
-        fs.unlink('temp-' + worker.process.pid, function() {
-            console.log('removed temp-' + worker.process.pid);
+        fs.unlink('temp-' + worker.process.pid, function(err) {
+            console.log('removed temp-' + worker.process.pid, err);
         });
         cluster.fork();
     });
