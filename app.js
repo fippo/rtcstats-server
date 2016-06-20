@@ -199,11 +199,15 @@ if (require.main === module && cluster.isMaster) {
     });
     cluster.on('exit', function(worker, code, signal) {
         console.log('worker', worker.process.pid, 'died, restarting');
-        // TODO: Possibly recover data. For now: throw it away.
-        fs.rmdir('temp-' + worker.process.pid, function(err) {
-            console.log('removed temp-' + worker.process.pid, err);
-        });
         cluster.fork();
+
+        // clean up after worker.
+        // TODO: Possibly recover data. For now: throw it away.
+        var path = 'temp-' + worker.process.pid;
+        fs.readdirSync(path).forEach(function(fname) {
+            fs.unlinkSync(path + '/' + fname); 
+        });
+        fs.rmdirSync(path);
     });
 } else {
     run();
