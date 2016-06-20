@@ -415,27 +415,25 @@ module.exports = {
     },
 
     // did the client ever request the screen?
+    // also returns the type even though (in chrome) that is not relevant.
     calledGetUserMediaRequestingScreen: function(client) {
         var gum = client.getUserMedia || [];
-        var requested = false;
         for (var i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
                 var options = gum[i].value;
                 if (options.video && typeof options.video === 'object') {
                     // Firefox
                     if (options.video.mozMediaSource || options.video.mediaSource) {
-                        requested = true;
-                        break;
+                        return options.video.mozMediaSource || options.video.mediaSource;
                     }
                     // Chrome
-                    if (options.video.chromeMediaSource) {
-                        requested = true;
-                        break;
+                    if (options.video.mandatory && options.video.mandatory.chromeMediaSource) {
+                        return options.video.mandatory.chromeMediaSource;
                     }
                 }
             }
         }
-        return requested;
+        return false;
     },
 
     // return the label of the first audio device
