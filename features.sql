@@ -1,4 +1,4 @@
-CREATE TABLE features (
+CREATE TABLE features_import (
     browsermajorversion character varying(255),
     browsername character varying(255),
     browsernameos character varying(255),
@@ -9,7 +9,7 @@ CREATE TABLE features (
     browserversion character varying(255),
     calledgetusermedia boolean,
     calledgetusermediarequestingaudio boolean,
-    calledgetusermediarequestingscreen boolean,
+    calledgetusermediarequestingscreen character varying(255),
     calledgetusermediarequestingvideo boolean,
     calledlegacygetusermedia boolean,
     calledmediadevicesgetusermedia boolean,
@@ -146,5 +146,6 @@ CREATE TABLE features (
     usingicelite boolean,
     usingmultistream boolean,
     usingrtcpmux boolean,
-    wasgoogbandwidthlimitedresolutionever boolean,
+    wasgoogbandwidthlimitedresolutionevertrue boolean,
+    wasgoogCpuLimitedResolutionevertrue boolean
 );
