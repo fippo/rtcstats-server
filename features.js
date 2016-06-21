@@ -312,12 +312,14 @@ module.exports = {
 
     browserMajorVersion: function(client) {
         if (!(client.userAgent && client.userAgent.length)) return;
-        return platform.parse(client.userAgent).version.split('.')[0];
+        var version = platform.parse(client.userAgent).version;
+        if (version) return version.split('.')[0];
     },
 
     browserOS: function(client) {
         if (!(client.userAgent && client.userAgent.length)) return;
-        return platform.parse(client.userAgent).os.toString();
+        var os = platform.parse(client.userAgent).os
+        if (os) return os.toString();
     },
 
     browserNameVersion: function(client) {
