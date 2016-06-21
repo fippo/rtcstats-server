@@ -1296,7 +1296,7 @@ module.exports = {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true) {
+                if (report.type === 'candidatepair' && report.selected === true && statsReport[report.localCandidateId]) {
                     var type = statsReport[report.localCandidateId].networkType;
                     if (type && type !== interfaceTypesList[interfaceTypesList.length - 1]) {
                         interfaceTypesList.push(type);
