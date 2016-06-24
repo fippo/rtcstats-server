@@ -29,6 +29,11 @@ var wss = null;
 function dump(url, client, clientid) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
+    var total = 0;
+    Object.keys(client.peerConnections).forEach(function(id) {
+        total += client.peerConnections[id].length;
+    });
+    console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
     if (isProduction) {
         Store.put(clientid, JSON.stringify(client));
     }
