@@ -1,3 +1,4 @@
+'use strict';
 // https://en.wikipedia.org/wiki/Feature_extraction for peerconnection
 // API traces and getStats data.
 
@@ -723,7 +724,7 @@ module.exports = {
                 srd = peerConnectionLog[i].time;
             } else if (peerConnectionLog[i].type === 'addIceCandidate') {
                 if (srd) {
-                    return peerConnectionLog[i].time.getTime() - srd.getTime();
+                    return new Date(peerConnectionLog[i].time).getTime() - new Date(srd).getTime();
                 } else {
                     return -1;
                 }
@@ -739,7 +740,7 @@ module.exports = {
                 sld = peerConnectionLog[i].time;
             } else if (peerConnectionLog[i].type === 'onicecandidate') {
                 if (sld) {
-                    return peerConnectionLog[i].time.getTime() - sld.getTime();
+                    return new Date(peerConnectionLog[i].time).getTime() - new Date(sld).getTime();
                 } else {
                     return -1; // should not happen but...
                 }
@@ -1487,5 +1488,44 @@ module.exports = {
 });
 
 if (require.main === module) {
-    console.log(Object.keys(module.exports).length + ' features implemented.');
+    if (process.argv.length === 3) {
+        var features = module.exports;
+        const fs = require('fs');
+        fs.readFile(process.argv[2], function(err, data) {
+            if (err) return;
+            // TODO: this is copy-paste from app.js
+            var client = JSON.parse(data);
+            Object.keys(features).forEach(function (fname) {
+                if (features[fname].length === 1) {
+                    var feature = features[fname].apply(null, [client]);
+                    if (feature !== undefined) {
+                        console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                        if (typeof feature === 'number' && isNaN(feature)) feature = -1;
+                        if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
+                        if (feature === false) feature = 0;
+                        if (feature === true) feature = 1;
+                    }
+                }
+            });
+            Object.keys(client.peerConnections).forEach(function(connid) {
+                if (connid === 'null') return; // ignore the null connid
+                var conn = client.peerConnections[connid];
+                var connectionFeatures = {};
+                Object.keys(features).forEach(function (fname) {
+                    if (features[fname].length === 2) {
+                        var feature = features[fname].apply(null, [client, conn]);
+                        if (feature !== undefined) {
+                            console.log(connid, 'FEATURE', fname, '=>', feature);
+                            if (typeof feature === 'number' && isNaN(feature)) feature = -1;
+                            if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
+                            if (feature === false) feature = 0;
+                            if (feature === true) feature = 1;
+                        }
+                    }
+                });
+            });
+        });
+    } else {
+        console.log(Object.keys(module.exports).length + ' features implemented.');
+    }
 }
