@@ -213,10 +213,13 @@ if (require.main === module && cluster.isMaster) {
         // clean up after worker.
         // TODO: Possibly recover data. For now: throw it away.
         var path = 'temp-' + worker.process.pid;
+        var count = 0;
         fs.readdirSync(path).forEach(function(fname) {
+            count++;
             fs.unlinkSync(path + '/' + fname); 
         });
         fs.rmdirSync(path);
+        console.log(count, 'datasets gone :-(');
     });
 } else {
     run();
