@@ -17,7 +17,7 @@ module.exports = function(config) {
         if (err) {
           console.log("Error gzipping data: ", err);
         } else {
-          s3bucket.upload({ Key: key, Body: data }, function(err, data) {
+          s3bucket.upload({ Key: key + '.gz', Body: data }, function(err, data) {
             if (err) {
               console.log("Error uploading data: ", err);
             } else {
