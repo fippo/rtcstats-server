@@ -77,6 +77,7 @@ function generateFeatures(url, client, clientid) {
                 }
             }
         });
+        delete client.peerConnections[connid]; // save memory
         if (isProduction) {
             Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
         }
