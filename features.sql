@@ -122,6 +122,7 @@ CREATE TABLE features (
     numberoflocalicecandidates integer,
     numberofremoteicecandidates integer,
     pageurl character varying(255),
+    origin character varying(255),
     peerconnectionaddicecandidatefailure boolean,
     peerconnectionsetdescriptionfailure boolean,
     peeridentifier character varying(255),
