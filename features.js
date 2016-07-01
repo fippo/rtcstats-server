@@ -464,6 +464,38 @@ module.exports = {
         return false;
     },
 
+    timeBetweenGetUserMediaAndGetUserMediaSuccess: function(client) {
+        var gum = client.getUserMedia || [];
+        var first;
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
+                first = gum[i].time;
+            } else if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
+                if (first) {
+                    return new Date(gum[i].time).getTime() - new Date(first).getTime();
+                } else {
+                    return -1;
+                }
+            }
+        }
+    },
+
+    timeBetweenGetUserMediaAndGetUserMediaFailure: function(client) {
+        var gum = client.getUserMedia || [];
+        var first;
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
+                first = gum[i].time;
+            } else if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnFailure' || gum[i].type === 'getUserMediaOnFailure') {
+                if (first) {
+                    return new Date(gum[i].time).getTime() - new Date(first).getTime();
+                } else {
+                    return -1;
+                }
+            }
+        }
+    },
+
     // return the label of the first audio device
     firstAudioTrackLabel: function(client) {
         var gum = client.getUserMedia || [];
