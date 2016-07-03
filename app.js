@@ -13,7 +13,6 @@ var WebSocketServer = require('ws').Server;
 
 var wss = null;
 
-var db = {};
 var server;
 var tempPath = 'temp';
 
@@ -44,17 +43,21 @@ function run(keys) {
 
         var ua = client.upgradeReq.headers['user-agent'];
         var clientid = uuid.v4();
+        var tempStream = fs.createWriteStream(tempPath + '/' + clientid);
+        tempStream.on('finish', function() {
+            child_process.fork('extract.js', [clientid]).on('exit', function() {
+                console.log('done', clientid);
+            });
+        });
 
-        if (!db[referer]) db[referer] = {};
-        db[referer][clientid] = {
-            getUserMedia: [],
+        var meta = {
             path: client.upgradeReq.url,
-            peerConnections: {},
             origin: client.upgradeReq.headers['origin'],
             url: referer,
-            userAgent: ua
+            userAgent: ua,
+            time: Date.now()
         };
-        var tempStream = fs.createWriteStream(tempPath + '/' + clientid);
+        tempStream.write(JSON.stringify(meta) + '\n');
 
 
         console.log('connected', ua, referer);
@@ -67,37 +70,20 @@ function run(keys) {
             case 'navigator.mediaDevices.getUserMedia':
             case 'navigator.mediaDevices.getUserMediaOnSuccess':
             case 'navigator.mediaDevices.getUserMediaOnFailure':
-                db[referer][clientid].getUserMedia.push({
-                    time: new Date(),
-                    type: data[0],
-                    value: data[2]
-                });
+                data.time = Date.now();
+                tempStream.write(JSON.stringify(data) + '\n');
                 break;
             default:
                 obfuscate(data);
-                data.time = new Date().getTime();
+                data.time = Date.now();
                 tempStream.write(JSON.stringify(data) + '\n');
                 break;
             }
         });
 
         client.on('close', function() {
-            tempStream.on('finish', function() {
-                fs.writeFile(tempStream.path + '-meta', JSON.stringify(db[referer][clientid]), function(err) {
-                    if (err) {
-                        console.log('error writing GUM file, data lost :-(');
-                        fs.unlink(tempStream.path, function(err, data) {
-                        });
-                        return;
-                    }
-                    delete db[referer][clientid];
-
-                    child_process.fork('extract.js', [clientid]).on('exit', function() {
-                        console.log('done', clientid);
-                    });
-                });
-            });
             tempStream.end();
+            delete tempStream;
         });
     });
 }

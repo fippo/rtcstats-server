@@ -74,44 +74,58 @@ function generateFeatures(url, client, clientid) {
 
 var clientid = process.argv[2];
 var path = 'temp/' + clientid;
-var meta = fs.readFileSync(path + '-meta', {encoding: 'utf-8'});
-fs.unlink(path + '-meta', function() {
-    // we're good...
-});
-var client = JSON.parse(meta);
-var url = meta.url;
 fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
     if (!err) {
         var baseStats = {};
-        data.split('\n').forEach(function(line) {
+        var lines = data.split('\n');
+        var client = JSON.parse(lines.shift());
+        client.peerConnections = {};
+        client.getUserMedia = [];
+        lines.forEach(function(line) {
             if (line.length) {
                 var data = JSON.parse(line);
-                var time = new Date(data.time);
+                var time = new Date(data.time)
                 delete data.time;
-                if (!client.peerConnections[data[1]]) {
-                    client.peerConnections[data[1]] = [];
-                    baseStats[data[1]] = {};
+                switch(data[0]) {
+                case 'getUserMedia':
+                case 'getUserMediaOnSuccess':
+                case 'getUserMediaOnFailure':
+                case 'navigator.mediaDevices.getUserMedia':
+                case 'navigator.mediaDevices.getUserMediaOnSuccess':
+                case 'navigator.mediaDevices.getUserMediaOnFailure':
+                    client.getUserMedia.push({
+                        time: time,
+                        type: data[0],
+                        value: data[2]
+                    });
+                    break;
+                default:
+                    if (!client.peerConnections[data[1]]) {
+                        client.peerConnections[data[1]] = [];
+                        baseStats[data[1]] = {};
+                    }
+                    if (data[0] === 'getstats') { // delta-compressed
+                        data[2] = statsDecompressor(baseStats[data[1]], data[2]);
+                        baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
+                    }
+                    if (data[0] === 'getStats' || data[0] === 'getstats') {
+                        data[2] = statsMangler(data[2]);
+                        data[0] = 'getStats';
+                    }
+                    client.peerConnections[data[1]].push({
+                        time: time,
+                        type: data[0],
+                        value: data[2]
+                    });
+                    break;
                 }
-                if (data[0] === 'getstats') { // delta-compressed
-                    data[2] = statsDecompressor(baseStats[data[1]], data[2]);
-                    baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
-                }
-                if (data[0] === 'getStats' || data[0] === 'getstats') {
-                    data[2] = statsMangler(data[2]);
-                    data[0] = 'getStats';
-                }
-                client.peerConnections[data[1]].push({
-                    time: time,
-                    type: data[0],
-                    value: data[2]
-                });
             }
         });
+        dump(client.url, client, clientid);
+        generateFeatures(client.url, client, clientid);
     }
-    // we proceed even if there was an error.
+    // remove the file
     fs.unlink(path, function() {
         // we're good...
     });
-    dump(url, client, clientid);
-    generateFeatures(url, client, clientid);
 });
