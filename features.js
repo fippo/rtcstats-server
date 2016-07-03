@@ -1054,14 +1054,18 @@ module.exports = {
     sessionDuration: function(client, peerConnectionLog) {
         var startTime = -1;
         var endTime = -1;
-        peerConnectionLog.forEach(function(entry) {
+        var i;
+        for (i = 0; i < peerConnectionLog.length; i++) {
+            var entry = peerConnectionLog[i];
             if (entry.type === 'oniceconnectionstatechange') {
-                if ((entry.value === 'checking' || entry.value === 'connected') && startTime === -1) {
+                if ((entry.value === 'connected' || entry.value === 'completed') && startTime === -1) {
                     startTime = new Date(entry.time).getTime();
+                    break;
                 }
             }
-        });
+        }
         if (startTime > 0) {
+            // TODO: this is too simplistic. What if the ice connection state went to failed?
             endTime = new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime();
             if (endTime > 0) {
                 return endTime - startTime;
