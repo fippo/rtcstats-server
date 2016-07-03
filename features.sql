@@ -44,6 +44,8 @@ CREATE TABLE features (
     gatheringtimeturntcp integer,
     gatheringtimeturntls integer,
     gatheringtimeturnudp integer,
+    timeBetweenGetUserMediaAndGetUserMediaSuccess integer,
+    timeBetweenGetUserMediaAndGetUserMediaFailure integer,
     getusermediaerror character varying(255),
     getusermediasuccess boolean,
     getusermediasuccessnotreally boolean,
