@@ -1248,7 +1248,7 @@ module.exports = {
     },
 
 
-    firstCandidatePairType: function(client, peerConnectionLog) {
+    firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
@@ -1261,10 +1261,18 @@ module.exports = {
             var pair = null;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true
-                  && statsReport[report.localCandidateId] && statsReport[report.remoteCandidateId]) {
-                    pair = statsReport[report.localCandidateId].candidateType +
-                        ';' + statsReport[report.remoteCandidateId].candidateType;
+                var localCandidate = statsReport[report.localCandidateId];
+                var remoteCandidate = statsReport[report.remoteCandidateId];
+                if (report.type === 'candidatepair' && report.selected === true && localCandidate && remoteCandidate) {
+                    pair = {
+                        type: localCandidate.candidateType + ';' + remoteCandidate.candidateType, // mostly for backward compat reasons
+                        localType: localCandidate.candidateType,
+                        remoteType: remoteCandidate.candidateType,
+                        localIPAddress: localCandidate.ipAddress,
+                        remoteIPAddress: remoteCandidate.ipAddress,
+                        localTypePreference: localCandidate.priority >> 24,
+                        remoteTypePreference: remoteCandidate.priority >> 24
+                    };
                 }
             });
             if (pair) return pair;
@@ -1523,6 +1531,14 @@ module.exports = {
     };
 });
 
+function safeFeature(feature) {
+    if (typeof feature === 'number' && isNaN(feature)) feature = -1;
+    if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
+    if (feature === false) feature = 0;
+    if (feature === true) feature = 1;
+
+    return feature;
+}
 if (require.main === module) {
     if (process.argv.length === 3) {
         var features = module.exports;
@@ -1534,11 +1550,13 @@ if (require.main === module) {
                 if (features[fname].length === 1) {
                     var feature = features[fname].apply(null, [client]);
                     if (feature !== undefined) {
-                        console.log('PAGE', 'FEATURE', fname, '=>', feature);
-                        if (typeof feature === 'number' && isNaN(feature)) feature = -1;
-                        if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
-                        if (feature === false) feature = 0;
-                        if (feature === true) feature = 1;
+                        if (typeof feature === 'object') {
+                            Object.keys(feature).forEach(function(subname) {
+                                console.log('PAGE', 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
+                            });
+                        }  else {
+                            console.log('PAGE', 'FEATURE', fname, '=>', safeFeature(feature));
+                        }
                     }
                 }
             });
@@ -1550,11 +1568,13 @@ if (require.main === module) {
                     if (features[fname].length === 2) {
                         var feature = features[fname].apply(null, [client, conn]);
                         if (feature !== undefined) {
-                            console.log(connid, 'FEATURE', fname, '=>', feature);
-                            if (typeof feature === 'number' && isNaN(feature)) feature = -1;
-                            if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
-                            if (feature === false) feature = 0;
-                            if (feature === true) feature = 1;
+                            if (typeof feature === 'object') {
+                                Object.keys(feature).forEach(function(subname) {
+                                    console.log(connid, 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
+                                });
+                            }  else {
+                                console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
+                            }
                         }
                     }
                 });
