@@ -305,42 +305,22 @@ module.exports = {
     origin: function(client) {
         return client.origin;
     },
-    browserName: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        return platform.parse(client.userAgent).name;
-    },
 
-    browserVersion: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        return platform.parse(client.userAgent).version;
-    },
-
-    browserMajorVersion: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var version = platform.parse(client.userAgent).version;
-        if (version) return version.split('.')[0];
-    },
-
-    browserOS: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var os = platform.parse(client.userAgent).os
-        if (os) return os.toString();
-    },
-
-    browserNameVersion: function(client) {
+    browser: function(client) {
         if (!(client.userAgent && client.userAgent.length)) return;
         var ua = platform.parse(client.userAgent);
-        return ua.name + '/' + ua.version;
-    },
-    browserNameOS: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var ua = platform.parse(client.userAgent);
-        return ua.name + '/' + ua.os;
-    },
-    browserNameVersionOS: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var ua = platform.parse(client.userAgent);
-        return ua.name + '/' + ua.version + '/' + ua.os;
+        var parts = {
+            name: ua.name,
+            version: ua.version,
+            os: ua.os.toString(),
+            nameVersion: ua.name + '/' + ua.version,
+            nameOs: ua.name + '/' + ua.os.toString(),
+            nameVersionOs: ua.name + '/' + ua.version + '/' + ua.os.toString()
+        };
+        if (ua.version) {
+            parts.majorVersion = ua.version.split('.')[0];
+        }
+        return parts;
     },
 
     // did the page call getUserMedia at all?
@@ -1539,48 +1519,45 @@ function safeFeature(feature) {
 
     return feature;
 }
-if (require.main === module) {
-    if (process.argv.length === 3) {
-        var features = module.exports;
-        fs.readFile(process.argv[2], function(err, data) {
-            if (err) return;
-            // TODO: this is copy-paste from app.js
-            var client = JSON.parse(data);
+
+if (require.main === module && process.argv.length === 3) {
+    var features = module.exports;
+    fs.readFile(process.argv[2], function(err, data) {
+        if (err) return;
+        // TODO: this is copy-paste from extract.js
+        var client = JSON.parse(data);
+        Object.keys(features).forEach(function (fname) {
+            if (features[fname].length === 1) {
+                var feature = features[fname].apply(null, [client]);
+                if (feature !== undefined) {
+                    if (typeof feature === 'object') {
+                        Object.keys(feature).forEach(function(subname) {
+                            console.log('PAGE', 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
+                        });
+                    }  else {
+                        console.log('PAGE', 'FEATURE', fname, '=>', safeFeature(feature));
+                    }
+                }
+            }
+        });
+        Object.keys(client.peerConnections).forEach(function(connid) {
+            if (connid === 'null') return; // ignore the null connid
+            var conn = client.peerConnections[connid];
+            var connectionFeatures = {};
             Object.keys(features).forEach(function (fname) {
-                if (features[fname].length === 1) {
-                    var feature = features[fname].apply(null, [client]);
+                if (features[fname].length === 2) {
+                    var feature = features[fname].apply(null, [client, conn]);
                     if (feature !== undefined) {
                         if (typeof feature === 'object') {
                             Object.keys(feature).forEach(function(subname) {
-                                console.log('PAGE', 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
+                                console.log(connid, 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
                             });
                         }  else {
-                            console.log('PAGE', 'FEATURE', fname, '=>', safeFeature(feature));
+                            console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
                         }
                     }
                 }
             });
-            Object.keys(client.peerConnections).forEach(function(connid) {
-                if (connid === 'null') return; // ignore the null connid
-                var conn = client.peerConnections[connid];
-                var connectionFeatures = {};
-                Object.keys(features).forEach(function (fname) {
-                    if (features[fname].length === 2) {
-                        var feature = features[fname].apply(null, [client, conn]);
-                        if (feature !== undefined) {
-                            if (typeof feature === 'object') {
-                                Object.keys(feature).forEach(function(subname) {
-                                    console.log(connid, 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
-                                });
-                            }  else {
-                                console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
-                            }
-                        }
-                    }
-                });
-            });
         });
-    } else {
-        console.log(Object.keys(module.exports).length + ' features implemented.');
-    }
+    });
 }
