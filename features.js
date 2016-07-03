@@ -300,6 +300,9 @@ function getCodec(peerConnectionLog, mediaType, direction) {
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
 module.exports = {
+    origin: function(client) {
+        return client.origin;
+    },
     browserName: function(client) {
         if (!(client.userAgent && client.userAgent.length)) return;
         return platform.parse(client.userAgent).name;
