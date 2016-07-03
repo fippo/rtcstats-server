@@ -2,6 +2,7 @@
 // https://en.wikipedia.org/wiki/Feature_extraction for peerconnection
 // API traces and getStats data.
 
+var fs = require('fs');
 var platform = require('platform');
 
 function filterIceConnectionStateChange(peerConnectionLog) {
@@ -1490,7 +1491,6 @@ module.exports = {
 if (require.main === module) {
     if (process.argv.length === 3) {
         var features = module.exports;
-        const fs = require('fs');
         fs.readFile(process.argv[2], function(err, data) {
             if (err) return;
             // TODO: this is copy-paste from app.js
