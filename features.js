@@ -310,8 +310,8 @@ module.exports = {
         if (!(client.userAgent && client.userAgent.length)) return;
         var ua = platform.parse(client.userAgent);
         var parts = {
-            name: ua.name,
-            version: ua.version,
+            name: ua.name || 'unknown',
+            version: ua.version || '-1',
             os: ua.os.toString(),
             nameVersion: ua.name + '/' + ua.version,
             nameOs: ua.name + '/' + ua.os.toString(),
