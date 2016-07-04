@@ -123,6 +123,7 @@ CREATE TABLE features_import (
     numberofcandidatepairchanges integer,
     numberoflocalicecandidates integer,
     numberofremoteicecandidates integer,
+    numberofpeerconnections integer,
     pageurl character varying(255),
     origin character varying(255),
     peerconnectionaddicecandidatefailure boolean,
