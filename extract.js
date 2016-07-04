@@ -9,6 +9,19 @@ var Database = require('./database')({
 });
 var isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
+function capitalize(str) {
+    return str[0].toUpperCase() + str.substr(1);
+}
+
+function safeFeature(feature) {
+    if (typeof feature === 'number' && isNaN(feature)) feature = -1;
+    if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
+    if (feature === false) feature = 0;
+    if (feature === true) feature = 1;
+
+    return feature;
+}
+
 var features = require('./features');
 var statsDecompressor = require('./getstats-deltacompression').decompress;
 var statsMangler = require('./getstats-mangle');
@@ -39,12 +52,17 @@ function generateFeatures(url, client, clientid) {
         if (features[fname].length === 1) {
             var feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
-                console.log('PAGE', 'FEATURE', fname, '=>', feature);
-                if (typeof feature === 'number' && isNaN(feature)) feature = -1;
-                if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
-                if (feature === false) feature = 0;
-                if (feature === true) feature = 1;
-                clientFeatures[fname] = feature;
+                if (typeof feature === 'object') {
+                    Object.keys(feature).forEach(function(subname) {
+                        feature[subname] = safeFeature(feature[subname]);
+                        console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                        clientFeatures[fname + capitalize(subname)] = feature[subname];
+                    });
+                }  else {
+                    feature = safeFeature(feature);
+                    console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                    clientFeatures[fname] = feature;
+                }
             }
         }
     });
@@ -56,12 +74,17 @@ function generateFeatures(url, client, clientid) {
             if (features[fname].length === 2) {
                 var feature = features[fname].apply(null, [client, conn]);
                 if (feature !== undefined) {
-                    console.log(connid, 'FEATURE', fname, '=>', feature);
-                    if (typeof feature === 'number' && isNaN(feature)) feature = -1;
-                    if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
-                    if (feature === false) feature = 0;
-                    if (feature === true) feature = 1;
-                    connectionFeatures[fname] = feature;
+                    if (typeof feature === 'object') {
+                        Object.keys(feature).forEach(function(subname) {
+                            feature[subname] = safeFeature(feature[subname]);
+                            console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                            connectionFeatures[fname + capitalize(subname)] = feature[subname];
+                        });
+                    }  else {
+                        feature = safeFeature(feature);
+                        console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
+                        connectionFeatures[fname] = feature;
+                    }
                 }
             }
         });
