@@ -6,10 +6,12 @@ server for https://github.com/opentok/rtcstats
 ## importing data
 The current schema is in features.sql. It will create a table features_import. Use this SQL query to populate it:
 ```
-copy features_import from 'dynamodb://snoop-table-name' credentials 'aws_access_key_id=key;aws_secret_access_key=secret' readratio 98;
+copy features_import from 'dynamodb://snoop-table-name'
+    credentials 'aws_access_key_id=key;aws_secret_access_key=secret'
+    readratio 98;
 ```
 
-It is advisable to increase the dynamodb read capacity for the duration of the import.
+It is advisable to increase the dynamodb read capacity for the duration of the import. Adding 'maxerrors 10' helps avoiding bailing out on crappy data.
 
 ## renaming the table after import
 ```
