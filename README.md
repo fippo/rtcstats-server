@@ -25,5 +25,5 @@ select starttime, colname, col_length, type, err_reason from stl_load_errors;
 
 ## views on recent data
 ```
-create or replace view recent as select * from features_new where date >= 1466553600000 order by date desc limit 100000;
+create or replace view recent as select * from features_new order by date desc limit 100000;
 ```
