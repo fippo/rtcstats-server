@@ -5,6 +5,10 @@
 var fs = require('fs');
 var platform = require('platform');
 
+function capitalize(str) {
+    return str[0].toUpperCase() + str.substr(1);
+}
+
 function filterIceConnectionStateChange(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.type === 'oniceconnectionstatechange';
@@ -1532,7 +1536,7 @@ if (require.main === module && process.argv.length === 3) {
                 if (feature !== undefined) {
                     if (typeof feature === 'object') {
                         Object.keys(feature).forEach(function(subname) {
-                            console.log('PAGE', 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
+                            console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
                         });
                     }  else {
                         console.log('PAGE', 'FEATURE', fname, '=>', safeFeature(feature));
@@ -1550,7 +1554,7 @@ if (require.main === module && process.argv.length === 3) {
                     if (feature !== undefined) {
                         if (typeof feature === 'object') {
                             Object.keys(feature).forEach(function(subname) {
-                                console.log(connid, 'FEATURE', fname + subname, '=>', safeFeature(feature[subname]));
+                                console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
                             });
                         }  else {
                             console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
