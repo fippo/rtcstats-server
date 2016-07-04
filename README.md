@@ -11,7 +11,7 @@ copy features_import from 'dynamodb://snoop-table-name'
     readratio 98;
 ```
 
-It is advisable to increase the dynamodb read capacity for the duration of the import. Adding 'maxerrors 10' helps avoiding bailing out on crappy data.
+It is advisable to increase the dynamodb read capacity for the duration of the import. Adding 'maxerror 10' helps avoiding bailing out on crappy data.
 
 ## renaming the table after import
 ```
@@ -20,7 +20,8 @@ alter table features_import rename to features_old
 
 ## Load errors
 ```
-select starttime, colname, col_length, type, err_reason from stl_load_errors;
+select starttime, colname, col_length, type, err_reason
+    from stl_load_errors;
 ```
 
 ## views on recent data
