@@ -5,6 +5,10 @@
 var fs = require('fs');
 var platform = require('platform');
 
+function capitalize(str) {
+    return str[0].toUpperCase() + str.substr(1);
+}
+
 function filterIceConnectionStateChange(peerConnectionLog) {
     return peerConnectionLog.filter(function(entry) {
         return entry.type === 'oniceconnectionstatechange';
@@ -307,42 +311,22 @@ module.exports = {
     origin: function(client) {
         return client.origin;
     },
-    browserName: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        return platform.parse(client.userAgent).name;
-    },
 
-    browserVersion: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        return platform.parse(client.userAgent).version;
-    },
-
-    browserMajorVersion: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var version = platform.parse(client.userAgent).version;
-        if (version) return version.split('.')[0];
-    },
-
-    browserOS: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var os = platform.parse(client.userAgent).os
-        if (os) return os.toString();
-    },
-
-    browserNameVersion: function(client) {
+    browser: function(client) {
         if (!(client.userAgent && client.userAgent.length)) return;
         var ua = platform.parse(client.userAgent);
-        return ua.name + '/' + ua.version;
-    },
-    browserNameOS: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var ua = platform.parse(client.userAgent);
-        return ua.name + '/' + ua.os;
-    },
-    browserNameVersionOS: function(client) {
-        if (!(client.userAgent && client.userAgent.length)) return;
-        var ua = platform.parse(client.userAgent);
-        return ua.name + '/' + ua.version + '/' + ua.os;
+        var parts = {
+            name: ua.name || 'unknown',
+            version: ua.version || '-1',
+            os: ua.os.toString(),
+            nameVersion: ua.name + '/' + ua.version,
+            nameOs: ua.name + '/' + ua.os.toString(),
+            nameVersionOs: ua.name + '/' + ua.version + '/' + ua.os.toString()
+        };
+        if (ua.version) {
+            parts.majorVersion = ua.version.split('.')[0];
+        }
+        return parts;
     },
 
     // did the page call getUserMedia at all?
@@ -1254,7 +1238,7 @@ module.exports = {
     },
 
 
-    firstCandidatePairType: function(client, peerConnectionLog) {
+    firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
@@ -1267,10 +1251,18 @@ module.exports = {
             var pair = null;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true
-                  && statsReport[report.localCandidateId] && statsReport[report.remoteCandidateId]) {
-                    pair = statsReport[report.localCandidateId].candidateType +
-                        ';' + statsReport[report.remoteCandidateId].candidateType;
+                var localCandidate = statsReport[report.localCandidateId];
+                var remoteCandidate = statsReport[report.remoteCandidateId];
+                if (report.type === 'candidatepair' && report.selected === true && localCandidate && remoteCandidate) {
+                    pair = {
+                        type: localCandidate.candidateType + ';' + remoteCandidate.candidateType, // mostly for backward compat reasons
+                        localType: localCandidate.candidateType,
+                        remoteType: remoteCandidate.candidateType,
+                        localIPAddress: localCandidate.ipAddress,
+                        remoteIPAddress: remoteCandidate.ipAddress,
+                        localTypePreference: localCandidate.priority >> 24,
+                        remoteTypePreference: remoteCandidate.priority >> 24
+                    };
                 }
             });
             if (pair) return pair;
@@ -1529,44 +1521,53 @@ module.exports = {
     };
 });
 
-if (require.main === module) {
-    if (process.argv.length === 3) {
-        var features = module.exports;
-        fs.readFile(process.argv[2], function(err, data) {
-            if (err) return;
-            // TODO: this is copy-paste from app.js
-            var client = JSON.parse(data);
+function safeFeature(feature) {
+    if (typeof feature === 'number' && isNaN(feature)) feature = -1;
+    if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
+    if (feature === false) feature = 0;
+    if (feature === true) feature = 1;
+
+    return feature;
+}
+
+if (require.main === module && process.argv.length === 3) {
+    var features = module.exports;
+    fs.readFile(process.argv[2], function(err, data) {
+        if (err) return;
+        // TODO: this is copy-paste from extract.js
+        var client = JSON.parse(data);
+        Object.keys(features).forEach(function (fname) {
+            if (features[fname].length === 1) {
+                var feature = features[fname].apply(null, [client]);
+                if (feature !== undefined) {
+                    if (typeof feature === 'object') {
+                        Object.keys(feature).forEach(function(subname) {
+                            console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                        });
+                    }  else {
+                        console.log('PAGE', 'FEATURE', fname, '=>', safeFeature(feature));
+                    }
+                }
+            }
+        });
+        Object.keys(client.peerConnections).forEach(function(connid) {
+            if (connid === 'null') return; // ignore the null connid
+            var conn = client.peerConnections[connid];
+            var connectionFeatures = {};
             Object.keys(features).forEach(function (fname) {
-                if (features[fname].length === 1) {
-                    var feature = features[fname].apply(null, [client]);
+                if (features[fname].length === 2) {
+                    var feature = features[fname].apply(null, [client, conn]);
                     if (feature !== undefined) {
-                        console.log('PAGE', 'FEATURE', fname, '=>', feature);
-                        if (typeof feature === 'number' && isNaN(feature)) feature = -1;
-                        if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
-                        if (feature === false) feature = 0;
-                        if (feature === true) feature = 1;
+                        if (typeof feature === 'object') {
+                            Object.keys(feature).forEach(function(subname) {
+                                console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                            });
+                        }  else {
+                            console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
+                        }
                     }
                 }
             });
-            Object.keys(client.peerConnections).forEach(function(connid) {
-                if (connid === 'null') return; // ignore the null connid
-                var conn = client.peerConnections[connid];
-                var connectionFeatures = {};
-                Object.keys(features).forEach(function (fname) {
-                    if (features[fname].length === 2) {
-                        var feature = features[fname].apply(null, [client, conn]);
-                        if (feature !== undefined) {
-                            console.log(connid, 'FEATURE', fname, '=>', feature);
-                            if (typeof feature === 'number' && isNaN(feature)) feature = -1;
-                            if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
-                            if (feature === false) feature = 0;
-                            if (feature === true) feature = 1;
-                        }
-                    }
-                });
-            });
         });
-    } else {
-        console.log(Object.keys(module.exports).length + ' features implemented.');
-    }
+    });
 }
