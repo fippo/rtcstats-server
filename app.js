@@ -16,12 +16,21 @@ var wss = null;
 var server;
 var tempPath = 'temp';
 
-function run(keys) {
+function setupWorkDirectory() {
     try {
-        fs.mkdirSync(tempPath);
+        fs.readdirSync(tempPath).forEach(function(fname) {
+            fs.unlinkSync(tempPath + '/' + fname); 
+        });
+        fs.rmdirSync(tempPath);
     } catch(e) {
-        console.log('work dir already exists');
+        console.error('work dir does not exist');
     }
+    fs.mkdirSync(tempPath);
+}
+
+function run(keys) {
+    setupWorkDirectory();
+
     app.use('/static', express.static(__dirname + '/static'));
 
     if (keys === undefined) {
