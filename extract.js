@@ -99,7 +99,6 @@ var clientid = process.argv[2];
 var path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
     if (!err) {
-        dump(client.url, client, clientid, data);
 
         var baseStats = {};
         var lines = data.split('\n');
@@ -146,6 +145,7 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
                 }
             }
         });
+        dump(client.url, client, clientid, data);
         generateFeatures(client.url, client, clientid);
     }
     // remove the file
