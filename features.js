@@ -363,6 +363,22 @@ function extractTrack(peerConnectionLog, kind, direction) {
     return reports;
 }
 
+function extractBWE(peerConnectionLog) {
+    var reports = [];
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'VideoBwe') {
+                    reports.push(report);
+                }
+            });
+        }
+    }
+    return reports;
+}
+
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
@@ -1489,6 +1505,37 @@ module.exports = {
     // TODO: packetsDiscardedOnSend
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
+
+    bwe: function(client, peerConnectionLog) {
+        var bwe = extractBWE(peerConnectionLog);
+        if (!bwe.length) return;
+        var stats = ['googActualEncBitrate', 'googRetransmitBitrate', 'googTargetEncBitrate',
+            'googBucketDelay', 'googTransmitBitrate'];
+        bwe = bwe.map(function(item) {
+            stats.forEach(function(stat) {
+                item[stat] = parseInt(item[stat], 10);
+            });
+            delete item.googAvailableSendBandwidth;
+            delete item.googAvailableReceiveBandwidth;
+            return item;
+        });
+        stats.push('availableOutgoingBitrate');
+        stats.push('availableIncomingBitrate');
+
+        var feature = {};
+        stats.forEach(function(stat) {
+            var series = bwe.map(function(item) { return item[stat]; });
+
+            feature[capitalize(stat) + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+            feature[capitalize(stat) + 'Max'] = Math.max.apply(null, series);
+            feature[capitalize(stat) + 'Min'] = Math.min.apply(null, series);
+
+            feature[capitalize(stat) + 'Variance'] = standardizedMoment(series, 1);
+            feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 2);
+            feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 3);
+        });
+        return feature;
+    }
 };
 
 // frame rate is not discrete, so mode does not make sense.
