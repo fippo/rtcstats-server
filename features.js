@@ -355,6 +355,7 @@ function extractTrack(peerConnectionLog, kind, direction) {
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
                 if (report.type === 'ssrc' && report.trackIdentifier === trackId) {
+                    report.timestamp = peerConnectionLog[i].time;
                     reports.push(report);
                 }
             });
@@ -1596,9 +1597,7 @@ module.exports = {
                 if (typeof track[0][stat] === 'undefined') return;
                 var series = track.map(function(item) { return parseInt(item[stat], 10) });
 
-                feature[stat + 'Mean'] = series.reduce(function(a, b) {
-                    return a + b;
-                }, 0) / series.length;
+                feature[stat + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
 
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
@@ -1622,9 +1621,34 @@ module.exports = {
                 if (typeof track[0][stat] === 'undefined') return;
                 var series = track.map(function(item) { return item[stat] === 'true' ? 1 : 0 });
 
-                feature[stat + 'Mean'] = series.reduce(function(a, b) {
-                    return a + b;
-                }, 0) / series.length;
+                feature[stat + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+                feature[stat + 'Max'] = Math.max.apply(null, series);
+                feature[stat + 'Min'] = Math.min.apply(null, series);
+                feature[stat + 'Mode'] = mode(series);
+            });
+
+            // stats for which we are interested in the difference between values.
+            ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(function(stat) {
+                var i;
+                var conversionFactor = stat.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
+                if (typeof track[0][stat] === 'undefined') return;
+                var series = track.map(function(item) { return parseInt(item[stat], 10) });
+                var dt = track.map(function(item) { return item.timestamp; });
+                // calculate the difference
+                for (i = 1; i < series.length; i++) {
+                    series[i - 1] = series[i] - series[i - 1];
+                    dt[i - 1] = dt[i] - dt[i - 1];
+                }
+                series.length = series.length - 1;
+                dt.length = dt.length - 1;
+                for (i = 0; i < series.length; i++) {
+                    series[i] = Math.floor(series[i] * 1000 / dt[i]) * conversionFactor;
+                }
+
+                // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                series.filter(function(x) { return isFinite(x) && !isNaN(x) && x >= 0; });
+
+                feature[stat + 'Delta' + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
                 feature[stat + 'Mode'] = mode(series);
