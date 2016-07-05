@@ -242,6 +242,25 @@ function extractMostCommonVideoStat(peerConnectionLog, statName) {
     return mode;
 }
 
+// determine mode (most common) element in a series.
+function mode(series) {
+    var modes = {};
+    series.forEach(function(item) {
+        if (!modes[item]) modes[item] = 0;
+        modes[item]++;
+    });
+
+    var value = -1;
+    var max = -1;
+    Object.keys(modes).forEach(function(key) {
+        if (modes[key] > max) {
+            max = modes[key];
+            value = key;
+        }
+    });
+    return value;
+}
+
 // Calculate standardized moment.
 // order=1: 0
 // order=2: variance
@@ -302,6 +321,46 @@ function getCodec(peerConnectionLog, mediaType, direction) {
         });
         if (codecName) return codecName;
     }
+}
+
+// extract a local/remote audio or video track.
+function extractTrack(peerConnectionLog, kind, direction) {
+    var trackId;
+    var reports = [];
+    var streamevent = 'onaddstream';
+    if (direction === 'send') {
+        streamevent = 'addStream';
+    }
+    // search for the (first) track of that kind.
+    for (var i = 0; i < peerConnectionLog.length; i++) {
+        if (peerConnectionLog[i].type === streamevent) {
+            var tracks = peerConnectionLog[i].value.split(' ', 2);
+            tracks.shift();
+            tracks = tracks[0].split(',');
+            for (var j = 0; j < tracks.length; j++) {
+                if (tracks[j].split(':')[0] === kind) {
+                    trackId = tracks[j].split(':')[1];
+                    break;
+                }
+            }
+            if (trackId) break;
+        }
+    }
+    if (!trackId) return []; // bail out
+
+    // search for signs of that track
+    for (; i < peerConnectionLog.length; i++) {
+        if (trackId && peerConnectionLog[i].type === 'getStats') {
+            var statsReport = peerConnectionLog[i].value;
+            Object.keys(statsReport).forEach(function(id) {
+                var report = statsReport[id];
+                if (report.type === 'ssrc' && report.trackIdentifier === trackId) {
+                    reports.push(report);
+                }
+            });
+        }
+    }
+    return reports;
 }
 
 // there are two types of features
@@ -1519,6 +1578,60 @@ module.exports = {
     module.exports['kurtosisAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 4);
     };
+});
+
+['audio', 'video'].forEach(function(kind) {
+    ['send', 'recv'].forEach(function(direction) {
+        module.exports[kind + capitalize(direction)] = function(client, peerConnectionLog) {
+            var track = extractTrack(peerConnectionLog, kind, direction);
+            if (!track.length) return;
+            var feature = {};
+            ['audioLevel', 'googJitterReceived',
+                'googRtt', 'googEncodeUsagePercent',
+                'googCurrentDelayMs', 'googJitterBufferMs',
+                'googPreferredJitterBufferMs', 'googJitterBufferMs',
+                'googDecodeMs', 'googMaxDecodeMs',
+                'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
+            ].forEach(function(stat) {
+                if (typeof track[0][stat] === 'undefined') return;
+                var series = track.map(function(item) { return parseInt(item[stat], 10) });
+
+                feature[stat + 'Mean'] = series.reduce(function(a, b) {
+                    return a + b;
+                }, 0) / series.length;
+
+                feature[stat + 'Max'] = Math.max.apply(null, series);
+                feature[stat + 'Min'] = Math.min.apply(null, series);
+
+                feature[stat + 'Variance'] = standardizedMoment(series, 1);
+                feature[stat + 'Skewness'] = standardizedMoment(series, 2);
+                feature[stat + 'Kurtosis'] = standardizedMoment(series, 3);
+            });
+            ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
+               'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
+                if (typeof track[0][stat] === 'undefined') return;
+                // mode, max, min
+                var series = track.map(function(item) { return parseInt(item[stat], 10) });
+
+                feature[stat + 'Max'] = Math.max.apply(null, series);
+                feature[stat + 'Min'] = Math.min.apply(null, series);
+                feature[stat + 'Mode'] = mode(series);
+            });
+
+            ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(function(stat) {
+                if (typeof track[0][stat] === 'undefined') return;
+                var series = track.map(function(item) { return item[stat] === 'true' ? 1 : 0 });
+
+                feature[stat + 'Mean'] = series.reduce(function(a, b) {
+                    return a + b;
+                }, 0) / series.length;
+                feature[stat + 'Max'] = Math.max.apply(null, series);
+                feature[stat + 'Min'] = Math.min.apply(null, series);
+                feature[stat + 'Mode'] = mode(series);
+            });
+            return feature;
+        };
+    });
 });
 
 function safeFeature(feature) {
