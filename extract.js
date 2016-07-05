@@ -27,7 +27,7 @@ var statsDecompressor = require('./getstats-deltacompression').decompress;
 var statsMangler = require('./getstats-mangle');
 
 // dumps all peerconnections to Store
-function dump(url, client, clientid) {
+function dump(url, client, clientid, data) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
     var total = 0;
@@ -36,7 +36,7 @@ function dump(url, client, clientid) {
     });
     console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
     if (isProduction) {
-        Store.put(clientid, JSON.stringify(client));
+        Store.put(clientid, data);
     }
 }
 
@@ -99,6 +99,8 @@ var clientid = process.argv[2];
 var path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
     if (!err) {
+        dump(client.url, client, clientid, data);
+
         var baseStats = {};
         var lines = data.split('\n');
         var client = JSON.parse(lines.shift());
@@ -144,7 +146,6 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
                 }
             }
         });
-        dump(client.url, client, clientid);
         generateFeatures(client.url, client, clientid);
     }
     // remove the file
