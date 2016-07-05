@@ -1652,6 +1652,10 @@ module.exports = {
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
                 feature[stat + 'Mode'] = mode(series);
+
+                feature[stat + 'Variance'] = standardizedMoment(series, 1);
+                feature[stat + 'Skewness'] = standardizedMoment(series, 2);
+                feature[stat + 'Kurtosis'] = standardizedMoment(series, 3);
             });
             return feature;
         };
