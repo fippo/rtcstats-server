@@ -378,6 +378,7 @@ module.exports = {
             name: ua.name || 'unknown',
             version: ua.version || '-1',
             os: ua.os.toString(),
+            userAgent: client.userAgent,
             nameVersion: ua.name + '/' + ua.version,
             nameOs: ua.name + '/' + ua.os.toString(),
             nameVersionOs: ua.name + '/' + ua.version + '/' + ua.os.toString()
