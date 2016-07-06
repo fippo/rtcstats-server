@@ -1,5 +1,5 @@
 CREATE TABLE features_import (
-    browsermajorversion character varying(255),
+    browsermajorversion integer,
     browsername character varying(255),
     browsernameos character varying(255),
     browsernameversion character varying(255),

@@ -383,7 +383,7 @@ module.exports = {
             nameVersionOs: ua.name + '/' + ua.version + '/' + ua.os.toString()
         };
         if (ua.version) {
-            parts.majorVersion = ua.version.split('.')[0];
+            parts.majorVersion = parseInt(ua.version.split('.')[0], 10);
         }
         return parts;
     },
