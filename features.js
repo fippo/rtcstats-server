@@ -952,7 +952,6 @@ module.exports = {
                     new Date(peerConnectionLog[first].time).getTime());
             }
         }
-        return undefined;
     },
 
     // was a local host candidate gathered. This should always be true.
@@ -1025,6 +1024,26 @@ module.exports = {
             }
         }
         return false;
+    },
+
+    // what types of RFC 1918 private ip addresses were gathered?
+    gatheredrfc1918address: function(client, peerConnectionLog) {
+        var gathered = {};
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onicecandidate') {
+                var cand = peerConnectionLog[i].value;
+                if (cand === null) break; // gathering done
+                if (cand.candidate) {
+                    var ip = cand.candidate.split(' ')[4];
+                    if (ip.indexOf('192.168.') === 0) gathered.prefix16 = true;
+                    else if (ip.indexOf('172.16.') === 0) gathered.prefix12 = true;
+                    else if (ip.indexOf('10.') === 0) gathered.prefix10 = true;
+                }
+            }
+        }
+        if (Object.keys(gathered).length) {
+            return gathered;
+        }
     },
 
     // how long does it take to establish the connection?
