@@ -1640,12 +1640,14 @@ module.exports = {
     module.exports['varianceAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 2);
     };
+    /*
     module.exports['skewnessAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 3);
     };
     module.exports['kurtosisAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
         return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 4);
     };
+    */
 });
 
 ['audio', 'video'].forEach(function(kind) {
@@ -1670,8 +1672,10 @@ module.exports = {
                 feature[stat + 'Min'] = Math.min.apply(null, series);
 
                 feature[stat + 'Variance'] = standardizedMoment(series, 1);
+                /*
                 feature[stat + 'Skewness'] = standardizedMoment(series, 2);
                 feature[stat + 'Kurtosis'] = standardizedMoment(series, 3);
+                */
             });
             ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
                'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
@@ -1721,8 +1725,10 @@ module.exports = {
                 feature[stat + 'Mode'] = mode(series);
 
                 feature[stat + 'Variance'] = standardizedMoment(series, 1);
+                /*
                 feature[stat + 'Skewness'] = standardizedMoment(series, 2);
                 feature[stat + 'Kurtosis'] = standardizedMoment(series, 3);
+                */
             });
             return feature;
         };
