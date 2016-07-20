@@ -1551,9 +1551,9 @@ module.exports = {
             feature[capitalize(stat) + 'Max'] = Math.max.apply(null, series);
             feature[capitalize(stat) + 'Min'] = Math.min.apply(null, series);
 
-            feature[capitalize(stat) + 'Variance'] = standardizedMoment(series, 1);
-            feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 2);
-            feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 3);
+            feature[capitalize(stat) + 'Variance'] = standardizedMoment(series, 2);
+            feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 3);
+            feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 4);
         });
         return feature;
     }
@@ -1669,9 +1669,9 @@ module.exports = {
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
 
-                feature[stat + 'Variance'] = standardizedMoment(series, 1);
-                feature[stat + 'Skewness'] = standardizedMoment(series, 2);
-                feature[stat + 'Kurtosis'] = standardizedMoment(series, 3);
+                feature[stat + 'Variance'] = standardizedMoment(series, 2);
+                feature[stat + 'Skewness'] = standardizedMoment(series, 3);
+                feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
             });
             ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
                'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
@@ -1720,9 +1720,9 @@ module.exports = {
                 feature[stat + 'Min'] = Math.min.apply(null, series);
                 feature[stat + 'Mode'] = mode(series);
 
-                feature[stat + 'Variance'] = standardizedMoment(series, 1);
-                feature[stat + 'Skewness'] = standardizedMoment(series, 2);
-                feature[stat + 'Kurtosis'] = standardizedMoment(series, 3);
+                feature[stat + 'Variance'] = standardizedMoment(series, 2);
+                feature[stat + 'Skewness'] = standardizedMoment(series, 3);
+                feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
             });
             return feature;
         };
