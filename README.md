@@ -21,7 +21,8 @@ alter table features_import rename to features_old
 ## Load errors
 ```
 select starttime, colname, col_length, type, err_reason
-    from stl_load_errors;
+    from stl_load_errors
+    order by starttime desc;
 ```
 
 ## views on recent data
