@@ -1,3 +1,4 @@
+'use strict';
 var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
@@ -15,6 +16,35 @@ var wss = null;
 
 var server;
 var tempPath = 'temp';
+
+class ProcessQueue {
+    constructor() {
+        this.maxProc = os.cpus().length;
+        this.q = [];
+        this.numProc = 0;
+    }
+    enqueue(clientid) {
+        this.q.push(clientid);
+        if (this.numProc < this.maxProc) {
+            process.nextTick(this.process.bind(this));
+        } else {
+            console.log('process Q too long:', this.numProc);
+        }
+    }
+    process() {
+        var clientid = this.q.shift();
+        if (!clientid) return;
+        child_process.fork('extract.js', [clientid]).on('exit', () => {
+            this.numProc--;
+            console.log('done', clientid, this.numProc);
+            if (this.numProc < 0) this.numProc = 0;
+            if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
+        });
+        this.numProc++;
+        console.log('process Q:', this.numProc);
+    }
+}
+var q = new ProcessQueue();
 
 function setupWorkDirectory() {
     try {
@@ -54,9 +84,7 @@ function run(keys) {
         var clientid = uuid.v4();
         var tempStream = fs.createWriteStream(tempPath + '/' + clientid);
         tempStream.on('finish', function() {
-            child_process.fork('extract.js', [clientid]).on('exit', function() {
-                console.log('done', clientid);
-            });
+            q.enqueue(clientid);
         });
 
         var meta = {
@@ -92,7 +120,7 @@ function run(keys) {
 
         client.on('close', function() {
             tempStream.end();
-            delete tempStream;
+            tempStream = null;
         });
     });
 }
