@@ -1,0 +1,7 @@
+{
+    "env": {
+        "builtin": true,
+        "es6": true,
+        "node": true
+    }
+}
