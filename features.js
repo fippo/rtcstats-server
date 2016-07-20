@@ -1064,6 +1064,23 @@ module.exports = {
         }
     },
 
+    // estimates the number of interfaces
+    numberOfInterfaces: function(client, peerConnectionLog) {
+        var ips = {};
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onicecandidate') {
+                var cand = peerConnectionLog[i].value;
+                if (cand === null) return false; // gathering finished so we have seen all candidates.
+                var parts = cand.candidate.split(' ');
+                if (parts[7] === 'host') {
+                    if (!ips[parts[4]]) ips[parts[4]] = 0;
+                    ips[parts[4]]++;
+                }
+            }
+        }
+        return Object.keys(ips).length;
+    },
+
     // how long does it take to establish the connection?
     // TODO: also figure out connection type so we don't lump relayed and non-relayed connections
     connectionTime: function(client, peerConnectionLog) {
