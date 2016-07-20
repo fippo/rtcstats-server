@@ -117,131 +117,6 @@ function extractLastVideoStat(peerConnectionLog, type) {
     return count;
 }
 
-function extractMaxSsrcStat(peerConnectionLog, statName, mediaType) {
-    var max = -1;
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
-                    var t = parseInt(report[statName], 10);
-                    max = Math.max(max, t);
-                }
-            });
-        }
-    }
-    return max !== -1 ? max : undefined;
-}
-
-function extractMaxVideoStat(peerConnectionLog, statName) {
-    return extractMaxSsrcStat(peerConnectionLog, statName, 'video');
-}
-
-function extractMaxAudioStat(peerConnectionLog, statName) {
-    return extractMaxSsrcStat(peerConnectionLog, statName, 'audio');
-}
-
-function extractMinSsrcStat(peerConnectionLog, statName, mediaType) {
-    var min = Number.MAX_VALUE;
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
-                    var t = parseInt(report[statName], 10);
-                    min = Math.min(min, t);
-                }
-            });
-        }
-    }
-    return min !== Number.MAX_VALUE ? min : undefined;
-}
-
-function extractMinVideoStat(peerConnectionLog, statName) {
-    return extractMinSsrcStat(peerConnectionLog, statName, 'video');
-}
-
-function extractMinAudioStat(peerConnectionLog, statName) {
-    return extractMinSsrcStat(peerConnectionLog, statName, 'audio');
-}
-
-// might not be useful for things like frameWidth/Height which
-// have discrete values. mode might be better.
-function extractMeanSsrcStat(peerConnectionLog, statName, mediaType) {
-    var sum = 0;
-    var count = 0;
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
-                    var t = parseInt(report[statName], 10);
-                    sum += t;
-                    count++;
-                }
-            });
-        }
-    }
-    return count > 0 ? Math.round(sum / count) : undefined;
-}
-
-function extractMeanVideoStat(peerConnectionLog, statName) {
-    return extractMeanSsrcStat(peerConnectionLog, statName, 'video');
-}
-
-function extractMeanAudioStat(peerConnectionLog, statName) {
-    return extractMeanSsrcStat(peerConnectionLog, statName, 'audio');
-}
-
-function wasVideoStatEverTrue(peerConnectionLog, statName) {
-    var found = false;
-    var wasTrue = false;
-    for (var i = 0; i < peerConnectionLog.length && !wasTrue; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report[statName]) {
-                    found = true;
-                    if (report[statName] === 'true') wasTrue = true;
-                }
-            });
-        }
-    }
-    return found ? wasTrue : undefined;
-}
-
-// mode, better suited for things with discrete distributions like
-// frame width/height
-function extractMostCommonVideoStat(peerConnectionLog, statName) {
-    var modes = {};
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report[statName]) {
-                    var t = parseInt(report[statName], 10);
-                    if (!modes[t]) modes[t] = 0;
-                    modes[t]++;
-                }
-            });
-        }
-    }
-    var mode = undefined;
-    var max = -1;
-    Object.keys(modes).forEach(function(key) {
-        if (modes[key] > max) {
-            max = modes[key];
-            mode = parseInt(key, 10);
-        }
-    });
-    return mode;
-}
-
 // determine mode (most common) element in a series.
 function mode(series) {
     var modes = {};
@@ -1229,36 +1104,14 @@ module.exports = {
         return getCodec(peerConnectionLog, 'audio', 'recv');
     },
 
-    // mean audio level sent. Between 0 and 1
-    statsMeanAudioLevel: function(client, peerConnectionLog) {
-        var audioLevels = {};
-        peerConnectionLog.forEach(function(entry) {
-            if (entry.type !== 'getStats') return;
-            var statsReport = entry.value;
-            // look for type track, remoteSource: false, audioLevel (0..1)
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'track' && report.remoteSource === false && report.audioLevel !== undefined) {
-                    if (!audioLevels[id]) audioLevels[id] = [];
-                    audioLevels[id].push(report.audioLevel);
-                }
-            });
-        });
-        var means = Object.keys(audioLevels).map(function(id) {
-            return audioLevels[id].reduce(function(a, b) {
-                return a + b;
-            }, 0) / (audioLevels[id].length || 1);
-        });
-        // TODO: support multiple local streams?
-        if (means.length) {
-            return means[0];
-        }
-        return 0;
-    },
-
-    // mean RTT of the selected candidate pair.
-    statsMeanRoundTripTime: function(client, peerConnectionLog) {
+    // mean RTT, send and recv bitrate of the active candidate pair
+    statsMean: function(client, peerConnectionLog) {
+        var feature = {};
         var rtts = [];
+        var recv = [];
+        var send = [];
+        var lastStatsReport;
+        var lastTime;
         peerConnectionLog.forEach(function(entry) {
             if (entry.type !== 'getStats') return;
             var statsReport = entry.value;
@@ -1269,70 +1122,41 @@ module.exports = {
                     rtts.push(report.roundTripTime);
                 }
             });
+            if (lastStatsReport) {
+                Object.keys(statsReport).forEach(function(id) {
+                    var report = statsReport[id];
+                    var bitrate;
+                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
+                        bitrate = 8 * (report.bytesReceived - lastStatsReport[id].bytesReceived) / (entry.time - lastTime);
+                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                        if (bitrate > 0) {
+                            recv.push(bitrate);
+                        }
+                    }
+                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
+                        bitrate = 8 * (report.bytesSent - lastStatsReport[id].bytesSent) / (entry.time - lastTime);
+                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                        if (bitrate > 0) {
+                            send.push(bitrate);
+                        }
+                    }
+                });
+            }
+            lastStatsReport = statsReport;
+            lastTime = entry.time;
         });
-        return Math.floor(rtts.reduce(function(a, b) {
+
+        feature['roundTripTime'] = Math.floor(rtts.reduce(function(a, b) {
             return a + b;
         }, 0) / (rtts.length || 1));
-    },
-
-    // mean recv bitrate
-    // TODO: only when receiving tracks? not really interested in rtcp
-    statsMeanReceivingBitrate: function(client, peerConnectionLog) {
-        var bitrates = [];
-        var lastStatsReport;
-        var lastTime;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            if (lastStatsReport) {
-                Object.keys(statsReport).forEach(function(id) {
-                    var report = statsReport[id];
-                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
-                        var bitrate = 8 * (report.bytesReceived - lastStatsReport[id].bytesReceived) / (peerConnectionLog[i].time - lastTime);
-                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                        if (bitrate > 0) {
-                            bitrates.push(bitrate);
-                        }
-                    }
-                });
-            }
-            lastStatsReport = statsReport;
-            lastTime = peerConnectionLog[i].time;
-        }
-        return Math.floor(bitrates.reduce(function(a, b) {
+        feature['receivingBitrate'] = Math.floor(recv.reduce(function(a, b) {
             return a + b;
-        }, 0) / (bitrates.length || 1));
-    },
-
-    // mean send bitrate
-    // TODO: only when sending tracks? not really interested in rtcp
-    statsMeanSendingBitrate: function(client, peerConnectionLog) {
-        var bitrates = [];
-        var lastStatsReport;
-        var lastTime;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            if (lastStatsReport) {
-                Object.keys(statsReport).forEach(function(id) {
-                    var report = statsReport[id];
-                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
-                        var bitrate = 8 * (report.bytesSent - lastStatsReport[id].bytesSent) / (peerConnectionLog[i].time - lastTime);
-                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                        if (bitrate > 0) {
-                            bitrates.push(bitrate);
-                        }
-                    }
-                });
-            }
-            lastStatsReport = statsReport;
-            lastTime = peerConnectionLog[i].time;
-        }
-        return Math.floor(bitrates.reduce(function(a, b) {
+        }, 0) / (recv.length || 1));
+        feature['sendingBitrate'] = Math.floor(send.reduce(function(a, b) {
             return a + b;
-        }, 0) / (bitrates.length || 1));
+        }, 0) / (send.length || 1));
+        return feature;
     },
-
 
     firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
@@ -1558,95 +1382,6 @@ module.exports = {
         return feature;
     }
 };
-
-// frame rate is not discrete, so mode does not make sense.
-['googFrameRateInput', 'googFrameRateSent', 'googFrameRateReceived', 'googFrameRateOutput'].forEach(function(stat) {
-    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, stat);
-    };
-    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, stat);
-    };
-    module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMeanVideoStat(peerConnectionLog, stat);
-    };
-});
-
-// discrete values, mean does not make sense but mode does
-['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
-   'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
-    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, stat);
-    };
-    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, stat);
-    };
-    module.exports['mode' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMostCommonVideoStat(peerConnectionLog, stat);
-    };
-});
-
-// googMinPlayoutDelayMs -- may be used to detect desync between audio and video
-//          Minimum playout delay (used for lip-sync). This is the minimum delay required
-//          to sync with audio. Not included in  VideoCodingModule::Delay()
-//          Defaults to 0 ms.
-// for these stats, mode does not make sense
-['googCurrentDelayMs', 'googJitterBufferMs', 'googMinPlayoutDelayMs', 'googTargetDelayMs'].forEach(function(stat) {
-    module.exports['max' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMaxVideoStat(peerConnectionLog, stat);
-    };
-    // min seem to be 0?
-    module.exports['min' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMinVideoStat(peerConnectionLog, stat);
-    };
-    module.exports['mean' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMeanVideoStat(peerConnectionLog, stat);
-    };
-});
-
-['googCpuLimitedResolution', 'googViewLimitedResolution', 'googBandwidthLimitedResolution'].forEach(function(stat) {
-    module.exports['was' + stat[0].toUpperCase() + stat.substr(1) + 'EverTrue'] = function(client, peerConnectionLog) {
-        return wasVideoStatEverTrue(peerConnectionLog, stat);
-    };
-});
-
-// calculate central moment of video jitter, assmuning it is a random variable.
-['googJitterBufferMs', 'googRtt'].forEach(function(stat) {
-    module.exports['variance' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 2);
-    };
-    module.exports['skewness' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 3);
-    };
-    module.exports['kurtosis' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractCentralMomentFromVideoStat(peerConnectionLog, stat, 4);
-    };
-});
-
-// calculate central moment of audio jitter, assmuning it is a random variable.
-// receiver-side stats!
-['googJitterBufferMs', 'googJitterReceived', 'googPreferredJitterBufferMs'].forEach(function(stat) {
-    module.exports['maxAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMaxAudioStat(peerConnectionLog, stat);
-    };
-    // min seem to be 0?
-    module.exports['minAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMinAudioStat(peerConnectionLog, stat);
-    };
-    module.exports['meanAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractMeanAudioStat(peerConnectionLog, stat);
-    };
-
-    module.exports['varianceAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 2);
-    };
-    module.exports['skewnessAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 3);
-    };
-    module.exports['kurtosisAudio' + stat[0].toUpperCase() + stat.substr(1)] = function(client, peerConnectionLog) {
-        return extractCentralMomentFromAudioStat(peerConnectionLog, stat, 4);
-    };
-});
 
 ['audio', 'video'].forEach(function(kind) {
     ['send', 'recv'].forEach(function(direction) {
