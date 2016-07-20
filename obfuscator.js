@@ -7,14 +7,12 @@ function obfuscateIP(ip) {
     if (ip.indexOf('[') === 0) { // IPv6
         return '::1';
     }
-    if (ip.indexOf('192.168.') === 0) {
-        return '192.168.x.x';
-    } else if (ip.indexOf('172.16.') === 0) {
-        return '172.16.x.x';
-    } else if (ip.indexOf('10.') === 0) {
-        return '10.x.x.x';
+    var parts = ip.split('.');
+    if (parts.length === 4) {
+        parts[3] = 'x';
+        return parts.join('.');
     } else {
-        return '0.0.0.0';
+        return ip;
     }
 }
 
