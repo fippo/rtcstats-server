@@ -1104,9 +1104,14 @@ module.exports = {
         return getCodec(peerConnectionLog, 'audio', 'recv');
     },
 
-    // mean RTT of the selected candidate pair.
-    statsMeanRoundTripTime: function(client, peerConnectionLog) {
+    // mean RTT, send and recv bitrate of the active candidate pair
+    statsMean: function(client, peerConnectionLog) {
+        var feature = {};
         var rtts = [];
+        var recv = [];
+        var send = [];
+        var lastStatsReport;
+        var lastTime;
         peerConnectionLog.forEach(function(entry) {
             if (entry.type !== 'getStats') return;
             var statsReport = entry.value;
@@ -1117,70 +1122,41 @@ module.exports = {
                     rtts.push(report.roundTripTime);
                 }
             });
+            if (lastStatsReport) {
+                Object.keys(statsReport).forEach(function(id) {
+                    var report = statsReport[id];
+                    var bitrate;
+                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
+                        bitrate = 8 * (report.bytesReceived - lastStatsReport[id].bytesReceived) / (entry.time - lastTime);
+                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                        if (bitrate > 0) {
+                            recv.push(bitrate);
+                        }
+                    }
+                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
+                        bitrate = 8 * (report.bytesSent - lastStatsReport[id].bytesSent) / (entry.time - lastTime);
+                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+                        if (bitrate > 0) {
+                            send.push(bitrate);
+                        }
+                    }
+                });
+            }
+            lastStatsReport = statsReport;
+            lastTime = entry.time;
         });
-        return Math.floor(rtts.reduce(function(a, b) {
+
+        feature['roundTripTime'] = Math.floor(rtts.reduce(function(a, b) {
             return a + b;
         }, 0) / (rtts.length || 1));
-    },
-
-    // mean recv bitrate
-    // TODO: only when receiving tracks? not really interested in rtcp
-    statsMeanReceivingBitrate: function(client, peerConnectionLog) {
-        var bitrates = [];
-        var lastStatsReport;
-        var lastTime;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            if (lastStatsReport) {
-                Object.keys(statsReport).forEach(function(id) {
-                    var report = statsReport[id];
-                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
-                        var bitrate = 8 * (report.bytesReceived - lastStatsReport[id].bytesReceived) / (peerConnectionLog[i].time - lastTime);
-                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                        if (bitrate > 0) {
-                            bitrates.push(bitrate);
-                        }
-                    }
-                });
-            }
-            lastStatsReport = statsReport;
-            lastTime = peerConnectionLog[i].time;
-        }
-        return Math.floor(bitrates.reduce(function(a, b) {
+        feature['receivingBitrate'] = Math.floor(recv.reduce(function(a, b) {
             return a + b;
-        }, 0) / (bitrates.length || 1));
-    },
-
-    // mean send bitrate
-    // TODO: only when sending tracks? not really interested in rtcp
-    statsMeanSendingBitrate: function(client, peerConnectionLog) {
-        var bitrates = [];
-        var lastStatsReport;
-        var lastTime;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            if (lastStatsReport) {
-                Object.keys(statsReport).forEach(function(id) {
-                    var report = statsReport[id];
-                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
-                        var bitrate = 8 * (report.bytesSent - lastStatsReport[id].bytesSent) / (peerConnectionLog[i].time - lastTime);
-                        // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                        if (bitrate > 0) {
-                            bitrates.push(bitrate);
-                        }
-                    }
-                });
-            }
-            lastStatsReport = statsReport;
-            lastTime = peerConnectionLog[i].time;
-        }
-        return Math.floor(bitrates.reduce(function(a, b) {
+        }, 0) / (recv.length || 1));
+        feature['sendingBitrate'] = Math.floor(send.reduce(function(a, b) {
             return a + b;
-        }, 0) / (bitrates.length || 1));
+        }, 0) / (send.length || 1));
+        return feature;
     },
-
 
     firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
