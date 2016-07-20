@@ -41,11 +41,11 @@ class ProcessQueue {
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
         });
-        p.on('error', () {
+        p.on('error', () => {
             this.numProc--;
             console.log('failed to spawn, rescheduling', clientid, this.numProc);
             this.q.push(clientid); // do not immediately retry
-        }
+        });
         this.numProc++;
         console.log('process Q:', this.numProc);
     }
