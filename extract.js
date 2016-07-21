@@ -30,11 +30,13 @@ var statsMangler = require('./getstats-mangle');
 function dump(url, client, clientid, data) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
-    var total = 0;
-    Object.keys(client.peerConnections).forEach(function(id) {
-        total += client.peerConnections[id].length;
-    });
-    console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
+    if (!isProduction) {
+        var total = 0;
+        Object.keys(client.peerConnections).forEach(function(id) {
+            total += client.peerConnections[id].length;
+        });
+        console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
+    }
     if (isProduction) {
         Store.put(clientid, data);
     }
@@ -55,12 +57,16 @@ function generateFeatures(url, client, clientid) {
                 if (typeof feature === 'object') {
                     Object.keys(feature).forEach(function(subname) {
                         feature[subname] = safeFeature(feature[subname]);
-                        console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                        if (!isProduction) {
+                            console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                        }
                         clientFeatures[fname + capitalize(subname)] = feature[subname];
                     });
                 }  else {
                     feature = safeFeature(feature);
-                    console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                    if (!isProduction) {
+                        console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                    }
                     clientFeatures[fname] = feature;
                 }
             }
@@ -77,12 +83,16 @@ function generateFeatures(url, client, clientid) {
                     if (typeof feature === 'object') {
                         Object.keys(feature).forEach(function(subname) {
                             feature[subname] = safeFeature(feature[subname]);
-                            console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                            if (!isProduction) {
+                                console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                            }
                             connectionFeatures[fname + capitalize(subname)] = feature[subname];
                         });
                     }  else {
                         feature = safeFeature(feature);
-                        console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
+                        if (!isProduction) {
+                            console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
+                        }
                         connectionFeatures[fname] = feature;
                     }
                 }
@@ -98,8 +108,11 @@ function generateFeatures(url, client, clientid) {
 var clientid = process.argv[2];
 var path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
+    // remove the file
+    fs.unlink(path, function() {
+        // we're good...
+    });
     if (!err) {
-
         var baseStats = {};
         var lines = data.split('\n');
         var client = JSON.parse(lines.shift());
@@ -145,11 +158,8 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
                 }
             }
         });
+
         dump(client.url, client, clientid, data);
         generateFeatures(client.url, client, clientid);
     }
-    // remove the file
-    fs.unlink(path, function() {
-        // we're good...
-    });
 });
