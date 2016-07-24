@@ -478,7 +478,7 @@ module.exports = {
 
     // number of peerConnections created
     numberOfPeerConnections: function(client) {
-        return client.peerConnections.length;
+        return Object.keys(client.peerConnections).length;
     },
 
     // client and conference identifiers, specified as optional peerconnection constraints
