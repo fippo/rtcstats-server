@@ -903,6 +903,20 @@ module.exports = {
     gatheringTimeTURNTLS: function(client, peerConnectionLog) {
         return gatheringTimeTURN('tls', client, peerConnectionLog);
     },
+
+    // which turn server was used? returns the relay address.
+    relayAddress: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onicecandidate') {
+                var cand = peerConnectionLog[i].value;
+                if (cand === null) return; // give up
+                if (cand && cand.candidate.indexOf('relay') !== -1) {
+                    return cand.candidate.split(' ')[4];
+                }
+            }
+        }
+    },
+
     // was there a remote candidate TURN added?
     // that is about as much as we can tell unless we snoop onto the
     // peerconnection and determine remote browser.
