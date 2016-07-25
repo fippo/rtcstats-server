@@ -17,6 +17,10 @@ It is advisable to increase the dynamodb read capacity for the duration of the i
 ```
 alter table features_import rename to features_old
 ```
+or add it to a permanent table:
+```
+insert into features_permanent (select * from features_import);
+```
 
 ## Load errors
 ```
