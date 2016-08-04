@@ -269,5 +269,6 @@ CREATE TABLE features_import (
     videoRecvGoogFrameWidthReceivedMax real,
     videoRecvGoogFrameWidthReceivedMin real,
     videoRecvGoogFrameWidthReceivedMode real,
-    relayaddress character varying(255)
+    relayaddress character varying(255),
+    notsendingaudio boolean
 );

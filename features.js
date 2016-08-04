@@ -722,6 +722,20 @@ module.exports = {
         }
     },
 
+    // detects the osx audio bug which manifests as "audio seems to work but
+    // no audio is ever sent (which manifests as bytesSent always being 0)
+    notsendingaudio: function(client, peerConnectionLog) {
+        var addedAudioStream = false;
+        var audioTrack = extractTrack(peerConnectionLog, 'audio', 'send');
+        if (!audioTrack) return false;
+        var count = 0;
+        for (var i = 0; i < audioTrack.length; i++) {
+            if (parseInt(audioTrack[i].bytesSent, 10) > 0) return false;
+            count++;
+        }
+        return count > 0;
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
