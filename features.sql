@@ -280,5 +280,11 @@ CREATE TABLE features_import (
     setremotedescriptionfailure character varying(255),
     addicecandidatefailure character varying(255),
     stoptime bigint,
-    lifetime integer
+    lifetime integer,
+    locationLon real,
+    locationLat real,
+    locationLonLat character varying(255),
+    locationContinent character varying(16),
+    locationCountry character varying(255),
+    locationCity character varying(255) 
 );

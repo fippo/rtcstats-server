@@ -5,7 +5,8 @@
   "main": "websocket.js",
   "scripts": {
     "test": "eslint *.js && node test/client.js",
-    "start": "NODE_ENV=production node app.js"
+    "start": "NODE_ENV=production node app.js",
+    "postinstall": "wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz && gunzip GeoLite2-City.mmdb.gz"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
     "config": "^1.17.1",
     "js-yaml": "^3.4.6",
     "lodash": "^4.1.0",
+    "maxmind": "^1.3.0",
     "pem": "^1.8.1",
     "platform": "https://github.com/bestiejs/platform.js.git",
     "sdp": "^1.0.0",

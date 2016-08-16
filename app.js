@@ -8,6 +8,9 @@ var child_process = require('child_process');
 
 var WebSocketServer = require('ws').Server;
 
+const maxmind = require('maxmind');
+const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
+
 var wss = null;
 
 var server;
@@ -109,6 +112,21 @@ function run(keys) {
         };
         tempStream.write(JSON.stringify(meta) + '\n');
 
+        var forwardedFor = client.upgradeReq.headers['x-forwarded-for'];
+        if (forwardedFor) {
+            process.nextTick(function() {
+                var city = cityLookup.get(forwardedFor);
+                if (tempStream) {
+                    tempStream.write(JSON.stringify({
+                        0: 'location',
+                        1: null,
+                        2: city,
+                        time: Date.now()
+                        }) + '\n'
+                    );
+                }
+            });
+        }
 
         console.log('connected', ua, referer);
         client.on('message', function (msg) {

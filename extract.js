@@ -126,6 +126,9 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
                 var time = new Date(data.time)
                 delete data.time;
                 switch(data[0]) {
+                case 'location':
+                    client.location = data[2];
+                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
