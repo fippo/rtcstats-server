@@ -722,6 +722,32 @@ module.exports = {
         }
     },
 
+    // detects the osx audio bug which manifests as "audio seems to work but
+    // no audio is ever sent (which manifests as bytesSent always being 0)
+    //  https://bugs.chromium.org/p/webrtc/issues/detail?id=4799
+    notsendingaudio: function(client, peerConnectionLog) {
+        var track = extractTrack(peerConnectionLog, 'audio', 'send');
+        if (!(track && track.length)) return false;
+        var count = 0;
+        for (var i = 0; i < track.length; i++) {
+            if (parseInt(track[i].bytesSent, 10) > 0) return false;
+            count++;
+        }
+        return count > 0;
+    },
+    // detect cam being used by another application (no bytes sent for video)
+    //  https://bugs.chromium.org/p/chromium/issues/detail?id=403710#c7
+    notsendingvideo: function(client, peerConnectionLog) {
+        var track = extractTrack(peerConnectionLog, 'video', 'send');
+        if (!(track && track.length)) return false;
+        var count = 0;
+        for (var i = 0; i < track.length; i++) {
+            if (parseInt(track[i].bytesSent, 10) > 0) return false;
+            count++;
+        }
+        return count > 0;
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
