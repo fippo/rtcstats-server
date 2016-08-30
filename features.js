@@ -748,6 +748,29 @@ module.exports = {
         return count > 0;
     },
 
+    // check whether video is received after 10 seconds
+    receivingvideo10s: function(client, peerConnectionLog) {
+        var count = 0;
+        var receivedVideo = undefined;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                if (count++ === 10) {
+                    Object.keys(peerConnectionLog[i].value).forEach(function(id) {
+                        var report = peerConnectionLog[i].value[id];
+                        if (report.type === 'ssrc' && report.mediaType === 'video' && id.indexOf('_recv')) {
+                            receivedVideo = {
+                                packetsReceived: report.packetsReceived,
+                                frameWidth: report.frameWidth,
+                                frameHeight: report.frameHeight
+                            };
+                        }
+                    });
+                    return receivedVideo;
+                }
+            }
+        }
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
