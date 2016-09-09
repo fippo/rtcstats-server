@@ -1,5 +1,4 @@
 CREATE TABLE features_import (
-    browsermajorversion character varying(255),
     browserUserAgent character varying(1023),
     browsername character varying(255),
     browsernameos character varying(255),
@@ -274,5 +273,6 @@ CREATE TABLE features_import (
     notsendingvideo boolean,
     receivingvideo10sPacketsReceived real,
     receivingvideo10sFrameWidth real,
-    receivingvideo10sFrameHeight real
+    receivingvideo10sFrameHeight real,
+    browsermajorversion character varying(255)
 );
