@@ -514,6 +514,15 @@ module.exports = {
         }
     },
 
+    // when did the session start
+    startTime: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'create') {
+                return new Date(peerConnectionLog[i].time).getTime();
+            }
+        }
+    },
+
     // the webrtc platform type -- webkit or moz
     // TODO: edge, mobile platforms?
     browserType: function(client, peerConnectionLog) {
