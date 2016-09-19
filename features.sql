@@ -275,5 +275,6 @@ CREATE TABLE features_import (
     receivingvideo10sFrameWidth real,
     receivingvideo10sFrameHeight real,
     browsermajorversion integer,
-    startTime bigint
+    startTime bigint,
+    icerestartsuccess boolean
 );
