@@ -13,6 +13,12 @@ dynamodb:
     region:
     table:
 
+firehose:
+    accessKeyId:
+    secretAccessKey:
+    region:
+    stream:
+
 appenders:
     - type: file
       layout:
@@ -27,3 +33,8 @@ appenders:
               type: pattern
               pattern: "%d{ISO8601}   %5p [%t]    %m"
           filename: rtcstats-server_error
+
+github:
+    client_id: GITHUB_CLIENT_ID
+    client_secret: GITHUB_SECRET
+    callback_url: GITHUB_CALLBACK_URL

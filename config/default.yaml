@@ -3,7 +3,7 @@ server:
 
 s3:
     accessKeyId:
-    secretAccessKey:
+    secretAccessKey: 
     region:
     bucket:
 
@@ -12,6 +12,12 @@ dynamodb:
     secretAccessKey:
     region:
     table:
+
+firehose:
+    accessKeyId:
+    secretAccessKey:
+    region:
+    stream:
 
 appenders:
     - type: file
