@@ -833,6 +833,24 @@ module.exports = {
         return iceRestart;
     },
 
+    ICERestartSuccess: function(client, peerConnectionLog) {
+        var i = 0;
+        var iceRestart = false;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'createOffer' && peerConnectionLog[i].value && peerConnectionLog[i].value.iceRestart) {
+                iceRestart = true;
+                break;
+            }
+        }
+        if (iceRestart) {
+            for (; i < peerConnectionLog.length; i++) {
+                if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
+                    (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) return true;
+            }
+        }
+        return false;
+    },
+
     // was the signaling state stable at least once?
     signalingStableAtLeastOnce: function(client, peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
