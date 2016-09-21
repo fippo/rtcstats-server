@@ -13,6 +13,12 @@ dynamodb:
     region:
     table:
 
+firehose:
+    accessKeyId:
+    secretAccessKey:
+    region:
+    stream:
+
 appenders:
     - type: file
       layout:

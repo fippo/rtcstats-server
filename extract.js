@@ -2,11 +2,13 @@ var fs = require('fs');
 var config = require('config');
 
 var Store = require('./store')({
-  s3: config.get('s3')
+  s3: config.get('s3'),
 });
 var Database = require('./database')({
-  dynamodb: config.get('dynamodb')
+  dynamodb: config.get('dynamodb'),
+  firehose: config.get('firehose'),
 });
+
 var isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 function capitalize(str) {
