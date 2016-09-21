@@ -3,7 +3,7 @@ server:
 
 s3:
     accessKeyId:
-    secretAccessKey: 
+    secretAccessKey:
     region:
     bucket:
 
