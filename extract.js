@@ -9,7 +9,7 @@ var Database = require('./database')({
   firehose: config.get('firehose'),
 });
 
-var isProduction = true;// process.env.NODE_ENV && process.env.NODE_ENV === 'production';
+var isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
