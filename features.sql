@@ -113,8 +113,8 @@ CREATE TABLE features_import (
     numberofpeerconnections integer,
     pageurl character varying(4096),
     origin character varying(255),
-    peerconnectionaddicecandidatefailure boolean,
-    peerconnectionsetdescriptionfailure boolean,
+    addicecandidatefailure boolean,
+    setdescriptionfailure boolean,
     peeridentifier character varying(255),
     recvaudiocodec character varying(255),
     recvvideocodec character varying(255),
@@ -278,5 +278,7 @@ CREATE TABLE features_import (
     icerestartsuccess boolean,
     icerestartfollowedbysetremotedescription boolean,
     numberofinterfaces integer,
-    icerestartfollowedbyrelaycandidate boolean
+    icerestartfollowedbyrelaycandidate boolean,
+    peerconnectionsetlocaldescriptionfailure character varying(255),
+    peerconnectionsetremotedescriptionfailure character varying(255)
 );

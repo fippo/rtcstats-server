@@ -901,29 +901,33 @@ module.exports = {
     },
 
     // was there a peerconnection api failure?
-    peerConnectionSetDescriptionFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            switch(entry.type) {
-                case 'SetLocalDescriptionOnFailure':
-                case 'SetRemoteDescriptionOnFailure':
-                    return true;
+    setDescriptionFailure: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'SetLocalDescriptionOnFailure' ||
+              peerConnectionLog[i].type === 'SetRemoteDescriptionOnFailure') {
+                return true;
             }
-            return false;
-        }).length > 0;
+        }
+        return false;
     },
-    peerConnectionSetLocalDescriptionFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'SetLocalDescriptionOnFailure';
-        }).length > 0;
+
+    setLocalDescriptionFailure: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'SetLocalDescriptionOnFailure') {
+                return peerConnectionLog[i].value;
+            }
+        }
     },
-    peerConnectionSetRemoteDescriptionFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'SetRemoteDescriptionOnFailure';
-        }).length > 0;
+    setRemoteDescriptionFailure: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'SetRemoteDescriptionOnFailure') {
+                return peerConnectionLog[i].value;
+            }
+        }
     },
 
     // was there an addIceCandidate failure
-    peerConnectionAddIceCandidateFailure: function(client, peerConnectionLog) {
+    addIceCandidateFailure: function(client, peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
             return entry.type === 'AddIceCandidateOnFailure';
         }).length > 0;
