@@ -851,6 +851,25 @@ module.exports = {
         return false;
     },
 
+    // was setRemoteDescription called after the ice restart? If not the peer
+    // went away.
+    ICERestartFollowedBySetRemoteDescription: function(client, peerConnectionLog) {
+        var i = 0;
+        var iceRestart = false;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'createOffer' && peerConnectionLog[i].value && peerConnectionLog[i].value.iceRestart) {
+                iceRestart = true;
+                break;
+            }
+        }
+        if (iceRestart) {
+            for (; i < peerConnectionLog.length; i++) {
+                if (peerConnectionLog[i].type === 'setRemoteDescription') return true;
+            }
+            return false;
+        }
+    },
+
     // was the signaling state stable at least once?
     signalingStableAtLeastOnce: function(client, peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
