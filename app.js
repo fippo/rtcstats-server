@@ -3,12 +3,8 @@ var fs = require('fs');
 var config = require('config');
 var uuid = require('uuid');
 var obfuscate = require('./obfuscator');
-var express = require('express');
 var os = require('os');
 var child_process = require('child_process');
-
-var WebSocketServer = require('ws').Server;
-var app = require('./web/server')();
 
 var WebSocketServer = require('ws').Server;
 
@@ -55,7 +51,7 @@ var q = new ProcessQueue();
 function setupWorkDirectory() {
     try {
         fs.readdirSync(tempPath).forEach(function(fname) {
-            fs.unlinkSync(tempPath + '/' + fname); 
+            fs.unlinkSync(tempPath + '/' + fname);
         });
         fs.rmdirSync(tempPath);
     } catch(e) {
@@ -67,15 +63,13 @@ function setupWorkDirectory() {
 function run(keys) {
     setupWorkDirectory();
 
-    app.use('/static', express.static(__dirname + '/static'));
-
     if (keys === undefined) {
-      server = require('http').Server(app);
+      server = require('http').Server(() => { });
     } else {
       server = require('https').Server({
           key: keys.serviceKey,
           cert: keys.certificate,
-      }, app);
+      }, () => { });
     }
 
     server.listen(config.get('server').port);
