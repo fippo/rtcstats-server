@@ -91,6 +91,7 @@ CREATE TABLE features_import (
     gatheredrfc1918addressPrefix16 boolean,
     gatheredrfc1918addressPrefix12 boolean,
     gatheredrfc1918addressPrefix10 boolean,
+    numberOfInterfaces integer,
     gatheringtime integer,
     gatheringtimeturntcp integer,
     gatheringtimeturntls integer,
