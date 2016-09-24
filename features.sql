@@ -277,5 +277,6 @@ CREATE TABLE features_import (
     starttime bigint,
     icerestartsuccess boolean,
     icerestartfollowedbysetremotedescription boolean,
-    numberofinterfaces integer
+    numberofinterfaces integer,
+    icerestartfollowedbyrelaycandidate boolean
 );
