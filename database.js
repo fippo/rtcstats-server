@@ -14,7 +14,7 @@ function lower(obj) {
 
 module.exports = function(config) {
   var dynamodb;
-  if (config.dynamodb) {
+  if (config.dynamodb && config.dynamodb.table) {
     AWS.config = config.dynamodb;
     dynamodb = new AWS.DynamoDB.DocumentClient();
   } else {
@@ -22,7 +22,7 @@ module.exports = function(config) {
   }
 
   var firehose;
-  if (config.firehose) {
+  if (config.firehose && config.firehose.stream) {
     AWS.config = config.firehose;
     firehose = new AWS.Firehose();
   } else {
