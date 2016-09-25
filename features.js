@@ -9,18 +9,6 @@ function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
 }
 
-function filterIceConnectionStateChange(peerConnectionLog) {
-    return peerConnectionLog.filter(function(entry) {
-        return entry.type === 'oniceconnectionstatechange';
-    });
-}
-
-function filterSignalingStateChange(peerConnectionLog) {
-    return peerConnectionLog.filter(function(entry) {
-        return entry.type === 'onsignalingstatechange';
-    });
-}
-
 function getPeerConnectionConfig(peerConnectionLog) {
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'create') {
@@ -670,21 +658,32 @@ module.exports = {
 
     // was an ice failure detected.
     ICEFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
-        }).length > 0;
+        var i = 0;
+        var iceRestart = false;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && peerConnectionLog[i].type === 'failed') {
+                return true;
+            }
+        }
+        return false;
     },
 
     // was an ice failure after a successful connection detected.
     ICEFailureSubsequent: function(client, peerConnectionLog) {
-        var log = filterIceConnectionStateChange(peerConnectionLog);
-        var failures = log.filter(function(entry) {
-            return entry.type === 'oniceconnectionstatechange' && entry.value === 'failed';
-        }).length;
-        if (failures > 0) {
-            return log.filter(function(entry) {
-                return entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed');
-            }).length > 0;
+        var i = 0;
+        var connected = false;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) {
+                connected = true;
+                break;
+            }
+        }
+        if (connected) {
+            for (; i < peerConnectionLog.length; i++) {
+                if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && peerConnectionLog[i].value === 'failed') {
+                    return true;
+                }
+            }
         }
         return false;
     },
