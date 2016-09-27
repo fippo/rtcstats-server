@@ -97,7 +97,6 @@ CREATE TABLE features_import (
     gatheringtimeturnudp integer,
     getusermediaerror character varying(255),
     getusermediasuccess boolean,
-    getusermediasuccessnotreally boolean,
     hadremoteturncandidate boolean,
     iceconnectedorcompleted boolean,
     icefailure boolean,
