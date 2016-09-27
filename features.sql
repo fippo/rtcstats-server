@@ -91,7 +91,6 @@ CREATE TABLE features_import (
     gatheredrfc1918addressprefix16 boolean,
     gatheredrfc1918addressprefix12 boolean,
     gatheredrfc1918addressprefix10 boolean,
-    numberofinterfaces integer,
     gatheringtime integer,
     gatheringtimeturntcp integer,
     gatheringtimeturntls integer,
@@ -278,5 +277,6 @@ CREATE TABLE features_import (
     browsermajorversion integer,
     starttime bigint,
     icerestartsuccess boolean,
-    icerestartfollowedbysetremotedescription boolean
+    icerestartfollowedbysetremotedescription boolean,
+    numberofinterfaces integer
 );
