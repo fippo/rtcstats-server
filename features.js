@@ -852,6 +852,30 @@ module.exports = {
         }
     },
 
+    // was there a relay candidate gathered after the ice restart?
+    ICERestartFollowedByRelayCandidate: function(client, peerConnectionLog) {
+        var i = 0;
+        var iceRestart = false;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'createOffer' && peerConnectionLog[i].value && peerConnectionLog[i].value.iceRestart) {
+                iceRestart = true;
+                break;
+            }
+        }
+        if (iceRestart) {
+            for (; i < peerConnectionLog.length; i++) {
+                if (peerConnectionLog[i].type === 'onicecandidate') {
+                    var cand = peerConnectionLog[i].value;
+                    if (cand === null) return false; // give up
+                    if (cand && cand.candidate.indexOf('relay') !== -1) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    },
+
     // was the signaling state stable at least once?
     signalingStableAtLeastOnce: function(client, peerConnectionLog) {
         return peerConnectionLog.filter(function(entry) {
