@@ -900,17 +900,7 @@ module.exports = {
         return max;
     },
 
-    // was there a peerconnection api failure?
-    setDescriptionFailure: function(client, peerConnectionLog) {
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'SetLocalDescriptionOnFailure' ||
-              peerConnectionLog[i].type === 'SetRemoteDescriptionOnFailure') {
-                return true;
-            }
-        }
-        return false;
-    },
-
+    // was there a setLocalDescription failure?
     setLocalDescriptionFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'SetLocalDescriptionOnFailure') {
@@ -918,6 +908,8 @@ module.exports = {
             }
         }
     },
+
+    // was there a setRemoteDescription failure?
     setRemoteDescriptionFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'SetRemoteDescriptionOnFailure') {
@@ -928,9 +920,11 @@ module.exports = {
 
     // was there an addIceCandidate failure
     addIceCandidateFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'AddIceCandidateOnFailure';
-        }).length > 0;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'AddIceCandidateOnFailure') {
+                return peerConnectionLog[i].value;
+            }
+        }
     },
 
     // how long did it take to gather all ice candidates?
