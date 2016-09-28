@@ -277,7 +277,7 @@ CREATE TABLE features_import (
     icerestartfollowedbysetremotedescription boolean,
     numberofinterfaces integer,
     icerestartfollowedbyrelaycandidate boolean,
-    localdescriptionfailure character varying(255),
+    setlocaldescriptionfailure character varying(255),
     setremotedescriptionfailure character varying(255),
     addicecandidatefailure character varying(255)
 );
