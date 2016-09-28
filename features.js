@@ -900,33 +900,31 @@ module.exports = {
         return max;
     },
 
-    // was there a peerconnection api failure?
-    peerConnectionSetDescriptionFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            switch(entry.type) {
-                case 'SetLocalDescriptionOnFailure':
-                case 'SetRemoteDescriptionOnFailure':
-                    return true;
+    // was there a setLocalDescription failure?
+    setLocalDescriptionFailure: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'SetLocalDescriptionOnFailure') {
+                return peerConnectionLog[i].value;
             }
-            return false;
-        }).length > 0;
+        }
     },
-    peerConnectionSetLocalDescriptionFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'SetLocalDescriptionOnFailure';
-        }).length > 0;
-    },
-    peerConnectionSetRemoteDescriptionFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'SetRemoteDescriptionOnFailure';
-        }).length > 0;
+
+    // was there a setRemoteDescription failure?
+    setRemoteDescriptionFailure: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'SetRemoteDescriptionOnFailure') {
+                return peerConnectionLog[i].value;
+            }
+        }
     },
 
     // was there an addIceCandidate failure
-    peerConnectionAddIceCandidateFailure: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'AddIceCandidateOnFailure';
-        }).length > 0;
+    addIceCandidateFailure: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'AddIceCandidateOnFailure') {
+                return peerConnectionLog[i].value;
+            }
+        }
     },
 
     // how long did it take to gather all ice candidates?
