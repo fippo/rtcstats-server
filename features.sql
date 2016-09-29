@@ -119,7 +119,6 @@ CREATE TABLE features_import (
     remotetype character varying(255),
     sendaudiocodec character varying(255),
     sendvideocodec character varying(255),
-    sendaudiorttnevergreaterzero boolean,
     sessionduration integer,
     signalingstableatleastonce boolean,
     srtpciphersuite character varying(255),
