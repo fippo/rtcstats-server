@@ -17,7 +17,7 @@ firehose:
     accessKeyId:
     secretAccessKey:
     region:
-    stream:
+    streams: # must be an array
 
 appenders:
     - type: file

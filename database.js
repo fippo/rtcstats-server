@@ -61,17 +61,19 @@ module.exports = function(config) {
       }
 
       if (firehose) {
-        firehose.putRecord({
-          DeliveryStreamName: config.firehose.stream, /* required */
-          Record: {
-            Data: JSON.stringify(lower(item))
-          },
-        }, function(err, data) {
-          if (err) {
-            console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
-          } else {
-            console.log("Successfully firehosed data");
-          }
+        config.firehose.streams.forEach(function (stream) {
+          firehose.putRecord({
+            DeliveryStreamName: stream, /* required */
+            Record: {
+              Data: JSON.stringify(lower(item))
+            },
+          }, function(err, data) {
+            if (err) {
+              console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
+            } else {
+              console.log("Successfully firehosed data");
+            }
+          });
         });
       }
     },
