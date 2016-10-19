@@ -278,5 +278,7 @@ CREATE TABLE features_import (
     icerestartfollowedbyrelaycandidate boolean,
     setlocaldescriptionfailure character varying(255),
     setremotedescriptionfailure character varying(255),
-    addicecandidatefailure character varying(255)
+    addicecandidatefailure character varying(255),
+    stoptime bigint,
+    lifetime integer
 );

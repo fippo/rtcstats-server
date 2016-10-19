@@ -493,6 +493,17 @@ module.exports = {
         }
     },
 
+    // when did the session end
+    stopTime: function(client, peerConnectionLog) {
+        return new Date(peerConnectionLog[peerConnectionLog.lenght - 1].time).getTime();
+    },
+
+    // how long did the peerconnection live?
+    // not necessarily connected which is different from session duration
+    lifeTime: function(client, peerConnectionLog) {
+        return new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime() - new Date(peerConnectionLog[0].time).getTime();
+    },
+
     // the webrtc platform type -- webkit or moz
     // TODO: edge, mobile platforms?
     browserType: function(client, peerConnectionLog) {
