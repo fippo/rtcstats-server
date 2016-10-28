@@ -73,6 +73,19 @@ function run(keys) {
     }
 
     server.listen(config.get('server').port);
+    server.on('request', function(request, response) {
+        // look at request.url
+        switch (request.url) {
+        case "/healthcheck":
+            response.writeHead(200);
+            response.end();
+            return;
+        default:
+            response.writeHead(404);
+            response.end();
+        }
+    });
+
     wss = new WebSocketServer({ server: server });
 
     wss.on('connection', function(client) {
