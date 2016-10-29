@@ -495,7 +495,7 @@ module.exports = {
 
     // when did the session end
     stopTime: function(client, peerConnectionLog) {
-        return new Date(peerConnectionLog[peerConnectionLog.lenght - 1].time).getTime();
+        return new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime();
     },
 
     // how long did the peerconnection live?
