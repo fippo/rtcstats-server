@@ -666,7 +666,7 @@ module.exports = {
         var i = 0;
         var iceRestart = false;
         for (; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && peerConnectionLog[i].type === 'failed') {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && peerConnectionLog[i].value === 'failed') {
                 return true;
             }
         }
