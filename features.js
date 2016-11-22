@@ -1513,6 +1513,13 @@ module.exports = {
             feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 4);
         });
         return feature;
+    },
+
+    userfeedback: function(client) {
+        if (!client.feedback) return;
+        var feature = {};
+        feature[client.feedback.mediaType] = client.feedback.score;
+        return feature;
     }
 };
 
