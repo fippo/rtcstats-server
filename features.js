@@ -1038,6 +1038,28 @@ module.exports = {
         }
     },
 
+    // which public address was used?
+    // either srflx or raddr from relay. Host is not considered (yet)
+    publicIPAddress: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onicecandidate') {
+                var cand = peerConnectionLog[i].value;
+                if (cand === null) return; // give up
+                if (cand && cand.candidate.indexOf('srflx') !== -1) {
+                    return cand.candidate.split(' ')[4];
+                }
+                if (cand && cand.candidate.indexOf('relay') !== -1) {
+                    var parts = cand.candidate.split(' ');
+                    for (var j = 8; j < parts.length; j += 2) {
+                        if (parts[j] === 'raddr') {
+                            return parts[j + 1];
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     // was there a remote candidate TURN added?
     // that is about as much as we can tell unless we snoop onto the
     // peerconnection and determine remote browser.

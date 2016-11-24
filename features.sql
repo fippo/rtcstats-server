@@ -286,5 +286,6 @@ CREATE TABLE features_import (
     locationLonLat character varying(255),
     locationContinent character varying(16),
     locationCountry character varying(255),
-    locationCity character varying(255) 
+    locationCity character varying(255),
+    publicipaddress character varying(255)
 );
