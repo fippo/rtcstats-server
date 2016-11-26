@@ -925,7 +925,7 @@ module.exports = {
     // was there a setLocalDescription failure?
     setLocalDescriptionFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'SetLocalDescriptionOnFailure') {
+            if (peerConnectionLog[i].type === 'setLocalDescriptionOnFailure') {
                 return peerConnectionLog[i].value;
             }
         }
@@ -934,7 +934,7 @@ module.exports = {
     // was there a setRemoteDescription failure?
     setRemoteDescriptionFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'SetRemoteDescriptionOnFailure') {
+            if (peerConnectionLog[i].type === 'setRemoteDescriptionOnFailure') {
                 return peerConnectionLog[i].value;
             }
         }
@@ -943,7 +943,7 @@ module.exports = {
     // was there an addIceCandidate failure
     addIceCandidateFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'AddIceCandidateOnFailure') {
+            if (peerConnectionLog[i].type === 'addIceCandidateOnFailure') {
                 return peerConnectionLog[i].value;
             }
         }
