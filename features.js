@@ -784,6 +784,28 @@ module.exports = {
         }
     },
 
+    // check whether audio is received after 10 seconds
+    receivingaudio10s: function(client, peerConnectionLog) {
+        var count = 0;
+        var receivedVideo = undefined;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'getStats') {
+                if (count++ === 10) {
+                    Object.keys(peerConnectionLog[i].value).forEach(function(id) {
+                        var report = peerConnectionLog[i].value[id];
+                        if (report.type === 'ssrc' && report.mediaType === 'audio' && id.indexOf('_recv')) {
+                            receivedAudio = {
+                                packetsReceived: report.packetsReceived,
+                                jitterbufferms: report.googJitterBufferMs
+                            };
+                        }
+                    });
+                    return receivedAudio;
+                }
+            }
+        }
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
