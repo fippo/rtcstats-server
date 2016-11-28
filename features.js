@@ -787,7 +787,7 @@ module.exports = {
     // check whether audio is received after 10 seconds
     receivingaudio10s: function(client, peerConnectionLog) {
         var count = 0;
-        var receivedVideo = undefined;
+        var receivedAudio = undefined;
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'getStats') {
                 if (count++ === 10) {
