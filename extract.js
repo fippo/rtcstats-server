@@ -129,6 +129,9 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
                 case 'location':
                     client.location = data[2];
                     break;
+                case 'userfeedback': // TODO: might be renamed
+                    client.feedback = data[2];
+                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
