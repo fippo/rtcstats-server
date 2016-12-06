@@ -4,7 +4,7 @@ var SDPUtils = require('sdp');
 
 // obfuscate ip, keeping address family intact.
 function obfuscateIP(ip) {
-    if (ip.indexOf('[') === 0) { // IPv6
+    if (ip.indexOf('[') === 0 || ip.indexOf(':') !== -1) { // IPv6
         return '::1';
     }
     var parts = ip.split('.');
