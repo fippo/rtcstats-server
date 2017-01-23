@@ -291,5 +291,6 @@ CREATE TABLE features_import (
     userfeedbackaudio integer,
     userfeedbackvideo integer,
     receivingaudio10spacketsreceived real,
-    receivingaudio10sjitterbufferms real
+    receivingaudio10sjitterbufferms real,
+    timeuntilreceivingvideo real
 );

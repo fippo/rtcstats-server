@@ -784,6 +784,34 @@ module.exports = {
         }
     },
 
+    // how long did it take until video arrived?
+    // in particular a keyframe which causes width and height to be set.
+    timeuntilreceivingvideo: function(client, peerConnectionLog) {
+        let timeConnected = false;
+        let timeReceived = false;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
+                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
+                }
+            }
+            if (peerConnectionLog[i].type === 'getStats') {
+                Object.keys(peerConnectionLog[i].value).forEach(function(id) {
+                    var report = peerConnectionLog[i].value[id];
+                    if (report.type === 'ssrc' && report.mediaType === 'video' && report.googFrameWidthReceived) {
+                        let width = parseInt(report.googFrameWidthReceived, 10);
+                        if (width > 0) {
+                            timeReceived = new Date(peerConnectionLog[i].time).getTime(); 
+                        }
+                    }
+                });
+            }
+            if (timeReceived) {
+                return timeReceived - timeConnected;
+            }
+        }
+    },
+
     // check whether audio is received after 10 seconds
     receivingaudio10s: function(client, peerConnectionLog) {
         var count = 0;
