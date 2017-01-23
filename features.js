@@ -1224,7 +1224,6 @@ module.exports = {
                 return endTime - startTime;
             }
         }
-        return -1;
     },
 
     // determine media types used in session.
