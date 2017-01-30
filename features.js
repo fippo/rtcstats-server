@@ -806,7 +806,7 @@ module.exports = {
                     }
                 });
             }
-            if (timeReceived) {
+            if (timeReceived && timeConnected) {
                 return timeReceived - timeConnected;
             }
         }
