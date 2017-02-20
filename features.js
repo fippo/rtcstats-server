@@ -1031,7 +1031,6 @@ module.exports = {
                 }
             }
         }
-        return false;
     },
 
     // was a local STUN candidate gathered?
@@ -1046,8 +1045,8 @@ module.exports = {
                 }
             }
         }
-        return false;
     },
+
     // was a local TURN/UDP relay candidate gathered?
     gatheredTURNUDP: function(client, peerConnectionLog) {
         return gatheringTimeTURN('udp', client, peerConnectionLog) !== undefined;
