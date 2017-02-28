@@ -988,6 +988,15 @@ module.exports = {
         }
     },
 
+    usingSimulcast: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'setLocalDescription') {
+                var value = peerConnectionLog[i].value;
+                return value && value.sdp && value.sdp.indexOf('a=ssrc-group:SIM') !== -1;
+            }
+        }
+    },
+
     // was there a setLocalDescription failure?
     setLocalDescriptionFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
