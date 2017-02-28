@@ -972,6 +972,22 @@ module.exports = {
         return max;
     },
 
+    firstRemoteStream: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'onaddstream') {
+                let value = peerConnectionLog[i].value;
+                let feature = {
+                    id: value.split(' ')[0]
+                };
+                value.split(' ')[1].split(',').forEach((kindAndTrack) => {
+                    let parts = kindAndTrack.split(':', 2);
+                    feature[parts[0]] = parts[1];
+                });
+                return feature;
+            }
+        }
+    },
+
     // was there a setLocalDescription failure?
     setLocalDescriptionFailure: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
