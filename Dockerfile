@@ -9,7 +9,9 @@ RUN useradd $app \
 WORKDIR /$app
 COPY . /$app
 RUN npm install
-RUN curl https://raw.githubusercontent.com/opentok/rtcstats/master/rtcstats.js -o static/rtcstats.js && node_modules/.bin/uglifyjs static/rtcstats.js -o static/rtcstats.min.js
+
+# Generate static/rtcstats.min.js
+RUN mkdir static && cd node_modules/rtcstats && npm run dist && cp min.js ../../static/rtcstats.min.js
 
 USER $app
 VOLUME ["/var/log/$app"]
