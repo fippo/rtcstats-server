@@ -33,8 +33,9 @@
     "rtcstats": "https://github.com/opentok/rtcstats.git"
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
-    "eslint-config-opentok": "^1.0.2",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb-base": "^11.1.1",
+    "eslint-plugin-import": "^2.2.0",
     "uglify-js": "^2.6.1"
   }
 }
