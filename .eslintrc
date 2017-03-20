@@ -1,7 +1,47 @@
 {
-    "env": {
-        "builtin": true,
-        "es6": true,
-        "node": true
-    }
+  extends: "airbnb-base",
+  env: {
+    browser: false,
+    node: true,
+  },
+  parserOptions: {
+    sourceType: "script"
+  },
+  "rules": {
+    strict: [2, "global"],
+    "comma-dangle": ["error", {
+        arrays: "only-multiline",
+        objects: "only-multiline",
+        imports: "only-multiline",
+        exports: "only-multiline",
+        functions: "never",
+    }],
+    "no-console": 0,
+
+    "max-len": 0,
+
+    "no-loop-func": 0,
+    "no-continue": 0,
+    "no-bitwise": 0,
+
+    // ** requires node 7 or babel, once upgraded remove this entire no-restricted-properties rule
+    "no-restricted-properties": ["error",
+      {
+        object: "arguments",
+        property: "callee",
+        message: "arguments.callee is deprecated",
+      }, {
+        property: "__defineGetter__",
+        message: "Please use Object.defineProperty instead.",
+      }, {
+        property: "__defineSetter__",
+        message: "Please use Object.defineProperty instead.",
+      },
+      // {
+      //   object: "Math",
+      //   property: "pow",
+      //   message: "Use the exponentiation operator (**) instead.",
+      // }
+    ],
+  }
 }

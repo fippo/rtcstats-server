@@ -1,19 +1,21 @@
+'use strict';
+
 // using shiftwidth=2 since reformating all the adapter code...
-module.exports = function(stats) {
+module.exports = function getStatsMangle(stats) {
   // Mangle chrome stats to spec stats. Just chrome stats.
-  var needsMangling = false;
-  Object.keys(stats).forEach(function(id) {
-      if (stats[id].type === 'googComponent') {
-          needsMangling = true;
-      }
+  let needsMangling = false;
+  Object.keys(stats).forEach((id) => {
+    if (stats[id].type === 'googComponent') {
+      needsMangling = true;
+    }
   });
   if (!needsMangling) {
-      return stats;
+    return stats;
   }
   // taken from https://github.com/fippo/adapter/tree/getstats-mangling
-  var standardReport = {};
-  Object.keys(stats).forEach(function(id) {
-    var standardStats = stats[id];
+  const standardReport = {};
+  Object.keys(stats).forEach((id) => {
+    const standardStats = stats[id];
 
     // Step 1: translate to standard types and attribute names.
     switch (standardStats.type) {
@@ -155,10 +157,10 @@ module.exports = function(stats) {
         // https://w3c.github.io/webrtc-stats/#candidatepair-dict*
         standardStats.transportId = standardStats.googChannelId;
         // FIXME: maybe set depending on iceconnectionstate and read/write?
-        //standardStats.state = 'FIXME'; // enum
+        // standardStats.state = 'FIXME'; // enum
 
         // FIXME: could be calculated from candidate priorities and role.
-        //standardStats.priority = 'FIXME'; // unsigned long long
+        // standardStats.priority = 'FIXME'; // unsigned long long
         standardStats.writable = standardStats.googWritable === 'true';
         standardStats.readable = standardStats.googReadable === 'true';
         // assumption: nominated is readable and writeable.
@@ -208,9 +210,10 @@ module.exports = function(stats) {
     standardReport[standardStats.id] = standardStats;
   });
   // Step 2: fix things spanning multiple reports.
-  Object.keys(standardReport).forEach(function(id) {
-    var report = standardReport[id];
-    var other, newId, sdp;
+  Object.keys(standardReport).forEach((id) => {
+    const report = standardReport[id];
+    let other;
+    let newId;
     switch (report.type) {
       case 'googCandidatePair':
         report.type = 'candidatepair';
@@ -225,13 +228,13 @@ module.exports = function(stats) {
       case 'googComponent':
         // create a new report since we don't carry over all fields.
         other = standardReport[report.selectedCandidatePairId];
-        newId = 'transport_' + report.id;
+        newId = `transport_${report.id}`;
         standardReport[newId] = {
           type: 'transport',
           timestamp: report.timestamp,
           id: newId,
-          bytesSent: other && other.bytesSent || 0,
-          bytesReceived: other && other.bytesReceived || 0,
+          bytesSent: (other && other.bytesSent) || 0,
+          bytesReceived: (other && other.bytesReceived) || 0,
           // FIXME (spec): rtpcpTransportStatsId: rtcp-mux is required so...
           activeConnection: other && other.selected,
           selectedCandidatePairId: report.selectedCandidatePairId,
@@ -240,7 +243,7 @@ module.exports = function(stats) {
         };
         break;
       case 'ssrc':
-        newId = 'rtpstream_' + report.id;
+        newId = `rtpstream_${report.id}`;
         // Workaround for https://code.google.com/p/webrtc/issues/detail?id=4808 (fixed in M46)
         /* it is not apparently. This can be set to the empty string.
         if (!report.googCodecName) {
@@ -248,18 +251,18 @@ module.exports = function(stats) {
         }
         */
         standardReport[newId] = {
-          //type: 'notastandalonething',
+          // type: 'notastandalonething',
           timestamp: report.timestamp,
           id: newId,
           ssrc: report.ssrc,
           mediaType: report.mediaType,
-          associateStatsId: 'rtcpstream_' + report.id,
+          associateStatsId: `rtcpstream_${report.id}`,
           isRemote: false,
-          mediaTrackId: 'mediatrack_' + report.id,
+          mediaTrackId: `mediatrack_${report.id}`,
           transportId: report.transportId,
         };
         if (report.googCodecName && report.googCodecName.length) {
-          standardReport.codecId = 'codec_' + report.googCodecName
+          standardReport.codecId = `codec_${report.googCodecName}`;
         }
         if (report.mediaType === 'video') {
           standardReport[newId].firCount = report.firCount;
@@ -283,17 +286,17 @@ module.exports = function(stats) {
         // FIXME: this is slightly more complicated. inboundrtp can have packetlost
         // but so can outboundrtp via rtcp (isRemote = true)
         // need to unmux with opposite type and put loss into remote report.
-        newId = 'rtcpstream_' + report.id;
+        newId = `rtcpstream_${report.id}`;
         standardReport[newId] = {
-          //type: 'notastandalonething',
+          // type: 'notastandalonething',
           timestamp: report.timestamp,
           id: newId,
           ssrc: report.ssrc,
-          associateStatsId: 'rtpstream_' + report.id,
+          associateStatsId: `rtpstream_${report.id}`,
           isRemote: true,
-          mediaTrackId: 'mediatrack_' + report.id,
+          mediaTrackId: `mediatrack_${report.id}`,
           transportId: report.transportId,
-          codecId: 'codec_' + report.googCodecName
+          codecId: `codec_${report.googCodecName}`
         };
         if (report.remoteSource) {
           standardReport[newId].type = 'outboundrtp';
@@ -312,14 +315,14 @@ module.exports = function(stats) {
           standardReport[newId].jitter = report.jitter;
         }
 
-        newId = 'mediatrack_' + report.id;
+        newId = `mediatrack_${report.id}`;
         standardReport[newId] = {
           type: 'track',
           timestamp: report.timestamp,
           id: newId,
           trackIdentifier: report.trackIdentifier,
           remoteSource: report.remoteSource,
-          ssrcIds: ['rtpstream_' + report.id, 'rtcpstream_' + report.id]
+          ssrcIds: [`rtpstream_${report.id}`, `rtcpstream_${report.id}`]
         };
         if (report.mediaType === 'audio') {
           standardReport[newId].audioLevel = report.audioLevel;
@@ -383,25 +386,25 @@ module.exports = function(stats) {
     }
   });
   // Step 3: fiddle the transport in between transport and rtp stream
-  Object.keys(standardReport).forEach(function(id) {
-    var report = standardReport[id];
+  Object.keys(standardReport).forEach((id) => {
+    const report = standardReport[id];
     if (report.type === 'transprort') {
       // RTCTransport has a pointer to the selectedCandidatePair...
-      var other = standardReport[report.selectedCandidatePairId];
+      let other = standardReport[report.selectedCandidatePairId];
       if (other) {
         other.transportId = report.id;
       }
       // but no pointers to the rtpstreams running over it?!
       // instead, we rely on having added 'transport_'
-      Object.keys(standardReport).forEach(function(otherid) {
+      Object.keys(standardReport).forEach((otherid) => {
         other = standardReport[otherid];
         if ((other.type === 'inboundrtp' ||
             other.type === 'outboundrtp') &&
-            report.id === 'transport_' + other.transportId) {
+            report.id === `transport_${other.transportId}`) {
           other.transportId = report.id;
         }
       });
     }
   });
   return standardReport;
-}
+};

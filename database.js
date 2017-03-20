@@ -1,61 +1,58 @@
-var AWS = require('aws-sdk');
-var _ = require('lodash');
+'use strict';
+
+const AWS = require('aws-sdk');
+const _ = require('lodash');
 
 function lower(obj) {
-  var key, keys = Object.keys(obj);
-  var n = keys.length;
-  var newobj={}
-  while (n--) {
-    key = keys[n];
-    newobj[key.toLowerCase()] = obj[key];
-  }
+  const newobj = {};
+  Object.keys(obj).forEach((key) => { newobj[key.toLowerCase()] = obj[key]; });
   return newobj;
 }
 
-module.exports = function(config) {
-  var dynamodb;
+module.exports = function database(config) {
+  let dynamodb;
   if (config.dynamodb && config.dynamodb.table) {
     AWS.config = config.dynamodb;
     dynamodb = new AWS.DynamoDB.DocumentClient();
   } else {
-    console.warn('No DynamoDB configuration present.  Skipping dynamodb storage.')
+    console.warn('No DynamoDB configuration present.  Skipping dynamodb storage.');
   }
 
-  var firehose;
+  let firehose;
   if (config.firehose && config.firehose.stream) {
     AWS.config = config.firehose;
     firehose = new AWS.Firehose();
   } else {
-    console.warn('No Firehose configuration present.  Skipping firehose storage.')
+    console.warn('No Firehose configuration present.  Skipping firehose storage.');
   }
 
   return {
-    put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures) {
-      var d = new Date().getTime();
-      var item = {
+    put(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures) {
+      const d = new Date().getTime();
+      const item = {
         Date: d - (d % (86400 * 1000)), // just the UTC day
         DateTime: d,
         ClientId: clientId,
-        ConnectionId: clientId + '_' + connectionId,
+        ConnectionId: `${clientId}_${connectionId}`,
         PageUrl: pageUrl,
       };
 
-      _.forEach(clientFeatures, function(value, key) {
+      _.forEach(clientFeatures, (value, key) => {
         item[key] = value;
       });
-      _.forEach(connectionFeatures, function(value, key) {
+      _.forEach(connectionFeatures, (value, key) => {
         item[key] = value;
       });
 
       if (dynamodb) {
         dynamodb.put({
-          TableName : config.dynamodb.table,
+          TableName: config.dynamodb.table,
           Item: item,
-        }, function(err, data) {
+        }, (err, data) => { // eslint-disable-line no-unused-vars
           if (err) {
-            console.log("Error saving data: ", err, JSON.stringify(item));
+            console.log('Error saving data: ', err, JSON.stringify(item));
           } else {
-            console.log("Successfully saved data");
+            console.log('Successfully saved data');
           }
         });
       }
@@ -66,25 +63,26 @@ module.exports = function(config) {
           Record: {
             Data: JSON.stringify(lower(item))
           },
-        }, function(err, data) {
+        }, (err, data) => { // eslint-disable-line no-unused-vars
           if (err) {
-            console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
+            console.log('Error firehosing data: ', err, JSON.stringify(lower(item)));
           } else {
-            console.log("Successfully firehosed data");
+            console.log('Successfully firehosed data');
           }
         });
       }
     },
 
-    get: function(clientId, connectionId, callback) {
-
-     var params = {
-        TableName : config.dynamodb.table,
-        Key: {
-          ConnectionId: clientId + '_' + connectionId,
-        }
-      };
-      docClient.get(params, callback);
+    get(clientId, connectionId, callback) {
+      callback(new Error('Database.get is not implemented'));
+      // const params = {
+      //   TableName: config.dynamodb.table,
+      //   Key: {
+      //     ConnectionId: `${clientId}_${connectionId}`,
+      //   }
+      // };
+      // I'm not sure what docClient is, and this method appears unused. Erroring out for safety.
+      // docClient.get(params, callback);
     }
-  }
-}
+  };
+};

@@ -1,10 +1,12 @@
-var AWS = require('aws-sdk');
-var zlib = require('zlib');
+'use strict';
 
-module.exports = function(config) {
+const AWS = require('aws-sdk');
+const zlib = require('zlib');
+
+module.exports = function createStore(config) {
   AWS.config = config.s3;
 
-  var s3bucket = new AWS.S3({
+  const s3bucket = new AWS.S3({
     params: {
       Bucket: config.s3.bucket
     }
@@ -12,20 +14,20 @@ module.exports = function(config) {
 
 
   return {
-    put: function(key, data) {
-      zlib.gzip(data, function(err, data) {
-        if (err) {
-          console.log("Error gzipping data: ", err);
+    put(key, putData) {
+      zlib.gzip(putData, (gzipErr, gzipData) => {
+        if (gzipErr) {
+          console.log('Error gzipping data: ', gzipErr);
         } else {
-          s3bucket.upload({ Key: key + '.gz', Body: data }, function(err, data) {
-            if (err) {
-              console.log("Error uploading data: ", err);
+          s3bucket.upload({ Key: `${key}.gz`, Body: gzipData }, (s3Error) => {
+            if (s3Error) {
+              console.log('Error uploading data: ', s3Error);
             } else {
-              console.log("Successfully uploaded data to myBucket/myKey");
+              console.log('Successfully uploaded data to myBucket/myKey');
             }
           });
         }
-      })
+      });
     },
-  }
-}
+  };
+};
