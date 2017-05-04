@@ -123,7 +123,7 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
         lines.forEach(function(line) {
             if (line.length) {
                 var data = JSON.parse(line);
-                var time = new Date(data.time)
+                var time = new Date(data.time || data[3])
                 delete data.time;
                 switch(data[0]) {
                 case 'location':
