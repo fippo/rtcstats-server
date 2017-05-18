@@ -1271,9 +1271,12 @@ module.exports = {
         }
         if (startTime > 0) {
             // TODO: this is too simplistic. What if the ice connection state went to failed?
-            endTime = new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime();
-            if (endTime > 0) {
-                return endTime - startTime;
+            for (var j = peerConnectionLog.length - 1; j > i; j--) {
+                endTime = new Date(peerConnectionLog[j].time).getTime();
+                console.log(startTime, endTime);
+                if (startTime < endTime && endTime > 0) {
+                    return endTime - startTime;
+                }
             }
         }
     },
