@@ -1367,7 +1367,7 @@ module.exports = {
             // look for type track, remoteSource: false, audioLevel (0..1)
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true) {
+                if (report.type === 'candidate-pair' && report.selected === true) {
                     rtts.push(report.roundTripTime);
                 }
             });
@@ -1375,14 +1375,14 @@ module.exports = {
                 Object.keys(statsReport).forEach(function(id) {
                     var report = statsReport[id];
                     var bitrate;
-                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
+                    if (report.type === 'candidate-pair' && report.selected === true && lastStatsReport[id]) {
                         bitrate = 8 * (report.bytesReceived - lastStatsReport[id].bytesReceived) / (entry.time - lastTime);
                         // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
                         if (bitrate > 0) {
                             recv.push(bitrate);
                         }
                     }
-                    if (report.type === 'candidatepair' && report.selected === true && lastStatsReport[id]) {
+                    if (report.type === 'candidate-pair' && report.selected === true && lastStatsReport[id]) {
                         bitrate = 8 * (report.bytesSent - lastStatsReport[id].bytesSent) / (entry.time - lastTime);
                         // needs to work around resetting counters -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
                         if (bitrate > 0) {
@@ -1422,7 +1422,7 @@ module.exports = {
                 var report = statsReport[id];
                 var localCandidate = statsReport[report.localCandidateId];
                 var remoteCandidate = statsReport[report.remoteCandidateId];
-                if (report.type === 'candidatepair' && report.selected === true && localCandidate && remoteCandidate) {
+                if (report.type === 'candidate-pair' && report.selected === true && localCandidate && remoteCandidate) {
                     pair = {
                         type: localCandidate.candidateType + ';' + remoteCandidate.candidateType, // mostly for backward compat reasons
                         localType: localCandidate.candidateType,
@@ -1447,7 +1447,7 @@ module.exports = {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true) {
+                if (report.type === 'candidate-pair' && report.selected === true) {
                     var pair = report.localCandidateId + ' ' + report.remoteCandidateId;
                     if (pair !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
                         selectedCandidatePairList.push(pair);
@@ -1468,7 +1468,7 @@ module.exports = {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true) {
+                if (report.type === 'candidate-pair' && report.selected === true) {
                     // this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
                     // receiver during  ice restart but that is not what we are looking for.
                     if (report.id !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
@@ -1502,7 +1502,7 @@ module.exports = {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(function(id) {
                 var report = statsReport[id];
-                if (report.type === 'candidatepair' && report.selected === true && statsReport[report.localCandidateId]) {
+                if (report.type === 'candidate-pair' && report.selected === true && statsReport[report.localCandidateId]) {
                     var type = statsReport[report.localCandidateId].networkType;
                     if (type && type !== interfaceTypesList[interfaceTypesList.length - 1]) {
                         interfaceTypesList.push(type);
