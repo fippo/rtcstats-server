@@ -1666,6 +1666,20 @@ module.exports = {
                 feature[stat + 'Mode'] = mode(series);
             });
 
+            // RecentMax is over a 10s window.
+            ['googResidualEchoLikelihoodRecentMax'].forEach(function(stat) {
+                if (typeof track[0][stat] === 'undefined') return;
+
+                var series = track.map(function(item) { return parseFloat(item[stat], 10) });
+
+                feature[stat + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+                feature[stat + 'Max'] = Math.max.apply(null, series);
+
+                feature[stat + 'Variance'] = standardizedMoment(series, 2);
+                feature[stat + 'Skewness'] = standardizedMoment(series, 3);
+                feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
+            });
+
             // stats for which we are interested in the difference between values.
             ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(function(stat) {
                 var i;
