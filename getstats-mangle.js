@@ -213,7 +213,7 @@ module.exports = function(stats) {
     var other, newId, sdp;
     switch (report.type) {
       case 'googCandidatePair':
-        report.type = 'candidatepair';
+        report.type = 'candidate-pair';
         if (standardReport.bweforvideo) {
           report.availableOutgoingBitrate =
               standardReport.bweforvideo.availableOutgoingBitrate;
