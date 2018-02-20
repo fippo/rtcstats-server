@@ -1,0 +1,16 @@
+server:
+    port: PORT
+
+s3:
+    bucket: S3_BUCKET_ID
+
+dynamodb:
+    table: DYNAMO_DB_TABLE
+
+firehose:
+    stream: FIREHOSE_STREAM
+
+github:
+    client_id: GITHUB_CLIENT_ID
+    client_secret: GITHUB_SECRET
+    callback_url: GITHUB_CALLBACK_URL

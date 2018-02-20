@@ -1,22 +1,16 @@
 server:
-    port: 3000
+    port: 4000
 
 s3:
-    accessKeyId:
-    secretAccessKey:
-    region:
+    region: eu-west-1
     bucket:
 
 dynamodb:
-    accessKeyId:
-    secretAccessKey:
-    region:
+    region: eu-west-1
     table:
 
 firehose:
-    accessKeyId:
-    secretAccessKey:
-    region:
+    region: eu-west-1
     stream:
 
 appenders:

@@ -1,7 +1,27 @@
-sudo: false
 language: node_js
 node_js:
-- 4.1
-
+- 8
 script:
-  - npm test
+- npm run test
+notifications:
+  email:
+    on_failure: change
+  slack:
+    rooms:
+    - confrer:yjflcetA76qbviTNMRWWA0IJ#eng
+    on_success: change
+    on_pull_requests: false
+branches:
+  only:
+  - develop
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: AKIAJR7XCPLJGKCFVTVA
+  secret_access_key:
+    secure: y0zrcLpEhPySEtp/oDFApMPKohwUy06t51r9gp/eQbaki0vjXfQ/CWlxiKVUuEJVFWr0/e7vpecrLptovJBcXJf3PbiB20YwinuN/EUGNxph7QFAOP1P+S4KqIqPu5OS0yoqInDEBReJCFWYBwc4Kz+plD1gXJZ8cj9nFxdBYK4duboHMBY27PTTKJSp+oobKyI69++Na/H/RmE1Bz4dTpxFCXOeh9oVH1kKMjrsxe88LSd7JicuDVVPgs72bVTR61MQNp8kwWDJR3vY8ErQTXFzbXRBq4iezFPZnYLNtSiRo7T4SToZYOvzEJNVsg3HncZAN8oPlIavsVApC5ZPgQyaw+bpj/0oYkfkW2B4K+qS7IYTwRZCsthYx5ABdMCPjvgHdN9XO/+7GrdvxXoM3/tOKQBAPeGZHeU4y7lnlUe6SF/OvI0LkFZX2uXq4p9sYPdKhuVeGscmKpU9X+y1ThaL2lHssbDl3okw/CUfvV97icXv8dza0UKyEy7yN0EocX1gbNmZjlVJpZTxUgsH63gSUujW0g5jhmZ4lUpIJe+jtn4PXOQ+beG4CXRxd9SlJD/b7kjmI4/kjdtd32MMGAak8eTxk1s9JcIIH2+ICnRaQlU99BiX0+IWs+dkD+x57Jkosl0RTmccd+pjLmS+/iPGwel77FA8JC7HIe26shs=
+  region: eu-west-1
+  app: rtcstats-server
+  env: rtcstats-server-prod
+  on:
+    repo: Confrer/rtcstats-server
+    branch: develop

@@ -79,6 +79,10 @@ function run(keys) {
     server.on('request', function(request, response) {
         // look at request.url
         switch (request.url) {
+        case "/":
+            response.writeHead(200);
+            response.end();
+            return;
         case "/healthcheck":
             response.writeHead(200);
             response.end();
