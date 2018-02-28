@@ -196,14 +196,23 @@ function extractTrack(peerConnectionLog, kind, direction) {
     }
     // search for the (first) track of that kind.
     for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === streamevent) {
-            var tracks = peerConnectionLog[i].value.split(' ', 2);
-            tracks.shift();
-            tracks = tracks[0].split(',');
-            for (var j = 0; j < tracks.length; j++) {
-                if (tracks[j].split(':')[0] === kind) {
-                    trackId = tracks[j].split(':')[1];
+        var type = peerConnectionLog[i].type;
+        if (type === streamevent || (direction === 'send' && type === 'addTrack')) {
+            if (type === 'addTrack') {
+                var kindAndTrack = peerConnectionLog[i].value.split(' ')[0].split(':');
+                if (kindAndTrack[0] === kind) {
+                    trackId = kindAndTrack[1];
                     break;
+                }
+            } else {
+                var tracks = peerConnectionLog[i].value.split(' ', 2);
+                tracks.shift();
+                tracks = tracks[0].split(',');
+                for (var j = 0; j < tracks.length; j++) {
+                    if (tracks[j].split(':')[0] === kind) {
+                        trackId = tracks[j].split(':')[1];
+                        break;
+                    }
                 }
             }
             if (trackId) break;
