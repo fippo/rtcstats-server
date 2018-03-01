@@ -7,12 +7,6 @@ s3:
     region:
     bucket:
 
-dynamodb:
-    accessKeyId:
-    secretAccessKey:
-    region:
-    table:
-
 firehose:
     accessKeyId:
     secretAccessKey:

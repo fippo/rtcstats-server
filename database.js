@@ -13,14 +13,6 @@ function lower(obj) {
 }
 
 module.exports = function(config) {
-  var dynamodb;
-  if (config.dynamodb && config.dynamodb.table) {
-    AWS.config = config.dynamodb;
-    dynamodb = new AWS.DynamoDB.DocumentClient();
-  } else {
-    console.warn('No DynamoDB configuration present.  Skipping dynamodb storage.')
-  }
-
   var firehose;
   if (config.firehose && config.firehose.stream) {
     AWS.config = config.firehose;
@@ -47,19 +39,6 @@ module.exports = function(config) {
         item[key] = value;
       });
 
-      if (dynamodb) {
-        dynamodb.put({
-          TableName : config.dynamodb.table,
-          Item: item,
-        }, function(err, data) {
-          if (err) {
-            console.log("Error saving data: ", err, JSON.stringify(item));
-          } else {
-            console.log("Successfully saved data");
-          }
-        });
-      }
-
       if (firehose) {
         firehose.putRecord({
           DeliveryStreamName: config.firehose.stream, /* required */
@@ -75,16 +54,4 @@ module.exports = function(config) {
         });
       }
     },
-
-    get: function(clientId, connectionId, callback) {
-
-     var params = {
-        TableName : config.dynamodb.table,
-        Key: {
-          ConnectionId: clientId + '_' + connectionId,
-        }
-      };
-      docClient.get(params, callback);
-    }
-  }
 }

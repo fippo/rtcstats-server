@@ -5,7 +5,6 @@ var Store = require('./store')({
   s3: config.get('s3'),
 });
 var Database = require('./database')({
-  dynamodb: config.get('dynamodb'),
   firehose: config.get('firehose'),
 });
 
