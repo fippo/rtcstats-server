@@ -128,7 +128,7 @@ function run(keys) {
             });
         }
 
-        console.log('connected', ua, referer);
+        console.log('connected', ua, referer, clientid);
         client.on('message', function (msg) {
             var data = JSON.parse(msg);
             switch(data[0]) {
