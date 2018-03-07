@@ -54,4 +54,5 @@ module.exports = function(config) {
         });
       }
     },
+  };
 }
