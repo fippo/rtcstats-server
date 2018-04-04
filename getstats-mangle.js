@@ -1,7 +1,7 @@
 // using shiftwidth=2 since reformating all the adapter code...
 module.exports = function(stats) {
   // Mangle chrome stats to spec stats. Just chrome stats.
-  var needsMangling = false;
+  let needsMangling = false;
   Object.keys(stats).forEach(function(id) {
       if (stats[id].type === 'googComponent') {
           needsMangling = true;
@@ -11,9 +11,9 @@ module.exports = function(stats) {
       return stats;
   }
   // taken from https://github.com/fippo/adapter/tree/getstats-mangling
-  var standardReport = {};
+  const standardReport = {};
   Object.keys(stats).forEach(function(id) {
-    var standardStats = stats[id];
+    const standardStats = stats[id];
 
     // Step 1: translate to standard types and attribute names.
     switch (standardStats.type) {
@@ -209,8 +209,8 @@ module.exports = function(stats) {
   });
   // Step 2: fix things spanning multiple reports.
   Object.keys(standardReport).forEach(function(id) {
-    var report = standardReport[id];
-    var other, newId, sdp;
+    const report = standardReport[id];
+    let other, newId, sdp;
     switch (report.type) {
       case 'googCandidatePair':
         report.type = 'candidate-pair';
@@ -384,10 +384,10 @@ module.exports = function(stats) {
   });
   // Step 3: fiddle the transport in between transport and rtp stream
   Object.keys(standardReport).forEach(function(id) {
-    var report = standardReport[id];
+    const report = standardReport[id];
     if (report.type === 'transprort') {
       // RTCTransport has a pointer to the selectedCandidatePair...
-      var other = standardReport[report.selectedCandidatePairId];
+      let other = standardReport[report.selectedCandidatePairId];
       if (other) {
         other.transportId = report.id;
       }

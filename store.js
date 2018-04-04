@@ -1,10 +1,10 @@
-var AWS = require('aws-sdk');
-var zlib = require('zlib');
+const AWS = require('aws-sdk');
+const zlib = require('zlib');
 
 module.exports = function(config) {
   AWS.config = config.s3;
 
-  var s3bucket = new AWS.S3({
+  const s3bucket = new AWS.S3({
     params: {
       Bucket: config.s3.bucket
     }

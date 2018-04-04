@@ -1,14 +1,14 @@
-var fs = require('fs');
-var config = require('config');
+const fs = require('fs');
+const config = require('config');
 
-var Store = require('./store')({
+const Store = require('./store')({
   s3: config.get('s3'),
 });
-var Database = require('./database')({
+const Database = require('./database')({
   firehose: config.get('firehose'),
 });
 
-var isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
@@ -23,16 +23,16 @@ function safeFeature(feature) {
     return feature;
 }
 
-var features = require('./features');
-var statsDecompressor = require('./getstats-deltacompression').decompress;
-var statsMangler = require('./getstats-mangle');
+const features = require('./features');
+const statsDecompressor = require('./getstats-deltacompression').decompress;
+const statsMangler = require('./getstats-mangle');
 
 // dumps all peerconnections to Store
 function dump(url, client, clientid, data) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
     if (!isProduction) {
-        var total = 0;
+        let total = 0;
         Object.keys(client.peerConnections).forEach(function(id) {
             total += client.peerConnections[id].length;
         });
@@ -50,10 +50,10 @@ function generateFeatures(url, client, clientid) {
 
     // clientFeatures are the same for all peerconnections but are saved together
     // with each peerconnection anyway to make correlation easier.
-    var clientFeatures = {};
+    const clientFeatures = {};
     Object.keys(features).forEach(function (fname) {
         if (features[fname].length === 1) {
-            var feature = features[fname].apply(null, [client]);
+            let feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
                 if (typeof feature === 'object') {
                     Object.keys(feature).forEach(function(subname) {
@@ -75,11 +75,11 @@ function generateFeatures(url, client, clientid) {
     });
     Object.keys(client.peerConnections).forEach(function(connid) {
         if (connid === 'null') return; // ignore the null connid
-        var conn = client.peerConnections[connid];
-        var connectionFeatures = {};
+        const conn = client.peerConnections[connid];
+        const connectionFeatures = {};
         Object.keys(features).forEach(function (fname) {
             if (features[fname].length === 2) {
-                var feature = features[fname].apply(null, [client, conn]);
+                let feature = features[fname].apply(null, [client, conn]);
                 if (feature !== undefined) {
                     if (typeof feature === 'object') {
                         Object.keys(feature).forEach(function(subname) {
@@ -107,22 +107,22 @@ function generateFeatures(url, client, clientid) {
 }
 
 var clientid = process.argv[2];
-var path = 'temp/' + clientid;
+const path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
     // remove the file
     fs.unlink(path, function() {
         // we're good...
     });
     if (!err) {
-        var baseStats = {};
-        var lines = data.split('\n');
-        var client = JSON.parse(lines.shift());
+        const baseStats = {};
+        const lines = data.split('\n');
+        const client = JSON.parse(lines.shift());
         client.peerConnections = {};
         client.getUserMedia = [];
         lines.forEach(function(line) {
             if (line.length) {
-                var data = JSON.parse(line);
-                var time = new Date(data.time || data[3])
+                const data = JSON.parse(line);
+                const time = new Date(data.time || data[3]);
                 delete data.time;
                 switch(data[0]) {
                 case 'location':
