@@ -2,7 +2,7 @@
 module.exports = function(stats) {
   // Mangle chrome stats to spec stats. Just chrome stats.
   let needsMangling = false;
-  Object.keys(stats).forEach(function(id) {
+  Object.keys(stats).forEach(id => {
       if (stats[id].type === 'googComponent') {
           needsMangling = true;
       }
@@ -12,7 +12,7 @@ module.exports = function(stats) {
   }
   // taken from https://github.com/fippo/adapter/tree/getstats-mangling
   const standardReport = {};
-  Object.keys(stats).forEach(function(id) {
+  Object.keys(stats).forEach(id => {
     const standardStats = stats[id];
 
     // Step 1: translate to standard types and attribute names.
@@ -208,7 +208,7 @@ module.exports = function(stats) {
     standardReport[standardStats.id] = standardStats;
   });
   // Step 2: fix things spanning multiple reports.
-  Object.keys(standardReport).forEach(function(id) {
+  Object.keys(standardReport).forEach(id => {
     const report = standardReport[id];
     let other, newId, sdp;
     switch (report.type) {
@@ -383,7 +383,7 @@ module.exports = function(stats) {
     }
   });
   // Step 3: fiddle the transport in between transport and rtp stream
-  Object.keys(standardReport).forEach(function(id) {
+  Object.keys(standardReport).forEach(id => {
     const report = standardReport[id];
     if (report.type === 'transprort') {
       // RTCTransport has a pointer to the selectedCandidatePair...
@@ -393,7 +393,7 @@ module.exports = function(stats) {
       }
       // but no pointers to the rtpstreams running over it?!
       // instead, we rely on having added 'transport_'
-      Object.keys(standardReport).forEach(function(otherid) {
+      Object.keys(standardReport).forEach(otherid => {
         other = standardReport[otherid];
         if ((other.type === 'inboundrtp' ||
             other.type === 'outboundrtp') &&

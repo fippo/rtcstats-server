@@ -31,7 +31,7 @@ function obfuscateCandidate(candidate) {
 
 function obfuscateSDP(sdp) {
     const lines = SDPUtils.splitLines(sdp);
-    return lines.map(function(line) {
+    return lines.map(line => {
         // obfuscate a=candidate, c= and a=rtcp
         if (line.indexOf('a=candidate:') === 0) {
             return obfuscateCandidate(line);
@@ -46,12 +46,12 @@ function obfuscateSDP(sdp) {
 }
 
 function obfuscateStats(stats) {
-    Object.keys(stats).forEach(function(id) {
+    Object.keys(stats).forEach(id => {
         const report = stats[id];
         if (report.ipAddress && report.candidateType !== 'relayed') {
             report.ipAddress = obfuscateIP(report.ipAddress);
         }
-        ['googLocalAddress', 'googRemoteAddress'].forEach(function(name) {
+        ['googLocalAddress', 'googRemoteAddress'].forEach(name => {
             // contains both address and port
             let port;
             if (report[name]) {

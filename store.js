@@ -13,11 +13,11 @@ module.exports = function(config) {
 
   return {
     put: function(key, data) {
-      zlib.gzip(data, function(err, data) {
+      zlib.gzip(data, (err, data) => {
         if (err) {
           console.log("Error gzipping data: ", err);
         } else {
-          s3bucket.upload({ Key: key + '.gz', Body: data }, function(err, data) {
+          s3bucket.upload({ Key: key + '.gz', Body: data }, (err, data) => {
             if (err) {
               console.log("Error uploading data: ", err);
             } else {
@@ -27,5 +27,5 @@ module.exports = function(config) {
         }
       })
     },
-  }
+  };
 }

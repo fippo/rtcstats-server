@@ -32,10 +32,10 @@ module.exports = function(config) {
         PageUrl: pageUrl,
       };
 
-      _.forEach(clientFeatures, function(value, key) {
+      _.forEach(clientFeatures, (value, key) => {
         item[key] = value;
       });
-      _.forEach(connectionFeatures, function(value, key) {
+      _.forEach(connectionFeatures, (value, key) => {
         item[key] = value;
       });
 
@@ -45,7 +45,7 @@ module.exports = function(config) {
           Record: {
             Data: JSON.stringify(lower(item))
           },
-        }, function(err, data) {
+        }, (err, data) => {
           if (err) {
             console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
           } else {

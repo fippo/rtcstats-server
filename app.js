@@ -53,7 +53,7 @@ var q = new ProcessQueue();
 
 function setupWorkDirectory() {
     try {
-        fs.readdirSync(tempPath).forEach(function(fname) {
+        fs.readdirSync(tempPath).forEach(fname => {
             fs.unlinkSync(tempPath + '/' + fname);
         });
         fs.rmdirSync(tempPath);
@@ -76,7 +76,7 @@ function run(keys) {
     }
 
     server.listen(config.get('server').port);
-    server.on('request', function(request, response) {
+    server.on('request', (request, response) => {
         // look at request.url
         switch (request.url) {
         case "/healthcheck":
@@ -91,7 +91,7 @@ function run(keys) {
 
     wss = new WebSocketServer({ server: server });
 
-    wss.on('connection', function(client) {
+    wss.on('connection', client => {
         // the url the client is coming from
         const referer = client.upgradeReq.headers['origin'] + client.upgradeReq.url;
         // TODO: check against known/valid urls
@@ -99,7 +99,7 @@ function run(keys) {
         const ua = client.upgradeReq.headers['user-agent'];
         const clientid = uuid.v4();
         let tempStream = fs.createWriteStream(tempPath + '/' + clientid);
-        tempStream.on('finish', function() {
+        tempStream.on('finish', () => {
             q.enqueue(clientid);
         });
 
@@ -114,7 +114,7 @@ function run(keys) {
 
         const forwardedFor = client.upgradeReq.headers['x-forwarded-for'];
         if (forwardedFor) {
-            process.nextTick(function() {
+            process.nextTick(() => {
                 const city = cityLookup.get(forwardedFor);
                 if (tempStream) {
                     tempStream.write(JSON.stringify({
@@ -129,7 +129,7 @@ function run(keys) {
         }
 
         console.log('connected', ua, referer, clientid);
-        client.on('message', function (msg) {
+        client.on('message', msg => {
             const data = JSON.parse(msg);
             switch(data[0]) {
             case 'getUserMedia':
@@ -149,7 +149,7 @@ function run(keys) {
             }
         });
 
-        client.on('close', function() {
+        client.on('close', () => {
             tempStream.end();
             tempStream = null;
         });

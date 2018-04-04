@@ -33,7 +33,7 @@ function dump(url, client, clientid, data) {
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
     if (!isProduction) {
         let total = 0;
-        Object.keys(client.peerConnections).forEach(function(id) {
+        Object.keys(client.peerConnections).forEach(id => {
             total += client.peerConnections[id].length;
         });
         console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
@@ -51,12 +51,12 @@ function generateFeatures(url, client, clientid) {
     // clientFeatures are the same for all peerconnections but are saved together
     // with each peerconnection anyway to make correlation easier.
     const clientFeatures = {};
-    Object.keys(features).forEach(function (fname) {
+    Object.keys(features).forEach(fname => {
         if (features[fname].length === 1) {
             let feature = features[fname].apply(null, [client]);
             if (feature !== undefined) {
                 if (typeof feature === 'object') {
-                    Object.keys(feature).forEach(function(subname) {
+                    Object.keys(feature).forEach(subname => {
                         feature[subname] = safeFeature(feature[subname]);
                         if (!isProduction) {
                             console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
@@ -73,16 +73,16 @@ function generateFeatures(url, client, clientid) {
             }
         }
     });
-    Object.keys(client.peerConnections).forEach(function(connid) {
+    Object.keys(client.peerConnections).forEach(connid => {
         if (connid === 'null') return; // ignore the null connid
         const conn = client.peerConnections[connid];
         const connectionFeatures = {};
-        Object.keys(features).forEach(function (fname) {
+        Object.keys(features).forEach(fname => {
             if (features[fname].length === 2) {
                 let feature = features[fname].apply(null, [client, conn]);
                 if (feature !== undefined) {
                     if (typeof feature === 'object') {
-                        Object.keys(feature).forEach(function(subname) {
+                        Object.keys(feature).forEach(subname => {
                             feature[subname] = safeFeature(feature[subname]);
                             if (!isProduction) {
                                 console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
@@ -108,9 +108,9 @@ function generateFeatures(url, client, clientid) {
 
 var clientid = process.argv[2];
 const path = 'temp/' + clientid;
-fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
+fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
     // remove the file
-    fs.unlink(path, function() {
+    fs.unlink(path, () => {
         // we're good...
     });
     if (!err) {
@@ -119,7 +119,7 @@ fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
         const client = JSON.parse(lines.shift());
         client.peerConnections = {};
         client.getUserMedia = [];
-        lines.forEach(function(line) {
+        lines.forEach(line => {
             if (line.length) {
                 const data = JSON.parse(line);
                 const time = new Date(data.time || data[3]);
