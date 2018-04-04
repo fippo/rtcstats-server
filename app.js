@@ -91,12 +91,12 @@ function run(keys) {
 
     wss = new WebSocketServer({ server: server });
 
-    wss.on('connection', client => {
+    wss.on('connection', (client, upgradeReq) => {
         // the url the client is coming from
-        const referer = client.upgradeReq.headers['origin'] + client.upgradeReq.url;
+        const referer = upgradeReq.headers['origin'] + upgradeReq.url;
         // TODO: check against known/valid urls
 
-        const ua = client.upgradeReq.headers['user-agent'];
+        const ua = upgradeReq.headers['user-agent'];
         const clientid = uuid.v4();
         let tempStream = fs.createWriteStream(tempPath + '/' + clientid);
         tempStream.on('finish', () => {
@@ -104,15 +104,15 @@ function run(keys) {
         });
 
         const meta = {
-            path: client.upgradeReq.url,
-            origin: client.upgradeReq.headers['origin'],
+            path: upgradeReq.url,
+            origin: upgradeReq.headers['origin'],
             url: referer,
             userAgent: ua,
             time: Date.now()
         };
         tempStream.write(JSON.stringify(meta) + '\n');
 
-        const forwardedFor = client.upgradeReq.headers['x-forwarded-for'];
+        const forwardedFor = upgradeReq.headers['x-forwarded-for'];
         if (forwardedFor) {
             process.nextTick(() => {
                 const city = cityLookup.get(forwardedFor);
