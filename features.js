@@ -95,7 +95,7 @@ function extractLastVideoStat(peerConnectionLog, type) {
     }
     if (!statsReport) return;
     var count;
-    Object.keys(statsReport).forEach(function(id) {
+    Object.keys(statsReport).forEach(id => {
         // type outboundrtp && mediaType video
         var report = statsReport[id];
         if (report.type === 'outboundrtp' && report.mediaType === 'video') {
@@ -108,14 +108,14 @@ function extractLastVideoStat(peerConnectionLog, type) {
 // determine mode (most common) element in a series.
 function mode(series) {
     var modes = {};
-    series.forEach(function(item) {
+    series.forEach(item => {
         if (!modes[item]) modes[item] = 0;
         modes[item]++;
     });
 
     var value = -1;
     var max = -1;
-    Object.keys(modes).forEach(function(key) {
+    Object.keys(modes).forEach(key => {
         if (modes[key] > max) {
             max = modes[key];
             value = key;
@@ -131,8 +131,8 @@ function mode(series) {
 // order=4: kurtosis
 function standardizedMoment(series, order) {
     var len = series.length || 1;
-    var mean = series.reduce(function(a, b) { return a + b; }, 0) / len;
-    return series.reduce(function(a, b) { return a + Math.pow(b - mean, order); }, 0) / len;
+    var mean = series.reduce((a, b) => a + b, 0) / len;
+    return series.reduce((a, b) => a + Math.pow(b - mean, order), 0) / len;
 }
 
 // extracts the central moment from video statistics.
@@ -141,7 +141,7 @@ function extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, me
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
                     series.push(parseInt(report[statName], 10));
@@ -174,7 +174,7 @@ function getCodec(peerConnectionLog, mediaType, direction) {
         if (!connected) continue;
         if (peerConnectionLog[i].type !== 'getStats') continue;
         var statsReport = peerConnectionLog[i].value;
-        Object.keys(statsReport).forEach(function(id) {
+        Object.keys(statsReport).forEach(id => {
             var report = statsReport[id];
             if (report.type === 'ssrc' && report.mediaType === mediaType &&
               report.googCodecName && report.googCodecName.length
@@ -224,7 +224,7 @@ function extractTrack(peerConnectionLog, kind, direction) {
     for (; i < peerConnectionLog.length; i++) {
         if (trackId && peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'ssrc' && report.trackIdentifier === trackId) {
                     report.timestamp = peerConnectionLog[i].time;
@@ -241,7 +241,7 @@ function extractBWE(peerConnectionLog) {
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'VideoBwe') {
                     reports.push(report);
@@ -665,9 +665,7 @@ module.exports = {
 
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
     ICEGatheringComplete: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'onicecandidate' && entry.value === null;
-        }).length > 0;
+        return peerConnectionLog.filter(entry => entry.type === 'onicecandidate' && entry.value === null).length > 0;
     },
 
     // was an ice failure detected.
@@ -704,9 +702,7 @@ module.exports = {
 
     // did ice connect/complete?
     ICEConnectedOrCompleted: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed');
-        }).length > 0;
+        return peerConnectionLog.filter(entry => entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed')).length > 0;
     },
 
     // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
@@ -777,7 +773,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'getStats') {
                 if (count++ === 10) {
-                    Object.keys(peerConnectionLog[i].value).forEach(function(id) {
+                    Object.keys(peerConnectionLog[i].value).forEach(id => {
                         var report = peerConnectionLog[i].value[id];
                         if (report.type === 'ssrc' && report.mediaType === 'video' && id.indexOf('_recv')) {
                             receivedVideo = {
@@ -805,7 +801,7 @@ module.exports = {
                 }
             }
             if (peerConnectionLog[i].type === 'getStats') {
-                Object.keys(peerConnectionLog[i].value).forEach(function(id) {
+                Object.keys(peerConnectionLog[i].value).forEach(id => {
                     var report = peerConnectionLog[i].value[id];
                     if (report.type === 'ssrc' && report.mediaType === 'video' && report.googFrameWidthReceived) {
                         let width = parseInt(report.googFrameWidthReceived, 10);
@@ -828,7 +824,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'getStats') {
                 if (count++ === 10) {
-                    Object.keys(peerConnectionLog[i].value).forEach(function(id) {
+                    Object.keys(peerConnectionLog[i].value).forEach(id => {
                         var report = peerConnectionLog[i].value[id];
                         if (report.type === 'ssrc' && report.mediaType === 'audio' && id.indexOf('_recv')) {
                             receivedAudio = {
@@ -846,7 +842,7 @@ module.exports = {
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (!usingIceLite && entry.type === 'setRemoteDescription') {
                 if (entry.value.sdp && entry.value.sdp.indexOf('\r\na=ice-lite\r\n') !== -1) {
                     usingIceLite = true;
@@ -860,7 +856,7 @@ module.exports = {
     usingRTCPMux: function(client, peerConnectionLog) {
         var usingRTCPMux = false;
         // search for SLD/SRD with type = answer and look for a=rtcp-mux
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (!usingRTCPMux && (entry.type === 'setRemoteDescription' || entry.type === 'setLocalDescription')) {
                 if (entry.value.type === 'answer' && entry.value.sdp && entry.value.sdp.indexOf('\r\na=rtcp-mux\r\n') !== -1) {
                     usingRTCPMux = true;
@@ -874,7 +870,7 @@ module.exports = {
     usingBundle: function(client, peerConnectionLog) {
         var usingBundle = false;
         // search for SLD/SRD with type = answer and look for a=GROUP
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (!usingBundle && (entry.type === 'setRemoteDescription' || entry.type === 'setLocalDescription')) {
                 if (entry.value.type === 'answer' && entry.value.sdp && entry.value.sdp.indexOf('\r\na=group:BUNDLE ') !== -1) {
                     usingBundle = true;
@@ -886,7 +882,7 @@ module.exports = {
 
     ICERestart: function(client, peerConnectionLog) {
         var iceRestart = false;
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (!iceRestart && entry.type === 'createOffer') {
                 if (entry.value && entry.value.iceRestart) {
                     iceRestart = true;
@@ -959,22 +955,18 @@ module.exports = {
 
     // was the signaling state stable at least once?
     signalingStableAtLeastOnce: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'onsignalingstatechange' && entry.value === 'stable';
-        }).length > 0;
+        return peerConnectionLog.filter(entry => entry.type === 'onsignalingstatechange' && entry.value === 'stable').length > 0;
     },
 
     // was more than one remote stream added?
     usingMultistream: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'onaddstream';
-        }).length > 1;
+        return peerConnectionLog.filter(entry => entry.type === 'onaddstream').length > 1;
     },
 
     // maximum number of concurrent streams
     maxStreams: function(client, peerConnectionLog) {
         var max = 0;
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (entry.type === 'onaddstream') max++;
             else if (entry.type === 'onremovestream' && max > 0) max--;
         });
@@ -1240,28 +1232,22 @@ module.exports = {
 
     // number of local ice candidates.
     numberOfLocalIceCandidates: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(function(entry) {
-            return entry.type === 'onicecandidate' && entry.value;
-        }).length;
+        return peerConnectionLog.filter(entry => entry.type === 'onicecandidate' && entry.value).length;
     },
 
     // number of remote ice candidates.
     numberOfRemoteIceCandidates: function(client, peerConnectionLog) {
         var candsInSdp = -1;
         // needs sentinel to avoid adding candidates from subsequent generations.
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (candsInSdp === -1 && entry.type === 'setRemoteDescription') {
                 if (entry.value.sdp) {
-                    candsInSdp = entry.value.sdp.split('\n').filter(function (line) {
-                        return line.indexOf('a=candidate:') === 0;
-                    }).length;
+                    candsInSdp = entry.value.sdp.split('\n').filter(line => line.indexOf('a=candidate:') === 0).length;
                 }
             }
         });
         if (candsInSdp === -1) candsInSdp = 0;
-        return candsInSdp + peerConnectionLog.filter(function(entry) {
-            return entry.type === 'addIceCandidate';
-        }).length;
+        return candsInSdp + peerConnectionLog.filter(entry => entry.type === 'addIceCandidate').length;
     },
 
     // session duration, defined by ICE states.
@@ -1301,10 +1287,8 @@ module.exports = {
             var desc = peerConnectionLog[i].value;
             if (desc && desc.sdp) {
                 var mediaTypes = {};
-                var lines = desc.sdp.split('\n').filter(function(line) {
-                    return line.indexOf('m=') === 0;
-                });
-                lines.forEach(function(line) {
+                var lines = desc.sdp.split('\n').filter(line => line.indexOf('m=') === 0);
+                lines.forEach(line => {
                     mediaTypes[line.split(' ', 1)[0].substr(2)] = true;
                 });
                 return Object.keys(mediaTypes).sort().join(';');
@@ -1320,7 +1304,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'googComponent' && report.dtlsCipher) {
                     dtlsCipher = report.dtlsCipher;
@@ -1336,7 +1320,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'googComponent' && report.srtpCipher) {
                     srtpCipher = report.srtpCipher;
@@ -1370,18 +1354,18 @@ module.exports = {
         var send = [];
         var lastStatsReport;
         var lastTime;
-        peerConnectionLog.forEach(function(entry) {
+        peerConnectionLog.forEach(entry => {
             if (entry.type !== 'getStats') return;
             var statsReport = entry.value;
             // look for type track, remoteSource: false, audioLevel (0..1)
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'candidate-pair' && report.selected === true) {
                     rtts.push(report.roundTripTime);
                 }
             });
             if (lastStatsReport) {
-                Object.keys(statsReport).forEach(function(id) {
+                Object.keys(statsReport).forEach(id => {
                     var report = statsReport[id];
                     var bitrate;
                     if (report.type === 'candidate-pair' && report.selected === true && lastStatsReport[id]) {
@@ -1404,15 +1388,9 @@ module.exports = {
             lastTime = entry.time;
         });
 
-        feature['roundTripTime'] = Math.floor(rtts.reduce(function(a, b) {
-            return a + b;
-        }, 0) / (rtts.length || 1));
-        feature['receivingBitrate'] = Math.floor(recv.reduce(function(a, b) {
-            return a + b;
-        }, 0) / (recv.length || 1));
-        feature['sendingBitrate'] = Math.floor(send.reduce(function(a, b) {
-            return a + b;
-        }, 0) / (send.length || 1));
+        feature['roundTripTime'] = Math.floor(rtts.reduce((a, b) => a + b, 0) / (rtts.length || 1));
+        feature['receivingBitrate'] = Math.floor(recv.reduce((a, b) => a + b, 0) / (recv.length || 1));
+        feature['sendingBitrate'] = Math.floor(send.reduce((a, b) => a + b, 0) / (send.length || 1));
         return feature;
     },
 
@@ -1427,7 +1405,7 @@ module.exports = {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
             var pair = null;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 var localCandidate = statsReport[report.localCandidateId];
                 var remoteCandidate = statsReport[report.remoteCandidateId];
@@ -1454,7 +1432,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'candidate-pair' && report.selected === true) {
                     var pair = report.localCandidateId + ' ' + report.remoteCandidateId;
@@ -1509,7 +1487,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
             var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
+            Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
                 if (report.type === 'candidate-pair' && report.selected === true && statsReport[report.localCandidateId]) {
                     var type = statsReport[report.localCandidateId].networkType;
@@ -1549,7 +1527,7 @@ module.exports = {
         for (i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'getStats') {
                 var statsReport = peerConnectionLog[i].value;
-                Object.keys(statsReport).forEach(function(id) {
+                Object.keys(statsReport).forEach(id => {
                     var report = statsReport[id];
                     if (report.type === 'ssrc' && report.mediaType === 'video' && report.googFrameWidthReceived) {
                         trackid = id;
@@ -1595,8 +1573,8 @@ module.exports = {
         if (!bwe.length) return;
         var stats = ['googActualEncBitrate', 'googRetransmitBitrate', 'googTargetEncBitrate',
             'googBucketDelay', 'googTransmitBitrate'];
-        bwe = bwe.map(function(item) {
-            stats.forEach(function(stat) {
+        bwe = bwe.map(item => {
+            stats.forEach(stat => {
                 item[stat] = parseInt(item[stat], 10);
             });
             delete item.googAvailableSendBandwidth;
@@ -1607,10 +1585,10 @@ module.exports = {
         stats.push('availableIncomingBitrate');
 
         var feature = {};
-        stats.forEach(function(stat) {
-            var series = bwe.map(function(item) { return item[stat]; });
+        stats.forEach(stat => {
+            var series = bwe.map(item => item[stat]);
 
-            feature[capitalize(stat) + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+            feature[capitalize(stat) + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
             feature[capitalize(stat) + 'Max'] = Math.max.apply(null, series);
             feature[capitalize(stat) + 'Min'] = Math.min.apply(null, series);
 
@@ -1629,8 +1607,8 @@ module.exports = {
     }
 };
 
-['audio', 'video'].forEach(function(kind) {
-    ['send', 'recv'].forEach(function(direction) {
+['audio', 'video'].forEach(kind => {
+    ['send', 'recv'].forEach(direction => {
         module.exports[kind + capitalize(direction)] = function(client, peerConnectionLog) {
             var track = extractTrack(peerConnectionLog, kind, direction);
             if (!track.length) return;
@@ -1641,11 +1619,11 @@ module.exports = {
                 'googPreferredJitterBufferMs', 'googJitterBufferMs',
                 'googDecodeMs', 'googMaxDecodeMs',
                 'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
-            ].forEach(function(stat) {
+            ].forEach(stat => {
                 if (typeof track[0][stat] === 'undefined') return;
-                var series = track.map(function(item) { return parseInt(item[stat], 10) });
+                var series = track.map(item => parseInt(item[stat], 10));
 
-                feature[stat + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+                feature[stat + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
 
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
@@ -1655,33 +1633,33 @@ module.exports = {
                 feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
             });
             ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
-               'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(function(stat) {
+               'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(stat => {
                 if (typeof track[0][stat] === 'undefined') return;
                 // mode, max, min
-                var series = track.map(function(item) { return parseInt(item[stat], 10) });
+                var series = track.map(item => parseInt(item[stat], 10));
 
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
                 feature[stat + 'Mode'] = mode(series);
             });
 
-            ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(function(stat) {
+            ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(stat => {
                 if (typeof track[0][stat] === 'undefined') return;
-                var series = track.map(function(item) { return item[stat] === 'true' ? 1 : 0 });
+                var series = track.map(item => (item[stat] === 'true' ? 1 : 0));
 
-                feature[stat + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+                feature[stat + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
                 feature[stat + 'Mode'] = mode(series);
             });
 
             // RecentMax is over a 10s window.
-            ['googResidualEchoLikelihoodRecentMax'].forEach(function(stat) {
+            ['googResidualEchoLikelihoodRecentMax'].forEach(stat => {
                 if (typeof track[0][stat] === 'undefined') return;
 
-                var series = track.map(function(item) { return parseFloat(item[stat], 10) });
+                var series = track.map(item => parseFloat(item[stat], 10));
 
-                feature[stat + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+                feature[stat + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
                 feature[stat + 'Max'] = Math.max.apply(null, series);
 
                 feature[stat + 'Variance'] = standardizedMoment(series, 2);
@@ -1690,12 +1668,12 @@ module.exports = {
             });
 
             // stats for which we are interested in the difference between values.
-            ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(function(stat) {
+            ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(stat => {
                 var i;
                 var conversionFactor = stat.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
                 if (typeof track[0][stat] === 'undefined') return;
-                var series = track.map(function(item) { return parseInt(item[stat], 10) });
-                var dt = track.map(function(item) { return item.timestamp; });
+                var series = track.map(item => parseInt(item[stat], 10));
+                var dt = track.map(item => item.timestamp);
                 // calculate the difference
                 for (i = 1; i < series.length; i++) {
                     series[i - 1] = series[i] - series[i - 1];
@@ -1708,9 +1686,9 @@ module.exports = {
                 }
 
                 // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                series.filter(function(x) { return isFinite(x) && !isNaN(x) && x >= 0; });
+                series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
 
-                feature[stat + 'Delta' + 'Mean'] = series.reduce(function(a, b) { return a + b; }, 0) / series.length;
+                feature[stat + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
                 feature[stat + 'Max'] = Math.max.apply(null, series);
                 feature[stat + 'Min'] = Math.min.apply(null, series);
                 feature[stat + 'Mode'] = mode(series);
@@ -1735,16 +1713,16 @@ function safeFeature(feature) {
 
 if (require.main === module && process.argv.length === 3) {
     var features = module.exports;
-    fs.readFile(process.argv[2], function(err, data) {
+    fs.readFile(process.argv[2], (err, data) => {
         if (err) return;
         // TODO: this is copy-paste from extract.js
         var client = JSON.parse(data);
-        Object.keys(features).forEach(function (fname) {
+        Object.keys(features).forEach(fname => {
             if (features[fname].length === 1) {
                 var feature = features[fname].apply(null, [client]);
                 if (feature !== undefined) {
                     if (typeof feature === 'object') {
-                        Object.keys(feature).forEach(function(subname) {
+                        Object.keys(feature).forEach(subname => {
                             console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
                         });
                     }  else {
@@ -1753,16 +1731,16 @@ if (require.main === module && process.argv.length === 3) {
                 }
             }
         });
-        Object.keys(client.peerConnections).forEach(function(connid) {
+        Object.keys(client.peerConnections).forEach(connid => {
             if (connid === 'null') return; // ignore the null connid
             var conn = client.peerConnections[connid];
             var connectionFeatures = {};
-            Object.keys(features).forEach(function (fname) {
+            Object.keys(features).forEach(fname => {
                 if (features[fname].length === 2) {
                     var feature = features[fname].apply(null, [client, conn]);
                     if (feature !== undefined) {
                         if (typeof feature === 'object') {
-                            Object.keys(feature).forEach(function(subname) {
+                            Object.keys(feature).forEach(subname => {
                                 console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
                             });
                         }  else {

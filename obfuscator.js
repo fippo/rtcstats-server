@@ -1,13 +1,13 @@
 // obfuscate ip addresses which should not be stored long-term.
 
-var SDPUtils = require('sdp');
+const SDPUtils = require('sdp');
 
 // obfuscate ip, keeping address family intact.
 function obfuscateIP(ip) {
     if (ip.indexOf('[') === 0 || ip.indexOf(':') !== -1) { // IPv6
         return '::1';
     }
-    var parts = ip.split('.');
+    const parts = ip.split('.');
     if (parts.length === 4) {
         parts[3] = 'x';
         return parts.join('.');
@@ -19,7 +19,7 @@ function obfuscateIP(ip) {
 // obfuscate the ip in ice candidates. Does NOT obfuscate the ip of the TURN server to allow
 // selecting/grouping sessions by TURN server.
 function obfuscateCandidate(candidate) {
-    var cand = SDPUtils.parseCandidate(candidate);
+    const cand = SDPUtils.parseCandidate(candidate);
     if (cand.type !== 'relay') {
         cand.ip = obfuscateIP(cand.ip);
     }
@@ -30,8 +30,8 @@ function obfuscateCandidate(candidate) {
 }
 
 function obfuscateSDP(sdp) {
-    var lines = SDPUtils.splitLines(sdp);
-    return lines.map(function(line) {
+    const lines = SDPUtils.splitLines(sdp);
+    return lines.map(line => {
         // obfuscate a=candidate, c= and a=rtcp
         if (line.indexOf('a=candidate:') === 0) {
             return obfuscateCandidate(line);
@@ -46,14 +46,14 @@ function obfuscateSDP(sdp) {
 }
 
 function obfuscateStats(stats) {
-    Object.keys(stats).forEach(function(id) {
-        var report = stats[id];
+    Object.keys(stats).forEach(id => {
+        const report = stats[id];
         if (report.ipAddress && report.candidateType !== 'relayed') {
             report.ipAddress = obfuscateIP(report.ipAddress);
         }
-        ['googLocalAddress', 'googRemoteAddress'].forEach(function(name) {
+        ['googLocalAddress', 'googRemoteAddress'].forEach(name => {
             // contains both address and port
-            var port;
+            let port;
             if (report[name]) {
                 if (report[name][0] === '[') {
                     port = report[name].substr(report[name].indexOf(']') + 2);

@@ -1,8 +1,8 @@
 // using shiftwidth=2 since reformating all the adapter code...
 module.exports = function(stats) {
   // Mangle chrome stats to spec stats. Just chrome stats.
-  var needsMangling = false;
-  Object.keys(stats).forEach(function(id) {
+  let needsMangling = false;
+  Object.keys(stats).forEach(id => {
       if (stats[id].type === 'googComponent') {
           needsMangling = true;
       }
@@ -11,9 +11,9 @@ module.exports = function(stats) {
       return stats;
   }
   // taken from https://github.com/fippo/adapter/tree/getstats-mangling
-  var standardReport = {};
-  Object.keys(stats).forEach(function(id) {
-    var standardStats = stats[id];
+  const standardReport = {};
+  Object.keys(stats).forEach(id => {
+    const standardStats = stats[id];
 
     // Step 1: translate to standard types and attribute names.
     switch (standardStats.type) {
@@ -208,9 +208,9 @@ module.exports = function(stats) {
     standardReport[standardStats.id] = standardStats;
   });
   // Step 2: fix things spanning multiple reports.
-  Object.keys(standardReport).forEach(function(id) {
-    var report = standardReport[id];
-    var other, newId, sdp;
+  Object.keys(standardReport).forEach(id => {
+    const report = standardReport[id];
+    let other, newId, sdp;
     switch (report.type) {
       case 'googCandidatePair':
         report.type = 'candidate-pair';
@@ -383,17 +383,17 @@ module.exports = function(stats) {
     }
   });
   // Step 3: fiddle the transport in between transport and rtp stream
-  Object.keys(standardReport).forEach(function(id) {
-    var report = standardReport[id];
+  Object.keys(standardReport).forEach(id => {
+    const report = standardReport[id];
     if (report.type === 'transprort') {
       // RTCTransport has a pointer to the selectedCandidatePair...
-      var other = standardReport[report.selectedCandidatePairId];
+      let other = standardReport[report.selectedCandidatePairId];
       if (other) {
         other.transportId = report.id;
       }
       // but no pointers to the rtpstreams running over it?!
       // instead, we rely on having added 'transport_'
-      Object.keys(standardReport).forEach(function(otherid) {
+      Object.keys(standardReport).forEach(otherid => {
         other = standardReport[otherid];
         if ((other.type === 'inboundrtp' ||
             other.type === 'outboundrtp') &&

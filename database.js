@@ -1,10 +1,10 @@
-var AWS = require('aws-sdk');
-var _ = require('lodash');
+const AWS = require('aws-sdk');
+const _ = require('lodash');
 
 function lower(obj) {
-  var key, keys = Object.keys(obj);
-  var n = keys.length;
-  var newobj={}
+  let key, keys = Object.keys(obj);
+  let n = keys.length;
+  const newobj={};
   while (n--) {
     key = keys[n];
     newobj[key.toLowerCase()] = obj[key];
@@ -13,7 +13,7 @@ function lower(obj) {
 }
 
 module.exports = function(config) {
-  var firehose;
+  let firehose;
   if (config.firehose && config.firehose.stream) {
     AWS.config = config.firehose;
     firehose = new AWS.Firehose();
@@ -23,8 +23,8 @@ module.exports = function(config) {
 
   return {
     put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures) {
-      var d = new Date().getTime();
-      var item = {
+      const d = new Date().getTime();
+      const item = {
         Date: d - (d % (86400 * 1000)), // just the UTC day
         DateTime: d,
         ClientId: clientId,
@@ -32,10 +32,10 @@ module.exports = function(config) {
         PageUrl: pageUrl,
       };
 
-      _.forEach(clientFeatures, function(value, key) {
+      _.forEach(clientFeatures, (value, key) => {
         item[key] = value;
       });
-      _.forEach(connectionFeatures, function(value, key) {
+      _.forEach(connectionFeatures, (value, key) => {
         item[key] = value;
       });
 
@@ -45,7 +45,7 @@ module.exports = function(config) {
           Record: {
             Data: JSON.stringify(lower(item))
           },
-        }, function(err, data) {
+        }, (err, data) => {
           if (err) {
             console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
           } else {

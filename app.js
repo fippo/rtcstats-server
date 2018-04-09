@@ -1,20 +1,20 @@
 'use strict';
-var fs = require('fs');
-var config = require('config');
-var uuid = require('uuid');
-var obfuscate = require('./obfuscator');
-var os = require('os');
-var child_process = require('child_process');
+const fs = require('fs');
+const config = require('config');
+const uuid = require('uuid');
+const obfuscate = require('./obfuscator');
+const os = require('os');
+const child_process = require('child_process');
 
-var WebSocketServer = require('ws').Server;
+const WebSocketServer = require('ws').Server;
 
 const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
-var wss = null;
+let wss = null;
 
-var server;
-var tempPath = 'temp';
+let server;
+const tempPath = 'temp';
 
 class ProcessQueue {
     constructor() {
@@ -31,9 +31,9 @@ class ProcessQueue {
         }
     }
     process() {
-        var clientid = this.q.shift();
+        const clientid = this.q.shift();
         if (!clientid) return;
-        var p = child_process.fork('extract.js', [clientid]);
+        const p = child_process.fork('extract.js', [clientid]);
         p.on('exit', () => {
             this.numProc--;
             console.log('done', clientid, this.numProc);
@@ -53,7 +53,7 @@ var q = new ProcessQueue();
 
 function setupWorkDirectory() {
     try {
-        fs.readdirSync(tempPath).forEach(function(fname) {
+        fs.readdirSync(tempPath).forEach(fname => {
             fs.unlinkSync(tempPath + '/' + fname);
         });
         fs.rmdirSync(tempPath);
@@ -76,7 +76,7 @@ function run(keys) {
     }
 
     server.listen(config.get('server').port);
-    server.on('request', function(request, response) {
+    server.on('request', (request, response) => {
         // look at request.url
         switch (request.url) {
         case "/healthcheck":
@@ -91,19 +91,19 @@ function run(keys) {
 
     wss = new WebSocketServer({ server: server });
 
-    wss.on('connection', function(client) {
+    wss.on('connection', client => {
         // the url the client is coming from
-        var referer = client.upgradeReq.headers['origin'] + client.upgradeReq.url;
+        const referer = client.upgradeReq.headers['origin'] + client.upgradeReq.url;
         // TODO: check against known/valid urls
 
-        var ua = client.upgradeReq.headers['user-agent'];
-        var clientid = uuid.v4();
-        var tempStream = fs.createWriteStream(tempPath + '/' + clientid);
-        tempStream.on('finish', function() {
+        const ua = client.upgradeReq.headers['user-agent'];
+        const clientid = uuid.v4();
+        let tempStream = fs.createWriteStream(tempPath + '/' + clientid);
+        tempStream.on('finish', () => {
             q.enqueue(clientid);
         });
 
-        var meta = {
+        const meta = {
             path: client.upgradeReq.url,
             origin: client.upgradeReq.headers['origin'],
             url: referer,
@@ -112,10 +112,10 @@ function run(keys) {
         };
         tempStream.write(JSON.stringify(meta) + '\n');
 
-        var forwardedFor = client.upgradeReq.headers['x-forwarded-for'];
+        const forwardedFor = client.upgradeReq.headers['x-forwarded-for'];
         if (forwardedFor) {
-            process.nextTick(function() {
-                var city = cityLookup.get(forwardedFor);
+            process.nextTick(() => {
+                const city = cityLookup.get(forwardedFor);
                 if (tempStream) {
                     tempStream.write(JSON.stringify({
                         0: 'location',
@@ -129,8 +129,8 @@ function run(keys) {
         }
 
         console.log('connected', ua, referer, clientid);
-        client.on('message', function (msg) {
-            var data = JSON.parse(msg);
+        client.on('message', msg => {
+            const data = JSON.parse(msg);
             switch(data[0]) {
             case 'getUserMedia':
             case 'getUserMediaOnSuccess':
@@ -149,7 +149,7 @@ function run(keys) {
             }
         });
 
-        client.on('close', function() {
+        client.on('close', () => {
             tempStream.end();
             tempStream = null;
         });

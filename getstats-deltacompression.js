@@ -1,11 +1,11 @@
 module.exports = {
   decompress: function(baseStats, newStats) {
-    Object.keys(newStats).forEach(function(id) {
+    Object.keys(newStats).forEach(id => {
       if (!baseStats[id]) {
         baseStats[id] = newStats[id];
       } else {
-        var report = newStats[id];
-        Object.keys(report).forEach(function(name) {
+        const report = newStats[id];
+        Object.keys(report).forEach(name => {
           baseStats[id][name] = report[name];
         });
       }
@@ -13,12 +13,12 @@ module.exports = {
     return baseStats;
   },
   compress: function(baseStats, newStats) {
-    Object.keys(newStats).forEach(function(id) {
+    Object.keys(newStats).forEach(id => {
       if (!baseStats[id]) {
         return;
       }
-      var report = newStats[id];
-      Object.keys(report).forEach(function(name) {
+      const report = newStats[id];
+      Object.keys(report).forEach(name => {
         if (report[name] === baseStats[id][name]) {
           delete newStats[id][name];
         }

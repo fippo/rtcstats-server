@@ -1,10 +1,10 @@
-var AWS = require('aws-sdk');
-var zlib = require('zlib');
+const AWS = require('aws-sdk');
+const zlib = require('zlib');
 
 module.exports = function(config) {
   AWS.config = config.s3;
 
-  var s3bucket = new AWS.S3({
+  const s3bucket = new AWS.S3({
     params: {
       Bucket: config.s3.bucket
     }
@@ -13,11 +13,11 @@ module.exports = function(config) {
 
   return {
     put: function(key, data) {
-      zlib.gzip(data, function(err, data) {
+      zlib.gzip(data, (err, data) => {
         if (err) {
           console.log("Error gzipping data: ", err);
         } else {
-          s3bucket.upload({ Key: key + '.gz', Body: data }, function(err, data) {
+          s3bucket.upload({ Key: key + '.gz', Body: data }, (err, data) => {
             if (err) {
               console.log("Error uploading data: ", err);
             } else {
@@ -27,5 +27,5 @@ module.exports = function(config) {
         }
       })
     },
-  }
+  };
 }
