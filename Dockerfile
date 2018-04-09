@@ -1,5 +1,4 @@
-FROM node:4
-MAINTAINER Tokbox <ops@tokbox.com>
+FROM node:6
 
 ENV app rtcstats-server
 
@@ -16,9 +15,6 @@ RUN chown -R $app:$app /$app
 USER $app
 
 RUN npm install
-
-# Generate static/rtcstats.min.js
-RUN mkdir static && cd node_modules/rtcstats && npm run dist && cp min.js ../../static/rtcstats.min.js
 
 VOLUME ["/var/log/$app"]
 EXPOSE 3000
