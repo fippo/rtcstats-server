@@ -27,7 +27,6 @@
     "maxmind": "^1.3.0",
     "pem": "^1.8.1",
     "platform": "https://github.com/bestiejs/platform.js.git",
-    "rtcstats": "https://github.com/opentok/rtcstats.git",
     "sdp": "^1.0.0",
     "uuid": "^2.0.1",
     "ws": "^5.1.1"
