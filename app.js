@@ -11,8 +11,9 @@ const WebSocketServer = require('ws').Server;
 const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
-let wss = null;
-
+const Database = require('./database')({
+    firehose: config.get('firehose'),
+});
 let server;
 const tempPath = 'temp';
 
@@ -39,6 +40,10 @@ class ProcessQueue {
             console.log('done', clientid, this.numProc);
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
+        });
+        p.on('message', (msg) => {
+            const {url, clientid, connid, clientFeatures, connectionFeatures} = msg;
+            Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
         });
         p.on('error', () => {
             this.numProc--;
@@ -89,8 +94,7 @@ function run(keys) {
         }
     });
 
-    wss = new WebSocketServer({ server: server });
-
+    const wss = new WebSocketServer({ server: server });
     wss.on('connection', (client, upgradeReq) => {
         // the url the client is coming from
         const referer = upgradeReq.headers['origin'] + upgradeReq.url;

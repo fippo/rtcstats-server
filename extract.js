@@ -4,10 +4,7 @@ const config = require('config');
 const Store = require('./store')({
   s3: config.get('s3'),
 });
-const Database = require('./database')({
-  firehose: config.get('firehose'),
-});
-
+const canUseProcessSend = !!process.send;
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 function capitalize(str) {
@@ -37,10 +34,9 @@ function dump(url, client, clientid, data) {
             total += client.peerConnections[id].length;
         });
         console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
+        return;
     }
-    if (isProduction) {
-        Store.put(clientid, data);
-    }
+    Store.put(clientid, data);
 }
 
 // Feature generation
@@ -100,8 +96,11 @@ function generateFeatures(url, client, clientid) {
             }
         });
         delete client.peerConnections[connid]; // save memory
-        if (isProduction) {
-            Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
+        if (!isProduction) return;
+        if (canUseProcessSend) {
+            process.send({url, clientid, connid, clientFeatures, connectionFeatures});
+        } else {
+            console.log(url, clientid, connid, clientFeatures, connectionFeatures);
         }
     });
 }
