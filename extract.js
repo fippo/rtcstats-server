@@ -1,9 +1,6 @@
 const fs = require('fs');
 const config = require('config');
 
-const Store = require('./store')({
-  s3: config.get('s3'),
-});
 const canUseProcessSend = !!process.send;
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
@@ -24,7 +21,7 @@ const features = require('./features');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
 
-// dumps all peerconnections to Store
+// dumps all peerconnections.
 function dump(url, client, clientid, data) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
@@ -36,7 +33,6 @@ function dump(url, client, clientid, data) {
         console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
         return;
     }
-    Store.put(clientid, data);
 }
 
 // Feature generation
@@ -108,10 +104,6 @@ function generateFeatures(url, client, clientid) {
 var clientid = process.argv[2];
 const path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
-    // remove the file
-    fs.unlink(path, () => {
-        // we're good...
-    });
     if (!err) {
         const baseStats = {};
         const lines = data.split('\n');
