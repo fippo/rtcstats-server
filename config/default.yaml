@@ -13,6 +13,12 @@ firehose:
     region:
     stream:
 
+postgres:
+    user:
+    host:
+    password:
+    database:
+
 appenders:
     - type: file
       layout:

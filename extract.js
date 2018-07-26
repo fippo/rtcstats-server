@@ -6,6 +6,7 @@ const Store = require('./store')({
 });
 const Database = require('./database')({
   firehose: config.get('firehose'),
+  postgres: config.get('postgres')
 });
 
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
@@ -38,7 +39,7 @@ function dump(url, client, clientid, data) {
         });
         console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
     }
-    if (isProduction) {
+    if (config.s3 && config.s3.accessKeyId) {
         Store.put(clientid, data);
     }
 }
@@ -100,7 +101,7 @@ function generateFeatures(url, client, clientid) {
             }
         });
         delete client.peerConnections[connid]; // save memory
-        if (isProduction) {
+        if ((config.postgres && config.postgres.host) || (config.firehose && config.firehose.stream)) {
             Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
         }
     });
