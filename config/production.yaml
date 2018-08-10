@@ -13,6 +13,12 @@ firehose:
     region:
     stream:
 
+postgres:
+    user: PG_USER
+    host: PG_HOST
+    password: PG_PASSWORD
+    database: PG_DATABASE
+
 appenders:
     - type: file
       layout:

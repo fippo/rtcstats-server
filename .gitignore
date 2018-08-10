@@ -10,7 +10,7 @@ lib-cov
 *.tgz
 *.sh
 *.tap
-.env
+*.env
 
 pids
 logs
