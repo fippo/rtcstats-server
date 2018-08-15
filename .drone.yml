@@ -8,33 +8,20 @@ pipeline:
     secrets: [ docker_username, docker_password ]
     when:
       event: [ tag ]
-  # deploy_api_stage:
-  #   image: quay.io/honestbee/drone-kubernetes
-  #   kubernetes_server: ${KUBERNETES_SERVER}
-  #   kubernetes_cert: ${KUBERNETES_CERT}
-  #   kubernetes_token: ${KUBERNETES_TOKEN}
-  #   deployment: swrtc-api-stage
-  #   repo: andyet/talky-api
-  #   container: swrtc-api-stage
-  #   namespace: default
-  #   tag: 
-  #   - ${DRONE_TAG##v}
-  #   when:
-  #     event: tag
-  #   secrets: [ kubernetes_cert, kubernetes_server, kubernetes_token ]
-  # deploy_prod:
-  #   image: quay.io/honestbee/drone-kubernetes
-  #   kubernetes_server: ${KUBERNETES_SERVER}
-  #   kubernetes_cert: ${KUBERNETES_CERT}
-  #   kubernetes_token: ${KUBERNETES_TOKEN}
-  #   deployment: swrtc-api-prod
-  #   repo: andyet/talky-api
-  #   container: api-prod
-  #   namespace: default
-  #   tag: ${DRONE_COMMIT_SHA:0:8}
-  #   when:
-  #     event: deployment
-  #   secrets: [ kubernetes_cert, kubernetes_server, kubernetes_token ]
+  deploy:
+    image: quay.io/honestbee/drone-kubernetes
+    kubernetes_server: ${KUBERNETES_SERVER}
+    kubernetes_cert: ${KUBERNETES_CERT}
+    kubernetes_token: ${KUBERNETES_TOKEN}
+    deployment: rtcstats-server
+    repo: andyet/rtcstats
+    container: rtcstats-server
+    namespace: default
+    tag: 
+    - ${DRONE_TAG##v}
+    when:
+      event: tag
+    secrets: [ kubernetes_cert, kubernetes_server, kubernetes_token ]
   slack:
     image: plugins/slack
     username: drone
