@@ -1,6 +1,7 @@
 FROM node:6
 
 ENV app rtcstats-server
+ENV NODE_ENV production
 
 RUN useradd $app \
   && mkdir /home/$app \
