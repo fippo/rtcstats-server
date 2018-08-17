@@ -1,11 +1,31 @@
 pipeline:
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    ttl: 7
+    mount:
+      - /drone/docker
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      event: [ tag ]
   build_docker:
     image: plugins/docker
     repo: andyet/rtcstats
     tags: 
       - ${DRONE_COMMIT_SHA:0:8}
       - ${DRONE_TAG##v}
+    storage_path: /drone/docker
     secrets: [ docker_username, docker_password ]
+    when:
+      event: [ tag ]
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - /drone/docker
+    volumes:
+      - /tmp/cache:/cache
     when:
       event: [ tag ]
   deploy:
