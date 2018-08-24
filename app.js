@@ -11,7 +11,12 @@ const WebSocketServer = require('ws').Server;
 const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
-let wss = null;
+const Database = require('./database')({
+    firehose: config.get('firehose'),
+});
+const Store = require('./store')({
+  s3: config.get('s3'),
+});
 
 let server;
 const tempPath = 'temp';
@@ -39,6 +44,21 @@ class ProcessQueue {
             console.log('done', clientid, this.numProc);
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
+            fs.readFile(tempPath + '/' + clientid, {encoding: 'utf-8'}, (err, data) => {
+                if (err) {
+                    console.error('Could not open file for store upload', err);
+                    return;
+                }
+                // remove the file
+                fs.unlink(tempPath + '/' + clientid, () => {
+                    // we're good...
+                });
+                Store.put(clientid, data);
+            });
+        });
+        p.on('message', (msg) => {
+            const {url, clientid, connid, clientFeatures, connectionFeatures} = msg;
+            Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
         });
         p.on('error', () => {
             this.numProc--;
@@ -89,9 +109,9 @@ function run(keys) {
         }
     });
 
-    wss = new WebSocketServer({ server: server });
-
+    const wss = new WebSocketServer({ server: server });
     wss.on('connection', (client, upgradeReq) => {
+        let numberOfEvents = 0;
         // the url the client is coming from
         const referer = upgradeReq.headers['origin'] + upgradeReq.url;
         // TODO: check against known/valid urls
@@ -100,7 +120,13 @@ function run(keys) {
         const clientid = uuid.v4();
         let tempStream = fs.createWriteStream(tempPath + '/' + clientid);
         tempStream.on('finish', () => {
-            q.enqueue(clientid);
+            if (numberOfEvents > 0) {
+                q.enqueue(clientid);
+            } else {
+                fs.unlink(tempPath + '/' + clientid, () => {
+                    // we're good...
+                });
+            }
         });
 
         const meta = {
@@ -129,8 +155,10 @@ function run(keys) {
         }
 
         console.log('connected', ua, referer, clientid);
+
         client.on('message', msg => {
             const data = JSON.parse(msg);
+            numberOfEvents++;
             switch(data[0]) {
             case 'getUserMedia':
             case 'getUserMediaOnSuccess':

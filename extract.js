@@ -1,13 +1,7 @@
 const fs = require('fs');
 const config = require('config');
 
-const Store = require('./store')({
-  s3: config.get('s3'),
-});
-const Database = require('./database')({
-  firehose: config.get('firehose'),
-});
-
+const canUseProcessSend = !!process.send;
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 function capitalize(str) {
@@ -27,7 +21,7 @@ const features = require('./features');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
 
-// dumps all peerconnections to Store
+// dumps all peerconnections.
 function dump(url, client, clientid, data) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
@@ -37,9 +31,7 @@ function dump(url, client, clientid, data) {
             total += client.peerConnections[id].length;
         });
         console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
-    }
-    if (isProduction) {
-        Store.put(clientid, data);
+        return;
     }
 }
 
@@ -100,8 +92,11 @@ function generateFeatures(url, client, clientid) {
             }
         });
         delete client.peerConnections[connid]; // save memory
-        if (isProduction) {
-            Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
+        if (!isProduction) return;
+        if (canUseProcessSend) {
+            process.send({url, clientid, connid, clientFeatures, connectionFeatures});
+        } else {
+            console.log(url, clientid, connid, clientFeatures, connectionFeatures);
         }
     });
 }
@@ -109,10 +104,6 @@ function generateFeatures(url, client, clientid) {
 var clientid = process.argv[2];
 const path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
-    // remove the file
-    fs.unlink(path, () => {
-        // we're good...
-    });
     if (!err) {
         const baseStats = {};
         const lines = data.split('\n');
