@@ -51,6 +51,9 @@ function obfuscateStats(stats) {
         if (report.ipAddress && report.candidateType !== 'relayed') {
             report.ipAddress = obfuscateIP(report.ipAddress);
         }
+        if (report.address && report.candidateType !== 'relayed') {
+            report.address = obfuscateIP(report.address);
+        }
         ['googLocalAddress', 'googRemoteAddress'].forEach(name => {
             // contains both address and port
             let port;
