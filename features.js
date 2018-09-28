@@ -663,6 +663,11 @@ module.exports = {
         return peerConnectionConfig ? peerConnectionConfig.certificates !== undefined : false;
     },
 
+    sdpSemantics: function(client, peerConnectionLog) {
+        var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+        return peerConnectionConfig ? peerConnectionConfig.sdpSemantics : '';
+    },
+
     // did ice gathering complete (aka: onicecandidate called with a null candidate)
     ICEGatheringComplete: function(client, peerConnectionLog) {
         return peerConnectionLog.filter(entry => entry.type === 'onicecandidate' && entry.value === null).length > 0;
