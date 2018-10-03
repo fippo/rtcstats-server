@@ -1422,7 +1422,8 @@ module.exports = {
                         localIPAddress: localCandidate.ipAddress,
                         remoteIPAddress: remoteCandidate.ipAddress,
                         localTypePreference: localCandidate.priority >> 24,
-                        remoteTypePreference: remoteCandidate.priority >> 24
+                        remoteTypePreference: remoteCandidate.priority >> 24,
+                        localNetworkType: localCandidate.networkType
                     };
                 }
             });
