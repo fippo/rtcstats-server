@@ -522,7 +522,8 @@ module.exports = {
     // how long did the peerconnection live?
     // not necessarily connected which is different from session duration
     lifeTime: function(client, peerConnectionLog) {
-        return new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime() - new Date(peerConnectionLog[0].time).getTime();
+        const lifeTime = new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime() - new Date(peerConnectionLog[0].time).getTime();
+        return lifeTime > 0 ? lifeTime : null;
     },
 
     // the webrtc platform type -- webkit or moz
