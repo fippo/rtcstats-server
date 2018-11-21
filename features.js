@@ -398,6 +398,18 @@ module.exports = {
         return false;
     },
 
+    calledGetUserMediaRequestingAEC3: function(client) {
+        var gum = client.getUserMedia || [];
+        var requested = false;
+        for (var i = 0; i < gum.length; i++) {
+            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
+                var options = gum[i].value;
+                if (options.audio && options.audio.echoCancellationType === 'aec3') requested = true;
+            }
+        }
+        return requested;
+    },
+
     timeBetweenGetUserMediaAndGetUserMediaSuccess: function(client) {
         var gum = client.getUserMedia || [];
         var first;
