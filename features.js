@@ -1618,7 +1618,7 @@ module.exports = {
         return feature;
     },
 
-    calledAddStream: function(client) {
+    calledAddStream: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             var type = peerConnectionLog[i].type;
             if (type === 'addStream') {
@@ -1628,7 +1628,7 @@ module.exports = {
         return false;
     },
 
-    calledAddTrack: function(client) {
+    calledAddTrack: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             var type = peerConnectionLog[i].type;
             if (type === 'addTrack') {
