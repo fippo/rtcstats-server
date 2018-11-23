@@ -1618,6 +1618,26 @@ module.exports = {
         return feature;
     },
 
+    calledAddStream: function(client) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            var type = peerConnectionLog[i].type;
+            if (type === 'addStream') {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    calledAddTrack: function(client) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            var type = peerConnectionLog[i].type;
+            if (type === 'addTrack') {
+                return true;
+            }
+        }
+        return false;
+    },
+
     userfeedback: function(client) {
         if (!client.feedback) return;
         var feature = {};

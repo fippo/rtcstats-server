@@ -297,5 +297,7 @@ CREATE TABLE features_import (
     firstremotestreamaudio character varying(255),
     firstremotestreamvideo character varying(255),
     usingsimulcast boolean,
-    sdpSemantics: character varying(32)
+    sdpsemantics: character varying(32),
+    calledaddtrack: boolean,
+    calledaddstream: boolean
 );
