@@ -191,14 +191,15 @@ function extractTrack(peerConnectionLog, kind, direction) {
     var trackId;
     var reports = [];
     var streamevent = 'onaddstream';
+    var trackevent = 'ontrack';
     if (direction === 'send') {
         streamevent = 'addStream';
     }
     // search for the (first) track of that kind.
     for (var i = 0; i < peerConnectionLog.length; i++) {
         var type = peerConnectionLog[i].type;
-        if (type === streamevent || (direction === 'send' && type === 'addTrack')) {
-            if (type === 'addTrack') {
+        if (type === streamevent || type === trackevent || (direction === 'send' && type === 'addTrack')) {
+            if (type === 'addTrack' || type === trackevent) {
                 var kindAndTrack = peerConnectionLog[i].value.split(' ')[0].split(':');
                 if (kindAndTrack[0] === kind) {
                     trackId = kindAndTrack[1];
