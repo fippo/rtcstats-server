@@ -394,6 +394,9 @@ module.exports = {
                     }
                 }
             }
+            if (gum[i].type === 'navigator.getDisplayMedia' || gum[i].type === 'navigator.mediaDevices.getDisplayMedia') {
+                return true;
+            }
         }
         return false;
     },
