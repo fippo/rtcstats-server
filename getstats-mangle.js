@@ -25,23 +25,6 @@ module.exports = function(stats) {
             standardStats.id.indexOf('recv') !== -1;
         standardStats.ssrc = parseInt(standardStats.ssrc, 10);
 
-        /* done in client since it needs access to PC
-        if (!standardStats.mediaType && standardStats.googTrackId) {
-          // look up track kind in local or remote streams.
-          var streams = standardStats.remoteSource ?
-              pc.getRemoteStreams() : pc.getLocalStreams();
-          for (var i = 0; i < streams.length && !standardStats.mediaType;
-              i++) {
-            var tracks = streams[i].getTracks();
-            for (var j = 0; j < tracks.length; j++) {
-              if (tracks[j].id === standardStats.googTrackId) {
-                standardStats.mediaType = tracks[j].kind;
-              }
-            }
-          }
-        }
-        */
-
         // FIXME: 'only makes sense' <=> not set?
         if (standardStats.googFrameWidthReceived ||
             standardStats.googFrameWidthSent) {
@@ -79,7 +62,7 @@ module.exports = function(stats) {
           standardStats.framesDecoded = 0;
         }
         // FIXME: both on sender and receiver?
-        if (standardStats.mediaType === 'video') {
+        if (standardStats.kind === 'video' || standardStats.mediaType === 'video') {
           standardStats.framesDropped = 0;
         }
         if (standardStats.audioInputLevel ||
@@ -252,7 +235,8 @@ module.exports = function(stats) {
           timestamp: report.timestamp,
           id: newId,
           ssrc: report.ssrc,
-          mediaType: report.mediaType,
+          mediaType: report.kind || report.mediaType,
+          kind: report.kind || report.mediaType,
           associateStatsId: 'rtcpstream_' + report.id,
           isRemote: false,
           mediaTrackId: 'mediatrack_' + report.id,
@@ -261,7 +245,7 @@ module.exports = function(stats) {
         if (report.googCodecName && report.googCodecName.length) {
           standardReport.codecId = 'codec_' + report.googCodecName
         }
-        if (report.mediaType === 'video') {
+        if (report.kind === 'video' || report.mediaType === 'video') {
           standardReport[newId].firCount = report.firCount;
           standardReport[newId].pliCount = report.pliCount;
           standardReport[newId].nackCount = report.nackCount;
@@ -321,14 +305,14 @@ module.exports = function(stats) {
           remoteSource: report.remoteSource,
           ssrcIds: ['rtpstream_' + report.id, 'rtcpstream_' + report.id]
         };
-        if (report.mediaType === 'audio') {
+        if (report.kind === 'audio' || report.mediaType === 'audio') {
           standardReport[newId].audioLevel = report.audioLevel;
           if (report.id.indexOf('send') !== -1) {
             standardReport[newId].echoReturnLoss = report.echoReturnLoss;
             standardReport[newId].echoReturnLossEnhancement =
                 report.echoReturnLossEnhancement;
           }
-        } else if (report.mediaType === 'video') {
+        } else if (report.kind === 'video' || report.mediaType === 'video') {
           standardReport[newId].frameWidth = report.frameWidth;
           standardReport[newId].frameHeight = report.frameHeight;
           standardReport[newId].framesPerSecond = report.framesPerSecond;

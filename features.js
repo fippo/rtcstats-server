@@ -96,9 +96,9 @@ function extractLastVideoStat(peerConnectionLog, type) {
     if (!statsReport) return;
     var count;
     Object.keys(statsReport).forEach(id => {
-        // type outboundrtp && mediaType video
+        // type outboundrtp && kind video
         var report = statsReport[id];
-        if (report.type === 'outboundrtp' && report.mediaType === 'video') {
+        if (report.type === 'outboundrtp' && (report.kind === 'video' || report.mediaType === 'video')) {
             count = report[type];
         }
     });
@@ -136,14 +136,14 @@ function standardizedMoment(series, order) {
 }
 
 // extracts the central moment from video statistics.
-function extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, mediaType) {
+function extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, kind) {
     var series = [];
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
             var statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(id => {
                 var report = statsReport[id];
-                if (report.type === 'ssrc' && report.mediaType === mediaType && report[statName]) {
+                if (report.type === 'ssrc' && (report.kind === kind || report.mediaType === kind) && report[statName]) {
                     series.push(parseInt(report[statName], 10));
                 }
             });
@@ -162,7 +162,7 @@ function extractCentralMomentFromAudioStat(peerConnectionLog, statName, order) {
 
 // extract the codec used. Has to happen after the connection is up and packets have
 // been received or sent.
-function getCodec(peerConnectionLog, mediaType, direction) { 
+function getCodec(peerConnectionLog, kind, direction) { 
     var codecName;
     var connected = false;
     for (var i = 0; i < peerConnectionLog.length; i++) {
@@ -176,7 +176,7 @@ function getCodec(peerConnectionLog, mediaType, direction) {
         var statsReport = peerConnectionLog[i].value;
         Object.keys(statsReport).forEach(id => {
             var report = statsReport[id];
-            if (report.type === 'ssrc' && report.mediaType === mediaType &&
+            if (report.type === 'ssrc' && (report.kind === kind || report.mediaType === kind) &&
               report.googCodecName && report.googCodecName.length
               && id.indexOf(direction) !== -1) {
                 codecName = report.googCodecName;
@@ -807,7 +807,7 @@ module.exports = {
                 if (count++ === 10) {
                     Object.keys(peerConnectionLog[i].value).forEach(id => {
                         var report = peerConnectionLog[i].value[id];
-                        if (report.type === 'ssrc' && report.mediaType === 'video' && id.indexOf('_recv')) {
+                        if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && id.indexOf('_recv')) {
                             receivedVideo = {
                                 packetsReceived: report.packetsReceived,
                                 frameWidth: report.frameWidth,
@@ -835,7 +835,7 @@ module.exports = {
             if (peerConnectionLog[i].type === 'getStats') {
                 Object.keys(peerConnectionLog[i].value).forEach(id => {
                     var report = peerConnectionLog[i].value[id];
-                    if (report.type === 'ssrc' && report.mediaType === 'video' && report.googFrameWidthReceived) {
+                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && report.googFrameWidthReceived) {
                         let width = parseInt(report.googFrameWidthReceived, 10);
                         if (width > 0) {
                             timeReceived = new Date(peerConnectionLog[i].time).getTime(); 
@@ -858,7 +858,7 @@ module.exports = {
                 if (count++ === 10) {
                     Object.keys(peerConnectionLog[i].value).forEach(id => {
                         var report = peerConnectionLog[i].value[id];
-                        if (report.type === 'ssrc' && report.mediaType === 'audio' && id.indexOf('_recv')) {
+                        if (report.type === 'ssrc' && (report.kind === 'audio' || report.mediaType === 'audio') && id.indexOf('_recv')) {
                             receivedAudio = {
                                 packetsReceived: report.packetsReceived,
                                 jitterbufferms: report.googJitterBufferMs
@@ -1562,7 +1562,7 @@ module.exports = {
                 var statsReport = peerConnectionLog[i].value;
                 Object.keys(statsReport).forEach(id => {
                     var report = statsReport[id];
-                    if (report.type === 'ssrc' && report.mediaType === 'video' && report.googFrameWidthReceived) {
+                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && report.googFrameWidthReceived) {
                         trackid = id;
                     }
                 });
