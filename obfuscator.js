@@ -5,6 +5,8 @@ const SDPUtils = require('sdp');
 // obfuscate ip, keeping address family intact.
 function obfuscateIP(ip) {
     if (ip.indexOf('[') === 0 || ip.indexOf(':') !== -1) { // IPv6
+        // TODO: Gathered candidate: Cand[:3209149097:1:udp:2121804031:[2600:380:76ec:x:x:x:x:x]:51639:
+        // apparently ok to use first three octets and obfuscated the rest
         return '::1';
     }
     const parts = ip.split('.');
