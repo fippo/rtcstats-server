@@ -299,5 +299,7 @@ CREATE TABLE features_import (
     usingsimulcast boolean,
     sdpsemantics: character varying(32),
     calledaddtrack: boolean,
-    calledaddstream: boolean
+    calledaddstream: boolean,
+    icedisconnected boolean,
+    icereconnected boolean
 );

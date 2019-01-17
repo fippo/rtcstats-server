@@ -737,6 +737,31 @@ module.exports = {
         return peerConnectionLog.filter(entry => entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed')).length > 0;
     },
 
+    // did ICE disconnect?
+    ICEDisconnected: function(client, peerConnectionLog) {
+        return !!(peerConnectionLog.find(entry => entry.type === 'oniceconnectionstatechange' && entry.value === 'disconnected'));
+    },
+
+    // did ICE reconnect?
+    ICEReconnected: function(client, peerConnectionLog) {
+        var i = 0;
+        var disconnected = false;
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && peerConnectionLog[i].value === 'disconnected') {
+                disconnected = true;
+                break;
+            }
+        }
+        if (disconnected) {
+            for (; i < peerConnectionLog.length; i++) {
+                if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
+
     // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
     // This calculates the delay between SRD and addIceCandidate which should allow
     // correlation with ICE failures caused by this.
