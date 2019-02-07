@@ -157,23 +157,28 @@ function run(keys) {
         console.log('connected', ua, referer, clientid);
 
         client.on('message', msg => {
-            const data = JSON.parse(msg);
-            numberOfEvents++;
-            switch(data[0]) {
-            case 'getUserMedia':
-            case 'getUserMediaOnSuccess':
-            case 'getUserMediaOnFailure':
-            case 'navigator.mediaDevices.getUserMedia':
-            case 'navigator.mediaDevices.getUserMediaOnSuccess':
-            case 'navigator.mediaDevices.getUserMediaOnFailure':
-                data.time = Date.now();
-                tempStream.write(JSON.stringify(data) + '\n');
-                break;
-            default:
-                obfuscate(data);
-                data.time = Date.now();
-                tempStream.write(JSON.stringify(data) + '\n');
-                break;
+            try {
+                const data = JSON.parse(msg);
+
+                numberOfEvents++;
+                switch(data[0]) {
+                case 'getUserMedia':
+                case 'getUserMediaOnSuccess':
+                case 'getUserMediaOnFailure':
+                case 'navigator.mediaDevices.getUserMedia':
+                case 'navigator.mediaDevices.getUserMediaOnSuccess':
+                case 'navigator.mediaDevices.getUserMediaOnFailure':
+                    data.time = Date.now();
+                    tempStream.write(JSON.stringify(data) + '\n');
+                    break;
+                default:
+                    obfuscate(data);
+                    data.time = Date.now();
+                    tempStream.write(JSON.stringify(data) + '\n');
+                    break;
+                }
+            } catch(e) {
+                console.error('invalid json message received', e);
             }
         });
 
