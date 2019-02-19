@@ -36,7 +36,7 @@ function obfuscateSDP(sdp) {
     return lines.map(line => {
         // obfuscate a=candidate, c= and a=rtcp
         if (line.indexOf('a=candidate:') === 0) {
-            return obfuscateCandidate(line);
+            return 'a=' + obfuscateCandidate(line);
         } else if (line.indexOf('c=') === 0) {
             return 'c=IN IP4 0.0.0.0';
         } else if (line.indexOf('a=rtcp:') === 0) {
