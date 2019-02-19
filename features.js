@@ -1021,6 +1021,18 @@ module.exports = {
         }
     },
 
+    numberOfRemoteStreams: function(client, peerConnectionLog) {
+        const remoteStreams = {};
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'ontrack') {
+                const {value} = peerConnectionLog[i];
+                const streamId = value.split(' ')[1];
+                remoteStreams[streamId] = true;
+            }
+        }
+        return Object.keys(remoteStreams).length;
+    },
+
     usingSimulcast: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'setLocalDescription') {
