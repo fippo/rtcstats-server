@@ -27,9 +27,9 @@ function records() {
         "GROUP BY day, usingicelite " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'count-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -46,9 +46,9 @@ function records_short() {
         "GROUP BY day, short " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.short;
+            const key = 'count-' + row.short;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -64,9 +64,9 @@ function recordsWeekly() {
         "GROUP BY week, usingicelite " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'count-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -82,9 +82,9 @@ function recordsWeekly_connected() {
         "GROUP BY week, connected " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + (row.connected ? 'connected' : 'not connected');
+            const key = 'count-' + (row.connected ? 'connected' : 'not connected');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -100,9 +100,9 @@ function videodays() {
         "GROUP BY day, usingicelite " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'days-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'days-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.videodays, 10)])
         });
@@ -118,7 +118,7 @@ function videodays_byBrowser() {
         "GROUP BY day, browsername " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browsername;
             if (!series[key]) series[key] = [];
@@ -140,7 +140,7 @@ function videodays_byBrowserChrome50() {
         "GROUP BY day, browsername, browsermajorversion " +
         "ORDER BY day ASC, browsermajorversion")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browsername + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
@@ -162,7 +162,7 @@ function videodays_osx() {
         "GROUP BY week, browseros " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browseros;
             if (!series[key]) series[key] = [];
@@ -184,7 +184,7 @@ function videodays_windows() {
         "GROUP BY day, browseros " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browseros;
             if (!series[key]) series[key] = [];
@@ -206,9 +206,9 @@ function videodays_chromeos() {
         "GROUP BY day " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'days';
+            const key = 'days';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.videodays, 10)])
         });
@@ -225,7 +225,7 @@ function videodays_byBrowserFirefox() {
         "GROUP BY day, browsername, browsermajorversion " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browsername + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
@@ -248,7 +248,7 @@ function videodays_byBrowserEdge() {
         "GROUP BY day, browsername, browsermajorversion " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browsername + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
@@ -270,7 +270,7 @@ function videodays_byBrowserSafari() {
         "GROUP BY day, browsername, browsermajorversion " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browsername + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
@@ -291,7 +291,7 @@ function videodays_byBrowserAndVersion() {
         "GROUP BY day, browsername, browsermajorversion " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
             let key = row.browsername + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
@@ -312,9 +312,9 @@ function hourlyMinutes() {
         "GROUP BY hour, usingicelite " +
         "ORDER BY hour ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.hour).getTime(), parseInt(row.minutes, 10)])
         });
@@ -333,9 +333,9 @@ function dailyMinutes() {
         "GROUP BY day, usingicelite " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.minutes, 10)])
         });
@@ -354,9 +354,9 @@ function dailyMinutesScreensharing() {
         "GROUP BY day, calledgetusermediarequestingscreen " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes-' + row.calledgetusermediarequestingscreen;
+            const key = 'minutes-' + row.calledgetusermediarequestingscreen;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.minutes, 10)])
         });
@@ -375,9 +375,9 @@ function dailyMinutesTotal() {
         "GROUP BY day " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes';
+            const key = 'minutes';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.minutes, 10)])
         });
@@ -396,9 +396,9 @@ function weeklyMinutes() {
         "GROUP BY week, usingicelite " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.minutes, 10)])
         });
@@ -417,9 +417,9 @@ function weeklyMinutesScreensharing() {
         "GROUP BY week, calledgetusermediarequestingscreen " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes-' + row.calledgetusermediarequestingscreen;
+            const key = 'minutes-' + row.calledgetusermediarequestingscreen;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.minutes, 10)])
         });
@@ -438,9 +438,9 @@ function weeklyMinutesTotal() {
         "GROUP BY week " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes';
+            const key = 'minutes';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.minutes, 10)])
         });
@@ -460,9 +460,9 @@ function weeklyMinutesRolling30() {
         "GROUP BY day) " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes';
+            const key = 'minutes';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.minutes, 10)])
         });
@@ -481,9 +481,9 @@ function monthlyMinutes() {
         "GROUP BY month, usingicelite " +
         "ORDER BY month ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'minutes-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.month).getTime(), parseInt(row.minutes, 10)])
         });
@@ -502,9 +502,9 @@ function monthlyMinutesTotal() {
         "GROUP BY month " +
         "ORDER BY month ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'minutes';
+            const key = 'minutes';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.month).getTime(), parseInt(row.minutes, 10)])
         });
@@ -523,9 +523,9 @@ function getusermedia() {
         "GROUP BY day, browsertype, getusermediaerror " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsertype + '-' + row.getusermediaerror;
+            const key = row.browsertype + '-' + row.getusermediaerror;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -544,9 +544,9 @@ function getusermedia_weekly() {
         "GROUP BY week, browsertype, getusermediaerror " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsertype + '-' + row.getusermediaerror;
+            const key = row.browsertype + '-' + row.getusermediaerror;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -566,9 +566,9 @@ function getusermedia_errsuccess() {
         "GROUP BY day, browsertype, getusermediaerror " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsertype + '-' + row.getusermediaerror;
+            const key = row.browsertype + '-' + row.getusermediaerror;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -588,9 +588,9 @@ function nocam() {
         "GROUP BY day, browsertype, hasvideo " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsertype + '-' + row.hasvideo;
+            const key = row.browsertype + '-' + row.hasvideo;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -610,9 +610,9 @@ function receivingvideo() {
         "GROUP BY day, usingicelite, receivingvideo " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.receivingvideo;
+            const key = row.receivingvideo;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -632,9 +632,9 @@ function receivingvideodelay() {
         "GROUP BY day, usingicelite, receivingvideo " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = (row.receivingvideo ? 'video' : 'novіdeo') + '-' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = (row.receivingvideo ? 'video' : 'novіdeo') + '-' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -650,9 +650,9 @@ function receivingvideodelay() {
 function bucket() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE bwegoogbucketdelaymax > 4000 and browsermajorversion > 50 and browsername = 'Chrome' GROUP BY day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.browseros + '-' + row.browsermajorversion + '-' + row.browsername;
+            const key = 'count-' + row.browseros + '-' + row.browsermajorversion + '-' + row.browsername;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -665,9 +665,9 @@ function bucket() {
 function bucketiosandroid() {
     query("SELECT [day], count(*), case WHEN (firstremotestreamid = 'APPEAR') THEN 'isandroid' WHEN ((firstremotestreamid || 'a0') = firstremotestreamaudio) THEN 'isios' ELSE 'other' END AS peer FROM features WHERE firstremotestreamid is not null and bwegoogbucketdelaymax > 5000 and browsermajorversion >= 56 GROUP BY day, peer ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.peer;
+            const key = 'count-' + row.peer;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -680,9 +680,9 @@ function bucketiosandroid() {
 function firstcandidatepairtype() {
     query("SELECT [day], count(*), firstcandidatepairtype FROM features WHERE iceconnectedorcompleted = 't' group by day, firstcandidatepairtype ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.firstcandidatepairtype;
+            const key = row.firstcandidatepairtype;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -695,9 +695,9 @@ function firstcandidatepairtype() {
 function firstcandidatepairtypeNULL() {
     query("SELECT [day], count(*), browsername, browserversion FROM features WHERE (browsername = 'Chrome') and browsermajorversion = 58 and iceconnectedorcompleted = 't' and firstcandidatepairtype is null and sessionduration > 10000 group by day, browsername, browserversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsername + '-' + row.browserversion;
+            const key = row.browsername + '-' + row.browserversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -710,9 +710,9 @@ function firstcandidatepairtypeNULL() {
 function firstcandidatepairlocaltypepreference() {
     query("SELECT [day], count(*), firstcandidatepairlocaltypepreference FROM features WHERE iceconnectedorcompleted = 't' and browsername = 'Chrome' group by day, firstcandidatepairlocaltypepreference ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.firstcandidatepairlocaltypepreference;
+            const key = row.firstcandidatepairlocaltypepreference;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -725,9 +725,9 @@ function firstcandidatepairlocaltypepreference() {
 function firstcandidatepairlocalTURN() {
     query("SELECT [week], count(*), firstcandidatepairlocaltypepreference FROM features WHERE iceconnectedorcompleted = 't' and browsername = 'Chrome' group by week, firstcandidatepairlocaltypepreference ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.firstcandidatepairlocaltypepreference;
+            const key = row.firstcandidatepairlocaltypepreference;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -741,9 +741,9 @@ function firstcandidatepairlocalTURN() {
 function firstcandidatepairremotetypepreference() {
     query("SELECT [day], count(*), firstcandidatepairremotetypepreference FROM features WHERE iceconnectedorcompleted = 't' and browsername = 'Chrome' group by day, firstcandidatepairremotetypepreference ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.firstcandidatepairremotetypepreference;
+            const key = row.firstcandidatepairremotetypepreference;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -756,9 +756,9 @@ function firstcandidatepairremotetypepreference() {
 function connected() {
     query("SELECT [day], count(*), iceconnectedorcompleted FROM features WHERE iceconnectedorcompleted is not null group by day, iceconnectedorcompleted ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.iceconnectedorcompleted;
+            const key = row.iceconnectedorcompleted;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -771,9 +771,9 @@ function connected() {
 function failed() {
     query("SELECT [day], count(*), icefailuresubsequent, browsertype FROM features WHERE icefailure = 't' group by day, icefailuresubsequent, browsertype ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.icefailuresubsequent + '-' + row.browsertype;
+            const key = row.icefailuresubsequent + '-' + row.browsertype;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -786,9 +786,9 @@ function failed() {
 function failedSFU() {
     query("SELECT [day], count(*), icefailuresubsequent, calledgetusermediarequestingscreen, browsertype FROM features WHERE icefailure = 't' and usingicelite = 't' group by day, icefailuresubsequent, browsertype, calledgetusermediarequestingscreen ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.icefailuresubsequent + '-' + row.browsertype + '-' + row.calledgetusermediarequestingscreen;
+            const key = row.icefailuresubsequent + '-' + row.browsertype + '-' + row.calledgetusermediarequestingscreen;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -801,9 +801,9 @@ function failedSFU() {
 function failedFirefox() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE icefailure = 't' and usingicelite = 'f' and icefailuresubsequent = 'f' and browsername = 'Firefox' and browsermajorversion >= 59 and browsermajorversion <= 69 group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion;
+            const key = row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -816,9 +816,9 @@ function failedFirefox() {
 function failedFirefoxWeekly() {
     query("SELECT [week], count(*), browsermajorversion FROM features WHERE icefailure = 't' and usingicelite = 'f' and icefailuresubsequent = 'f' and browsername = 'Firefox' and browsermajorversion >= 59 and browsermajorversion <= 69 group by week, browsermajorversion ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion;
+            const key = row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -831,9 +831,9 @@ function failedFirefoxWeekly() {
 function failedChrome() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE icefailure = 't' and usingicelite = 'f' and icefailuresubsequent = 'f' and browsername = 'Chrome' and browsermajorversion >= 66 and browsermajorversion <= 69 group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion;
+            const key = row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -846,9 +846,9 @@ function failedChrome() {
 function failedChromeWeekly() {
     query("SELECT [week], count(*), browsermajorversion FROM features WHERE icefailure = 't' and usingicelite = 'f' and icefailuresubsequent = 'f' and browsername = 'Chrome' and browsermajorversion >= 66 and browsermajorversion <= 69 group by week, browsermajorversion ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion;
+            const key = row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -861,9 +861,9 @@ function failedChromeWeekly() {
 function failedSFUWeekly() {
     query("SELECT [week], count(*), icefailure, browsertype FROM features WHERE usingicelite = 't' group by week, icefailure, browsertype ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsertype + '-' + row.icefailure;
+            const key = row.browsertype + '-' + row.icefailure;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -876,9 +876,9 @@ function failedSFUWeekly() {
 function failedHourly() {
     query("SELECT [hour], count(*), browsertype FROM features WHERE icefailure = 't' group by hour, browsertype ORDER BY hour ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsertype;
+            const key = row.browsertype;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.hour).getTime(), parseInt(row.count, 10)])
         });
@@ -896,9 +896,9 @@ function SLDFailure() {
           "HAVING count > 1 " +
           "ORDER by day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.setlocaldescriptionfailure;
+            const key = row.setlocaldescriptionfailure;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -916,9 +916,9 @@ function SRDFailure() {
           "HAVING count > 1 " +
           "ORDER by day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.setremotedescriptionfailure;
+            const key = row.setremotedescriptionfailure;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -936,9 +936,9 @@ function addIceCandidateFailure() {
           "HAVING count > 1 " +
           "ORDER by day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.addicecandidatefailure;
+            const key = row.addicecandidatefailure;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -955,9 +955,9 @@ function noRemoteCandidates() {
         "GROUP BY day, browsername, browsermajorversion " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.browsername + '-' + row.browsermajorversion;
+            const key = row.browsername + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -971,9 +971,9 @@ function noRemoteCandidates() {
 function audiobug() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE browsername = 'Chrome' and notsendingaudio = 't' and browsermajorversion >= 56 group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.notsendingaudio + '-' + row.browsermajorversion;
+            const key = row.notsendingaudio + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -986,9 +986,9 @@ function audiobug() {
 function audiobug2() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE browsername = 'Chrome' and notsendingaudio = 't' and sessionduration > 10000 and browsermajorversion >= 56 group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.notsendingaudio + '-' + row.browsermajorversion;
+            const key = row.notsendingaudio + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1001,9 +1001,9 @@ function audiobug2() {
 function audiobug_osx() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE browsername = 'Chrome' and notsendingaudio = 't' and browsermajorversion >= 56 and browseros like '%OS X%' group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.notsendingaudio + '-' + row.browsermajorversion;
+            const key = row.notsendingaudio + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1016,9 +1016,9 @@ function audiobug_osx() {
 function audiobug_windows() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE browsername = 'Chrome' and notsendingaudio = 't' and browsermajorversion >= 56 and browseros like '%Win%' group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.notsendingaudio + '-' + row.browsermajorversion;
+            const key = row.notsendingaudio + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1031,9 +1031,9 @@ function audiobug_windows() {
 function audiobug_chromeos() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE browsername = 'Chrome' and notsendingaudio = 't' and browsermajorversion >= 56 and browseros like 'Chrome OS%' group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.notsendingaudio + '-' + row.browsermajorversion;
+            const key = row.notsendingaudio + '-' + row.browsermajorversion;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1054,10 +1054,9 @@ function incomingmean() {
         "GROUP BY day, browsermajorversion, usingicelite " +
         "ORDER BY day DESC, browsermajorversion ASC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion + '-' + row.usingicelite;
+            const key = row.browsermajorversion + '-' + row.usingicelite;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
         });
@@ -1078,10 +1077,9 @@ function incomingbitratesfu() {
         "GROUP BY day " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = 'mean';
+            const key = 'mean';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
         });
@@ -1104,10 +1102,9 @@ function videojitter() {
         "GROUP BY day, browsermajorversion " +
         "ORDER BY day DESC, browsermajorversion")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion + '-';
+            const key = row.browsermajorversion + '-';
             if (!series[key + 'mean']) series[key + 'mean'] = [];
             if (!series[key + 'max']) series[key + 'max'] = [];
             series[key + 'mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
@@ -1131,10 +1128,9 @@ function videojittervariance() {
         "GROUP BY day, browsermajorversion " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion + '-';
+            const key = row.browsermajorversion + '-';
             if (!series[key + 'mean']) series[key + 'mean'] = [];
             //if (!series[key + 'max']) series[key + 'max'] = [];
             series[key + 'mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
@@ -1153,9 +1149,9 @@ function videojittervarianceclasses() {
         "GROUP BY DAY, jittervariance " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.jittervariance;
+            const key = row.jittervariance;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1177,10 +1173,9 @@ function videosendrtt() {
         "GROUP BY day, browsermajorversion " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.browsermajorversion + '-';
+            const key = row.browsermajorversion + '-';
             if (!series[key + 'mean']) series[key + 'mean'] = [];
             if (!series[key + 'max']) series[key + 'max'] = [];
             series[key + 'mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
@@ -1200,9 +1195,9 @@ function videosendrttclasses() {
         "GROUP BY DAY, sendrtt " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.sendrtt;
+            const key = row.sendrtt;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1225,10 +1220,9 @@ function videosendrttcountry() {
         "GROUP BY day, locationcountry " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.locationcountry + '-';
+            const key = row.locationcountry + '-';
             if (!series[key + 'mean']) series[key + 'mean'] = [];
             series[key + 'mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
         });
@@ -1251,10 +1245,9 @@ function videosendrttvariance() {
         "GROUP BY day, locationcountry " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.locationcountry + '-';
+            const key = row.locationcountry + '-';
             if (!series[key + 'mean']) series[key + 'mean'] = [];
             //if (!series[key + 'max']) series[key + 'max'] = [];
             series[key + 'mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
@@ -1279,10 +1272,9 @@ function videosendrttcountrysfu() {
         "GROUP BY day, locationcountry, usingicelite " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.locationcountry + '-' + (row.usingicelite ? 'sfu' : 'p2p') + '-';
+            const key = row.locationcountry + '-' + (row.usingicelite ? 'sfu' : 'p2p') + '-';
             if (!series[key + 'mean']) series[key + 'mean'] = [];
             series[key + 'mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
         });
@@ -1303,12 +1295,11 @@ function videosendrttsfu() {
         "GROUP BY day " +
         "ORDER BY day DESC")
     .then(res => {
-        var series = {
-            mean: []
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = 'mean';
-            series['mean'].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
+            const key = 'mean';
+            if (!series[key]) series[key] = [];
+            series[key].push([new Date(row.day).getTime(), parseInt(row.mean, 10)]);
         });
         graph(series, {
             title: 'chrome video send rtt median, per day'
@@ -1329,11 +1320,10 @@ function connectiontime() {
         "GROUP BY day, browsername " +
         "ORDER BY day ASC, browsername")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            //var key = row.browsername + '-' + row.browsermajorversion + '-';
-            var key = row.browsername;
+            //const key = row.browsername + '-' + row.browsermajorversion + '-';
+            const key = row.browsername;
             if (!series[key + 'median']) series[key + 'median'] = [];
             if (!series[key + 'stddev']) series[key + 'stddev'] = [];
             series[key + 'median'].push([new Date(row.day).getTime(), parseInt(row.median, 10)]);
@@ -1359,10 +1349,9 @@ function connectiontimeCountry() {
         "GROUP BY day, locationcountry " +
         "ORDER BY day ASC, locationcountry")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = row.locationcountry + '-';
+            const key = row.locationcountry + '-';
             if (!series[key + 'median']) series[key + 'median'] = [];
             if (!series[key + 'stddev']) series[key + 'stddev'] = [];
             series[key + 'median'].push([new Date(row.day).getTime(), parseInt(row.median, 10)]);
@@ -1387,10 +1376,9 @@ function connectiontimeSFU() {
         "GROUP BY day, usingicelite " +
         "ORDER BY day ASC, usingicelite")
     .then(res => {
-        var series = {
-        };
+        const series = {};
         res.rows.forEach((row) => {
-            var key = (row.usingicelite ? 'sfu' : 'p2p');
+            const key = (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key + 'median']) series[key + 'median'] = [];
             //if (!series[key + 'stddev']) series[key + 'stddev'] = [];
             series[key + 'median'].push([new Date(row.day).getTime(), parseInt(row.median, 10)]);
@@ -1419,9 +1407,9 @@ function averageDuration() {
         "GROUP BY week, usingicelite " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'duration' + (row.usingicelite ? 'sfu' : 'p2p');
+            const key = 'duration' + (row.usingicelite ? 'sfu' : 'p2p');
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.seconds, 10)])
         });
@@ -1441,9 +1429,9 @@ function emptyid() {
         "GROUP BY day, usingicelite " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'empty-' + row.usingicelite;
+            const key = 'empty-' + row.usingicelite;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1463,9 +1451,9 @@ function nohost_osx() {
         "GROUP BY week, gatheredstun, isinitiator " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'osx-' + (row.gatheredstun ? 'stun' : 'nostun') + '-' + row.isinitiator;
+            const key = 'osx-' + (row.gatheredstun ? 'stun' : 'nostun') + '-' + row.isinitiator;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -1482,9 +1470,9 @@ function nohost_windows() {
         "GROUP BY week, gatheredstun, isinitiator " +
         "ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'win-' + (row.gatheredstun ? 'stun' : 'nostun') + '-' + row.isinitiator;
+            const key = 'win-' + (row.gatheredstun ? 'stun' : 'nostun') + '-' + row.isinitiator;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -1497,9 +1485,9 @@ function nohost_windows() {
 function ipv6() {
     query("SELECT [week], count(*), firstcandidatepairlocalipaddress LIKE '%:%' AS ipv6 FROM features WHERE firstcandidatepairlocalipaddress IS NOT NULL GROUP BY week, ipv6 ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.ipv6;
+            const key = row.ipv6;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -1512,9 +1500,9 @@ function ipv6() {
 function roomnames() {
     query("SELECT [week], count(distinct conferenceidentifier), usingicelite FROM features WHERE conferenceidentifier is not null GROUP BY week, usingicelite ORDER BY week ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = row.usingicelite ? 'sfu' : 'p2p';
+            const key = row.usingicelite ? 'sfu' : 'p2p';
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.week).getTime(), parseInt(row.count, 10)])
         });
@@ -1531,9 +1519,9 @@ function receivedwidthMax() {
         "GROUP BY day, width " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.width;
+            const key = 'count-' + row.width;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1550,9 +1538,9 @@ function receivedwidthMode() {
         "GROUP BY day, width " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.width;
+            const key = 'count-' + row.width;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1568,9 +1556,9 @@ function sentwidthMax() {
         "GROUP BY day, width " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.width;
+            const key = 'count-' + row.width;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1587,9 +1575,9 @@ function sentwidthMode() {
         "GROUP BY day, width " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'count-' + row.width;
+            const key = 'count-' + row.width;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
@@ -1606,9 +1594,9 @@ function sdpsemantics() {
         "GROUP BY day, sdpsemantics, usingicelite, browsername " +
         "ORDER BY day ASC")
     .then(res => {
-        var series = {}
+        const series = {}
         res.rows.forEach((row) => {
-            var key = 'records-' + row.sdpsemantics + '-' + (row.usingicelite ? 'sfu' : 'p2p') + '-' + row.browsername;
+            const key = 'records-' + row.sdpsemantics + '-' + (row.usingicelite ? 'sfu' : 'p2p') + '-' + row.browsername;
             if (!series[key]) series[key] = [];
             series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
         });
