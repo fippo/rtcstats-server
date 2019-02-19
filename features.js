@@ -1209,7 +1209,7 @@ module.exports = {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'onicecandidate') {
                 var cand = peerConnectionLog[i].value;
-                if (cand === null) return false; // gathering finished so we have seen all candidates.
+                if (cand === null) break; // gathering finished so we have seen all candidates.
                 var parts = cand.candidate.split(' ');
                 if (parts[7] === 'host') {
                     if (!ips[parts[4]]) ips[parts[4]] = 0;
