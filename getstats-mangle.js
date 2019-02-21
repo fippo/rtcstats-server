@@ -13,6 +13,9 @@ module.exports = function(stats) {
   // taken from https://github.com/fippo/adapter/tree/getstats-mangling
   const standardReport = {};
   Object.keys(stats).forEach(id => {
+    if (id === 'timestamp') {
+        return;
+    }
     const standardStats = stats[id];
 
     // Step 1: translate to standard types and attribute names.
