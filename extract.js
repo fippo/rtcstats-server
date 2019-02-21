@@ -18,6 +18,7 @@ function safeFeature(feature) {
 }
 
 const features = require('./features');
+const clientfeatures = require('./features-client');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
 
@@ -43,25 +44,23 @@ function generateFeatures(url, client, clientid) {
     // clientFeatures are the same for all peerconnections but are saved together
     // with each peerconnection anyway to make correlation easier.
     const clientFeatures = {};
-    Object.keys(features).forEach(fname => {
-        if (features[fname].length === 1) {
-            let feature = features[fname].apply(null, [client]);
-            if (feature !== undefined) {
-                if (typeof feature === 'object') {
-                    Object.keys(feature).forEach(subname => {
-                        feature[subname] = safeFeature(feature[subname]);
-                        if (!isProduction) {
-                            console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
-                        }
-                        clientFeatures[fname + capitalize(subname)] = feature[subname];
-                    });
-                }  else {
-                    feature = safeFeature(feature);
+    Object.keys(clientfeatures).forEach(fname => {
+        let feature = clientfeatures[fname].apply(null, [client]);
+        if (feature !== undefined) {
+            if (typeof feature === 'object') {
+                Object.keys(feature).forEach(subname => {
+                    feature[subname] = safeFeature(feature[subname]);
                     if (!isProduction) {
-                        console.log('PAGE', 'FEATURE', fname, '=>', feature);
+                        console.log('PAGE', 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
                     }
-                    clientFeatures[fname] = feature;
+                    clientFeatures[fname + capitalize(subname)] = feature[subname];
+                });
+            }  else {
+                feature = safeFeature(feature);
+                if (!isProduction) {
+                    console.log('PAGE', 'FEATURE', fname, '=>', feature);
                 }
+                clientFeatures[fname] = feature;
             }
         }
     });
@@ -70,24 +69,22 @@ function generateFeatures(url, client, clientid) {
         const conn = client.peerConnections[connid];
         const connectionFeatures = {};
         Object.keys(features).forEach(fname => {
-            if (features[fname].length === 2) {
-                let feature = features[fname].apply(null, [client, conn]);
-                if (feature !== undefined) {
-                    if (typeof feature === 'object') {
-                        Object.keys(feature).forEach(subname => {
-                            feature[subname] = safeFeature(feature[subname]);
-                            if (!isProduction) {
-                                console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
-                            }
-                            connectionFeatures[fname + capitalize(subname)] = feature[subname];
-                        });
-                    }  else {
-                        feature = safeFeature(feature);
+            let feature = features[fname].apply(null, [client, conn]);
+            if (feature !== undefined) {
+                if (typeof feature === 'object') {
+                    Object.keys(feature).forEach(subname => {
+                        feature[subname] = safeFeature(feature[subname]);
                         if (!isProduction) {
-                            console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
+                            console.log(connid, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
                         }
-                        connectionFeatures[fname] = feature;
+                        connectionFeatures[fname + capitalize(subname)] = feature[subname];
+                    });
+                }  else {
+                    feature = safeFeature(feature);
+                    if (!isProduction) {
+                        console.log(connid, 'FEATURE', fname, '=>', safeFeature(feature));
                     }
+                    connectionFeatures[fname] = feature;
                 }
             }
         });
