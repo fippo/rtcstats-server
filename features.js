@@ -800,21 +800,27 @@ module.exports = {
 
     // check whether video is received after 10 seconds
     receivingvideo10s: function(client, peerConnectionLog) {
-        var count = 0;
         var receivedVideo = undefined;
+        var timeConnected = false;
         for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                if (count++ === 10) {
-                    Object.keys(peerConnectionLog[i].value).forEach(id => {
-                        var report = peerConnectionLog[i].value[id];
-                        if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && id.indexOf('_recv')) {
-                            receivedVideo = {
-                                packetsReceived: report.packetsReceived,
-                                frameWidth: report.frameWidth,
-                                frameHeight: report.frameHeight
-                            };
-                        }
-                    });
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
+                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
+                }
+            }
+            if (timeConnected && peerConnectionLog[i].type === 'getStats') {
+                Object.keys(peerConnectionLog[i].value).forEach(id => {
+                    var report = peerConnectionLog[i].value[id];
+                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && id.indexOf('_recv') !== -1 && report.trackIdentifier) {
+                        receivedVideo = {
+                            timestamp: report.timestamp,
+                            packetsReceived: report.packetsReceived,
+                            frameWidth: report.frameWidth,
+                            frameHeight: report.frameHeight
+                        };
+                    }
+                });
+                if (receivedVideo && receivedVideo.timestamp - timeConnected >= 10000) {
                     return receivedVideo;
                 }
             }
@@ -851,20 +857,26 @@ module.exports = {
 
     // check whether audio is received after 10 seconds
     receivingaudio10s: function(client, peerConnectionLog) {
-        var count = 0;
         var receivedAudio = undefined;
+        var timeConnected = false;
         for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'getStats') {
-                if (count++ === 10) {
-                    Object.keys(peerConnectionLog[i].value).forEach(id => {
-                        var report = peerConnectionLog[i].value[id];
-                        if (report.type === 'ssrc' && (report.kind === 'audio' || report.mediaType === 'audio') && id.indexOf('_recv')) {
-                            receivedAudio = {
-                                packetsReceived: report.packetsReceived,
-                                jitterbufferms: report.googJitterBufferMs
-                            };
-                        }
-                    });
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
+                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
+                }
+            }
+            if (timeConnected && peerConnectionLog[i].type === 'getStats') {
+                Object.keys(peerConnectionLog[i].value).forEach(id => {
+                    var report = peerConnectionLog[i].value[id];
+                    if (report.type === 'ssrc' && (report.kind === 'audio' || report.mediaType === 'audio') && id.indexOf('_recv') !== -1 && report.trackIdentifier) {
+                        receivedAudio = {
+                            timestamp: report.timestamp,
+                            packetsReceived: report.packetsReceived,
+                            jitterbufferms: report.googJitterBufferMs
+                        };
+                    }
+                });
+                if (receivedAudio && receivedAudio.timestamp - timeConnected >= 10000) {
                     return receivedAudio;
                 }
             }
