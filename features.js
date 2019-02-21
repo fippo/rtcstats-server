@@ -37,6 +37,24 @@ function determineBrowserFromOLine(sdp) {
     }
 }
 
+// extracts stream id, track id and kind from the format used in addTrack/ontrack
+function extractFromTrackFormat(value) {
+    const [kind, trackId] = value.split(' ')[0].split(':');
+    const streamId = value.split(' ')[1].split(':')[1];
+    return {kind, trackId, streamId};
+}
+
+// extracts stream id, track id and kind from the format used in legacy addStream/onaddstream
+function extractFromStreamFormat(value) {
+    const [streamId, trackList] = value.split(' ');
+    const tracks = [];
+    trackList.split(',').forEach(id => {
+        const [kind, trackId] = id.split(':');
+        tracks.push({kind, trackId});
+    });
+    return {streamId, tracks};
+}
+
 function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
     var typepref;
@@ -192,19 +210,14 @@ function extractTracks(peerConnectionLog) {
     for (let i = 0; i < peerConnectionLog.length; i++) {
         const {type, value} = peerConnectionLog[i];
         if (type === 'addStream') {
-            const [streamId, _] = value.split(' ');
-            _.split(',').forEach(id => {
-                const [kind, trackId] = id.split(':');
+            const {streamId, tracks: listOfTracks} = extractFromStreamFormat(value);
+            listOfTracks.forEach(({kind, trackId}) => {
                 tracks.set(trackId, {kind, streamId, direction: 'send', stats: []});
             });
-        } else if (type === 'addTrack') {
-            const [kind, trackId] = value.split(' ')[0].split(':');
-            const streamId = value.split(' ')[1].split(':')[1];
-            tracks.set(trackId, {kind, streamId, direction: 'send', stats: []});
-        } else if (type === 'ontrack') {
-            const [kind, trackId] = value.split(' ')[0].split(':');
-            const streamId = value.split(' ')[1].split(':')[1];
-            tracks.set(trackId, {kind, streamId, direction: 'recv', stats: []});
+        } else if (type === 'addTrack' || type === 'ontrack') {
+            const direction = type === 'addTrack' ? 'send' : 'recv';
+            const {kind, trackId, streamId} = extractFromTrackFormat(value);
+            tracks.set(trackId, {kind, streamId, direction, stats: []});
         } else if (type === 'getStats') {
             Object.keys(value).forEach(id => {
                 const report = value[id];
