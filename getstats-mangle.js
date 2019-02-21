@@ -255,12 +255,12 @@ module.exports = function(stats) {
           standardReport[newId].sliCount = report.sliCount; // undefined yet
         }
         if (report.remoteSource) {
-          standardReport[newId].type = 'inboundrtp';
+          standardReport[newId].type = 'inbound-rtp';
           standardReport[newId].packetsReceived = report.packetsReceived;
           standardReport[newId].bytesReceived = report.bytesReceived;
           standardReport[newId].packetsLost = report.packetsLost;
         } else {
-          standardReport[newId].type = 'outboundrtp';
+          standardReport[newId].type = 'outbound-rtp';
           standardReport[newId].packetsSent = report.packetsSent;
           standardReport[newId].bytesSent = report.bytesSent;
           standardReport[newId].roundTripTime = report.roundTripTime;
@@ -268,7 +268,7 @@ module.exports = function(stats) {
         }
 
         // FIXME: this is slightly more complicated. inboundrtp can have packetlost
-        // but so can outboundrtp via rtcp (isRemote = true)
+        // but so can outbound-rtp via rtcp (isRemote = true)
         // need to unmux with opposite type and put loss into remote report.
         newId = 'rtcpstream_' + report.id;
         standardReport[newId] = {
@@ -283,13 +283,13 @@ module.exports = function(stats) {
           codecId: 'codec_' + report.googCodecName
         };
         if (report.remoteSource) {
-          standardReport[newId].type = 'outboundrtp';
+          standardReport[newId].type = 'outbound-rtp';
           standardReport[newId].packetsSent = report.packetsSent;
           standardReport[newId].bytesSent = report.bytesSent;
           standardReport[newId].roundTripTime = report.roundTripTime;
           standardReport[newId].packetsLost = report.packetsLost;
         } else {
-          standardReport[newId].type = 'inboundrtp';
+          standardReport[newId].type = 'inbound-rtp';
           standardReport[newId].packetsReceived = report.packetsReceived;
           standardReport[newId].bytesReceived = report.bytesReceived;
           standardReport[newId].packetsLost = report.packetsLost;
@@ -372,7 +372,7 @@ module.exports = function(stats) {
   // Step 3: fiddle the transport in between transport and rtp stream
   Object.keys(standardReport).forEach(id => {
     const report = standardReport[id];
-    if (report.type === 'transprort') {
+    if (report.type === 'transport') {
       // RTCTransport has a pointer to the selectedCandidatePair...
       let other = standardReport[report.selectedCandidatePairId];
       if (other) {
@@ -382,8 +382,8 @@ module.exports = function(stats) {
       // instead, we rely on having added 'transport_'
       Object.keys(standardReport).forEach(otherid => {
         other = standardReport[otherid];
-        if ((other.type === 'inboundrtp' ||
-            other.type === 'outboundrtp') &&
+        if ((other.type === 'inbound-rtp' ||
+            other.type === 'outbound-rtp') &&
             report.id === 'transport_' + other.transportId) {
           other.transportId = report.id;
         }

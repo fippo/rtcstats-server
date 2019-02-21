@@ -96,9 +96,9 @@ function extractLastVideoStat(peerConnectionLog, type) {
     if (!statsReport) return;
     var count;
     Object.keys(statsReport).forEach(id => {
-        // type outboundrtp && kind video
+        // type outbound-rtp && kind video
         var report = statsReport[id];
-        if (report.type === 'outboundrtp' && (report.kind === 'video' || report.mediaType === 'video')) {
+        if (report.type === 'outbound-rtp' && (report.kind === 'video' || report.mediaType === 'video')) {
             count = report[type];
         }
     });
