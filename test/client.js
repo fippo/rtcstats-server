@@ -39,7 +39,7 @@ setTimeout(function() {
           //console.log(JSON.stringify(base).length, 'reduced to', JSON.stringify(evt.value).length);
           prev = base;
         }
-        ws.send(JSON.stringify([evt.type, 'testid', evt.value]));
+        ws.send(JSON.stringify([evt.type, 'testid', evt.value, new Date(evt.time).getTime()]));
         setTimeout(process, 10);
       };
       process();
