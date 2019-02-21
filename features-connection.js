@@ -6,8 +6,6 @@
 // 2) features which take the client and a connection argument. Those do something with the connection.
 // The second type of feature is contained in this file.
 
-var fs = require('fs');
-var platform = require('platform');
 const {extractTracks} = require('./utils');
 
 function capitalize(str) {
