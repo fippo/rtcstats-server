@@ -4,6 +4,7 @@
 
 var fs = require('fs');
 var platform = require('platform');
+const {extractTracks} = require('./utils');
 
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
@@ -188,63 +189,13 @@ function getCodec(peerConnectionLog, kind, direction) {
 
 // extract a local/remote audio or video track.
 function extractTrack(peerConnectionLog, kind, direction) {
-    var trackId;
-    var reports = [];
-    var streamevent = 'onaddstream';
-    var trackevent = 'ontrack';
-    if (direction === 'send') {
-        streamevent = 'addStream';
-    }
-    // search for the (first) track of that kind.
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        var type = peerConnectionLog[i].type;
-        if (direction === 'send') {
-            if (type === 'addTrack') {
-                var kindAndTrack = peerConnectionLog[i].value.split(' ')[0].split(':');
-                if (kindAndTrack[0] === kind) {
-                    trackId = kindAndTrack[1];
-                    break;
-                }
-            }
-        } else {
-            if (type === streamevent || type === trackevent) {
-                if (type === trackevent) {
-                    var kindAndTrack = peerConnectionLog[i].value.split(' ')[0].split(':');
-                    if (kindAndTrack[0] === kind) {
-                        trackId = kindAndTrack[1];
-                        break;
-                    }
-                } else {
-                    var tracks = peerConnectionLog[i].value.split(' ', 2);
-                    tracks.shift();
-                    tracks = tracks[0].split(',');
-                    for (var j = 0; j < tracks.length; j++) {
-                        if (tracks[j].split(':')[0] === kind) {
-                            trackId = tracks[j].split(':')[1];
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        if (trackId) break;
-    }
-    if (!trackId) return []; // bail out
-
-    // search for signs of that track
-    for (; i < peerConnectionLog.length; i++) {
-        if (trackId && peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(id => {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && report.trackIdentifier === trackId) {
-                    report.timestamp = peerConnectionLog[i].time;
-                    reports.push(report);
-                }
-            });
+    const allTracks = extractTracks(peerConnectionLog);
+    for (const [trackId, value] of allTracks.entries()) {
+        if (value.kind === kind && value.direction === direction) {
+            return value.stats;
         }
     }
-    return reports;
+    return [];
 }
 
 function extractBWE(peerConnectionLog) {
