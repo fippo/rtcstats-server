@@ -19,8 +19,10 @@ function safeFeature(feature) {
 
 const connectionfeatures = require('./features-connection');
 const clientfeatures = require('./features-client');
+const trackfeatures = require('./features-track');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
+const {extractTracks} = require('./utils');
 
 // dumps all peerconnections.
 function dump(url, client, clientid, data) {
@@ -88,12 +90,30 @@ function generateFeatures(url, client, clientid) {
                 }
             }
         });
-        delete client.peerConnections[connid]; // save memory
+        // delete client.peerConnections[connid]; // save memory
         if (!isProduction) return;
         if (canUseProcessSend) {
             process.send({url, clientid, connid, clientFeatures, connectionFeatures});
         } else {
             console.log(url, clientid, connid, clientFeatures, connectionFeatures);
+        }
+    });
+
+    Object.keys(client.peerConnections).forEach(connid => {
+        if (connid === 'null') return; // ignore the null connid
+        const conn = client.peerConnections[connid];
+        const trackFeatures = {};
+        const tracks = extractTracks(conn);
+        for (const [trackId, {kind, direction, stats}] of tracks.entries()) {
+            Object.keys(trackfeatures).forEach(fname => {
+                let feature = trackfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
+                if (feature !== undefined) {
+                    feature = safeFeature(feature);
+                    if (!isProduction) {
+                        console.log(connid, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
+                    }
+                }
+            });
         }
     });
 }
