@@ -1,9 +1,10 @@
 'use strict';
 // https://en.wikipedia.org/wiki/Feature_extraction for peerconnection
 // API traces and getStats data.
-// there are two types of features
+// there are three types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
+// 3) features which are specific to a track.
 // The second type of feature is contained in this file.
 
 const {extractTracks} = require('./utils');

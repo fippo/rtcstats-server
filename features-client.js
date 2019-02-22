@@ -4,6 +4,7 @@
 // there are two types of features
 // 1) features which only take the client as argument. E.g. extracting the browser version
 // 2) features which take the client and a connection argument. Those do something with the connection.
+// 3) features which are specific to a track.
 // The first type of feature is contained in this file.
 
 var platform = require('platform');
