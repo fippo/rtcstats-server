@@ -38,8 +38,16 @@ function extractTracks(peerConnectionLog) {
                 if (report.type === 'ssrc') {
                     const {trackIdentifier} =  report;
                     if (tracks.has(trackIdentifier)) {
-                        report.timestamp = peerConnectionLog[i].time;
-                        tracks.get(trackIdentifier).stats.push(report);
+                        if (!report.timestamp) {
+                            report.timestamp = peerConnectionLog[i].time;
+                        } else {
+                            report.timestamp = new Date(report.timestamp);
+                        }
+                        const currentStats = tracks.get(trackIdentifier).stats;
+                        const lastStat = currentStats[currentStats.length - 1];
+                        if (!lastStat || (report.timestamp.getTime() - lastStat.timestamp.getTime() > 0)) {
+                            tracks.get(trackIdentifier).stats.push(report);
+                        }
                     } else if (trackIdentifier !== undefined) {
                         console.log('NO ONTRACK FOR', trackIdentifier, report.ssrc);
                     }
