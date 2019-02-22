@@ -5,8 +5,8 @@ module.exports = {
         baseStats[id] = newStats[id];
       } else {
         const report = newStats[id];
-        if (!report.timestamp) {
-            report.timestamp = new Date(newStats.timestamp).getTime();
+        if (!report.timestamp && id !== 'timestamp') {
+            report.timestamp = new Date(baseStats[id].timestamp).getTime();
         }
         Object.keys(report).forEach(name => {
           baseStats[id][name] = report[name];
