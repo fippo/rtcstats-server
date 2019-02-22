@@ -491,117 +491,6 @@ module.exports = {
         }
     },
 
-    // detects the osx audio bug which manifests as "audio seems to work but
-    // no audio is ever sent (which manifests as bytesSent always being 0)
-    //  https://bugs.chromium.org/p/webrtc/issues/detail?id=4799
-    notsendingaudio: function(client, peerConnectionLog) {
-        var track = extractTrack(peerConnectionLog, 'audio', 'send');
-        if (!(track && track.length)) return false;
-        var count = 0;
-        for (var i = 0; i < track.length; i++) {
-            if (parseInt(track[i].bytesSent, 10) > 0) return false;
-            count++;
-        }
-        return count > 0;
-    },
-    // detect cam being used by another application (no bytes sent for video)
-    //  https://bugs.chromium.org/p/chromium/issues/detail?id=403710#c7
-    notsendingvideo: function(client, peerConnectionLog) {
-        var track = extractTrack(peerConnectionLog, 'video', 'send');
-        if (!(track && track.length)) return false;
-        var count = 0;
-        for (var i = 0; i < track.length; i++) {
-            if (parseInt(track[i].bytesSent, 10) > 0) return false;
-            count++;
-        }
-        return count > 0;
-    },
-
-    // check whether video is received after 10 seconds
-    receivingvideo10s: function(client, peerConnectionLog) {
-        var receivedVideo = undefined;
-        var timeConnected = false;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
-                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
-                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
-                }
-            }
-            if (timeConnected && peerConnectionLog[i].type === 'getStats') {
-                Object.keys(peerConnectionLog[i].value).forEach(id => {
-                    var report = peerConnectionLog[i].value[id];
-                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && id.indexOf('_recv') !== -1 && report.trackIdentifier) {
-                        receivedVideo = {
-                            timestamp: report.timestamp,
-                            packetsReceived: report.packetsReceived,
-                            frameWidth: report.frameWidth,
-                            frameHeight: report.frameHeight
-                        };
-                    }
-                });
-                if (receivedVideo && receivedVideo.timestamp - timeConnected >= 10000) {
-                    return receivedVideo;
-                }
-            }
-        }
-    },
-
-    // how long did it take until video arrived?
-    // in particular a keyframe which causes width and height to be set.
-    timeuntilreceivingvideo: function(client, peerConnectionLog) {
-        let timeConnected = false;
-        let timeReceived = false;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
-                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
-                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
-                }
-            }
-            if (peerConnectionLog[i].type === 'getStats') {
-                Object.keys(peerConnectionLog[i].value).forEach(id => {
-                    var report = peerConnectionLog[i].value[id];
-                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && report.googFrameWidthReceived) {
-                        let width = parseInt(report.googFrameWidthReceived, 10);
-                        if (width > 0) {
-                            timeReceived = new Date(peerConnectionLog[i].time).getTime(); 
-                        }
-                    }
-                });
-            }
-            if (timeReceived && timeConnected) {
-                return timeReceived - timeConnected;
-            }
-        }
-    },
-
-    // check whether audio is received after 10 seconds
-    receivingaudio10s: function(client, peerConnectionLog) {
-        var receivedAudio = undefined;
-        var timeConnected = false;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
-                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
-                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
-                }
-            }
-            if (timeConnected && peerConnectionLog[i].type === 'getStats') {
-                Object.keys(peerConnectionLog[i].value).forEach(id => {
-                    var report = peerConnectionLog[i].value[id];
-                    if (report.type === 'ssrc' && (report.kind === 'audio' || report.mediaType === 'audio') && id.indexOf('_recv') !== -1 && report.trackIdentifier) {
-                        receivedAudio = {
-                            timestamp: report.timestamp,
-                            packetsReceived: report.packetsReceived,
-                            jitterbufferms: report.googJitterBufferMs
-                        };
-                    }
-                });
-                if (receivedAudio && receivedAudio.timestamp - timeConnected >= 10000) {
-                    return receivedAudio;
-                }
-            }
-        }
-    },
-
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
@@ -1105,22 +994,6 @@ module.exports = {
         }
     },
 
-    // video codec used
-    sendVideoCodec: function(client, peerConnectionLog) {
-        return getCodec(peerConnectionLog, 'video', 'send');
-    },
-    recvVideoCodec: function(client, peerConnectionLog) {
-        return getCodec(peerConnectionLog, 'video', 'recv');
-    },
-
-    // audio codec used
-    sendAudioCodec: function(client, peerConnectionLog) {
-        return getCodec(peerConnectionLog, 'audio', 'send');
-    },
-    recvAudioCodec: function(client, peerConnectionLog) {
-        return getCodec(peerConnectionLog, 'audio', 'recv');
-    },
-
     // mean RTT, send and recv bitrate of the active candidate pair
     statsMean: function(client, peerConnectionLog) {
         var feature = {};
@@ -1222,39 +1095,6 @@ module.exports = {
     },
 
 
-    // experimental fippo feature, don't use this
-    /*
-    flakyActive: function(client, peerConnectionLog) {
-        var selectedCandidatePairList = [null];
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(function(id) {
-                var report = statsReport[id];
-                if (report.type === 'candidate-pair' && report.selected === true) {
-                    // this is interesting as it shows flakyness in -1-0 and -1-1 and back at the
-                    // receiver during  ice restart but that is not what we are looking for.
-                    if (report.id !== selectedCandidatePairList[selectedCandidatePairList.length - 1]) {
-                        selectedCandidatePairList.push(report.id);
-                        console.log('candidate pair change', i, peerConnectionLog[i].time, report.id);
-                        console.log('local', statsReport[report.localCandidateId].ipAddress,
-                            statsReport[report.localCandidateId].portNumber,
-                            'remote', statsReport[report.remoteCandidateId].ipAddress,
-                            statsReport[report.remoteCandidateId].portNumber);
-                    }
-                }
-            });
-        }
-        peerConnectionLog.forEach(function(entry) {
-            if (entry.type === 'createOffer') {
-                if (entry.value && entry.value.iceRestart) {
-                    console.log('icerestart', entry.time);
-                }
-            }
-        });
-    },
-    */
-
     // how did the selected interface type change? e.g. a wifi->mobile transition
     // see https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/app/webrtc/statscollector.cc&q=statscollector&sq=package:chromium&l=53
     // TODO: check if this really allows detecting such transitions
@@ -1275,6 +1115,186 @@ module.exports = {
         }
         interfaceTypesList.shift();
         return interfaceTypesList.join(';') || 'unknown';
+    },
+
+    bwe: function(client, peerConnectionLog) {
+        var bwe = extractBWE(peerConnectionLog);
+        if (!bwe.length) return;
+        var stats = ['googActualEncBitrate', 'googRetransmitBitrate', 'googTargetEncBitrate',
+            'googBucketDelay', 'googTransmitBitrate'];
+        bwe = bwe.map(item => {
+            stats.forEach(stat => {
+                item[stat] = parseInt(item[stat], 10);
+            });
+            delete item.googAvailableSendBandwidth;
+            delete item.googAvailableReceiveBandwidth;
+            return item;
+        });
+        stats.push('availableOutgoingBitrate');
+        stats.push('availableIncomingBitrate');
+
+        var feature = {};
+        stats.forEach(stat => {
+            var series = bwe.map(item => item[stat]);
+
+            feature[capitalize(stat) + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[capitalize(stat) + 'Max'] = Math.max.apply(null, series);
+            feature[capitalize(stat) + 'Min'] = Math.min.apply(null, series);
+
+            feature[capitalize(stat) + 'Variance'] = standardizedMoment(series, 2);
+            feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 3);
+            feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 4);
+        });
+        return feature;
+    },
+
+    calledAddStream: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            var type = peerConnectionLog[i].type;
+            if (type === 'addStream') {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    calledAddTrack: function(client, peerConnectionLog) {
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            var type = peerConnectionLog[i].type;
+            if (type === 'addTrack') {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    // stats below here are per-track and should be track-stats, not connection stats.
+
+    // detects the osx audio bug which manifests as "audio seems to work but
+    // no audio is ever sent (which manifests as bytesSent always being 0)
+    //  https://bugs.chromium.org/p/webrtc/issues/detail?id=4799
+    notsendingaudio: function(client, peerConnectionLog) {
+        var track = extractTrack(peerConnectionLog, 'audio', 'send');
+        if (!(track && track.length)) return false;
+        var count = 0;
+        for (var i = 0; i < track.length; i++) {
+            if (parseInt(track[i].bytesSent, 10) > 0) return false;
+            count++;
+        }
+        return count > 0;
+    },
+    // detect cam being used by another application (no bytes sent for video)
+    //  https://bugs.chromium.org/p/chromium/issues/detail?id=403710#c7
+    notsendingvideo: function(client, peerConnectionLog) {
+        var track = extractTrack(peerConnectionLog, 'video', 'send');
+        if (!(track && track.length)) return false;
+        var count = 0;
+        for (var i = 0; i < track.length; i++) {
+            if (parseInt(track[i].bytesSent, 10) > 0) return false;
+            count++;
+        }
+        return count > 0;
+    },
+
+    // check whether video is received after 10 seconds
+    receivingvideo10s: function(client, peerConnectionLog) {
+        var receivedVideo = undefined;
+        var timeConnected = false;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
+                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
+                }
+            }
+            if (timeConnected && peerConnectionLog[i].type === 'getStats') {
+                Object.keys(peerConnectionLog[i].value).forEach(id => {
+                    var report = peerConnectionLog[i].value[id];
+                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && id.indexOf('_recv') !== -1 && report.trackIdentifier) {
+                        receivedVideo = {
+                            timestamp: report.timestamp,
+                            packetsReceived: report.packetsReceived,
+                            frameWidth: report.frameWidth,
+                            frameHeight: report.frameHeight
+                        };
+                    }
+                });
+                if (receivedVideo && receivedVideo.timestamp - timeConnected >= 10000) {
+                    return receivedVideo;
+                }
+            }
+        }
+    },
+
+    // how long did it take until video arrived?
+    // in particular a keyframe which causes width and height to be set.
+    timeuntilreceivingvideo: function(client, peerConnectionLog) {
+        let timeConnected = false;
+        let timeReceived = false;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
+                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
+                }
+            }
+            if (peerConnectionLog[i].type === 'getStats') {
+                Object.keys(peerConnectionLog[i].value).forEach(id => {
+                    var report = peerConnectionLog[i].value[id];
+                    if (report.type === 'ssrc' && (report.kind === 'video' || report.mediaType === 'video') && report.googFrameWidthReceived) {
+                        let width = parseInt(report.googFrameWidthReceived, 10);
+                        if (width > 0) {
+                            timeReceived = new Date(peerConnectionLog[i].time).getTime(); 
+                        }
+                    }
+                });
+            }
+            if (timeReceived && timeConnected) {
+                return timeReceived - timeConnected;
+            }
+        }
+    },
+
+    // check whether audio is received after 10 seconds
+    receivingaudio10s: function(client, peerConnectionLog) {
+        var receivedAudio = undefined;
+        var timeConnected = false;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && !timeConnected) {
+                if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
+                    timeConnected = new Date(peerConnectionLog[i].time).getTime();
+                }
+            }
+            if (timeConnected && peerConnectionLog[i].type === 'getStats') {
+                Object.keys(peerConnectionLog[i].value).forEach(id => {
+                    var report = peerConnectionLog[i].value[id];
+                    if (report.type === 'ssrc' && (report.kind === 'audio' || report.mediaType === 'audio') && id.indexOf('_recv') !== -1 && report.trackIdentifier) {
+                        receivedAudio = {
+                            timestamp: report.timestamp,
+                            packetsReceived: report.packetsReceived,
+                            jitterbufferms: report.googJitterBufferMs
+                        };
+                    }
+                });
+                if (receivedAudio && receivedAudio.timestamp - timeConnected >= 10000) {
+                    return receivedAudio;
+                }
+            }
+        }
+    },
+
+    // video codec used
+    sendVideoCodec: function(client, peerConnectionLog) {
+        return getCodec(peerConnectionLog, 'video', 'send');
+    },
+    recvVideoCodec: function(client, peerConnectionLog) {
+        return getCodec(peerConnectionLog, 'video', 'recv');
+    },
+
+    // audio codec used
+    sendAudioCodec: function(client, peerConnectionLog) {
+        return getCodec(peerConnectionLog, 'audio', 'send');
+    },
+    recvAudioCodec: function(client, peerConnectionLog) {
+        return getCodec(peerConnectionLog, 'audio', 'recv');
     },
 
     // count # of PLIs sent
@@ -1344,56 +1364,6 @@ module.exports = {
     // TODO: goog aec thingies and typing noise states
     // TODO: goog plc things
 
-    bwe: function(client, peerConnectionLog) {
-        var bwe = extractBWE(peerConnectionLog);
-        if (!bwe.length) return;
-        var stats = ['googActualEncBitrate', 'googRetransmitBitrate', 'googTargetEncBitrate',
-            'googBucketDelay', 'googTransmitBitrate'];
-        bwe = bwe.map(item => {
-            stats.forEach(stat => {
-                item[stat] = parseInt(item[stat], 10);
-            });
-            delete item.googAvailableSendBandwidth;
-            delete item.googAvailableReceiveBandwidth;
-            return item;
-        });
-        stats.push('availableOutgoingBitrate');
-        stats.push('availableIncomingBitrate');
-
-        var feature = {};
-        stats.forEach(stat => {
-            var series = bwe.map(item => item[stat]);
-
-            feature[capitalize(stat) + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-            feature[capitalize(stat) + 'Max'] = Math.max.apply(null, series);
-            feature[capitalize(stat) + 'Min'] = Math.min.apply(null, series);
-
-            feature[capitalize(stat) + 'Variance'] = standardizedMoment(series, 2);
-            feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 3);
-            feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 4);
-        });
-        return feature;
-    },
-
-    calledAddStream: function(client, peerConnectionLog) {
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            var type = peerConnectionLog[i].type;
-            if (type === 'addStream') {
-                return true;
-            }
-        }
-        return false;
-    },
-
-    calledAddTrack: function(client, peerConnectionLog) {
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            var type = peerConnectionLog[i].type;
-            if (type === 'addTrack') {
-                return true;
-            }
-        }
-        return false;
-    },
 };
 
 ['audio', 'video'].forEach(kind => {
