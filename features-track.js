@@ -26,7 +26,7 @@ module.exports = {
 /* these features operate on stats of each track, in send and recv direction */
 ['audio', 'video'].forEach(statKind => {
     ['send', 'recv'].forEach(statDirection => {
-        module.exports[statKind] = function({kind, direction, trackId, stats}) {
+        module.exports[statKind + capitalize(statDirection)] = function({kind, direction, trackId, stats}) {
             if (kind !== statKind || direction !== statDirection) {
                 return;
             }

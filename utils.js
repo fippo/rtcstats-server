@@ -60,12 +60,12 @@ function extractTracks(peerConnectionLog) {
         if (type === 'addStream') {
             const {streamId, tracks: listOfTracks} = extractFromStreamFormat(value);
             listOfTracks.forEach(({kind, trackId}) => {
-                tracks.set(trackId, {kind, streamId, direction: 'send', stats: []});
+                tracks.set(trackId, {kind, streamId, trackId, direction: 'send', stats: []});
             });
         } else if (type === 'addTrack' || type === 'ontrack') {
             const direction = type === 'addTrack' ? 'send' : 'recv';
             const {kind, trackId, streamId} = extractFromTrackFormat(value);
-            tracks.set(trackId, {kind, streamId, direction, stats: []});
+            tracks.set(trackId, {kind, streamId, trackId, direction, stats: []});
         } else if (type === 'getStats') {
             Object.keys(value).forEach(id => {
                 const report = value[id];
@@ -92,9 +92,22 @@ function extractTracks(peerConnectionLog) {
     return tracks;
 }
 
+function extractStreams(tracks) {
+    const streams = new Map();
+    for (const [trackId, {streamId}] of tracks.entries()) {
+        if (streams.has(streamId)) {
+            streams.get(streamId).push(tracks.get(trackId));
+        } else {
+            streams.set(streamId, [tracks.get(trackId)]);
+        }
+    }
+    return streams;
+}
+
 module.exports = {
     capitalize,
     extractTracks,
+    extractStreams,
     mode,
     standardizedMoment,
 }

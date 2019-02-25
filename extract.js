@@ -22,7 +22,7 @@ const clientfeatures = require('./features-client');
 const trackfeatures = require('./features-track');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
-const {extractTracks} = require('./utils');
+const {extractTracks, extractStreams} = require('./utils');
 
 // dumps all peerconnections.
 function dump(url, client, clientid, data) {
@@ -92,31 +92,34 @@ function generateFeatures(url, client, clientid) {
         });
 
         const tracks = extractTracks(conn);
-        for (const [trackId, {kind, direction, stats}] of tracks.entries()) {
-            const trackFeatures = {trackId};
-            Object.keys(trackfeatures).forEach(fname => {
-                let feature = trackfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
-                if (feature !== undefined) {
-                    feature = safeFeature(feature);
-                    if (typeof feature === 'object') {
-                        Object.keys(feature).forEach(subname => {
-                            feature[subname] = safeFeature(feature[subname]);
-                            if (!isProduction) {
-                                console.log(connid, 'TRACK', trackId, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
-                            }
-                            trackFeatures[fname + capitalize(subname)] = feature[subname];
-                        });
-                    }  else {
+        const streams = extractStreams(tracks);
+        for (const [streamId, tracks] of streams.entries()) {
+            const streamFeatures = {streamId};
+            for (const {trackId, kind, direction, stats} of tracks) {
+                Object.keys(trackfeatures).forEach(fname => {
+                    let feature = trackfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
+                    if (feature !== undefined) {
                         feature = safeFeature(feature);
-                        if (!isProduction) {
-                            console.log(connid, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
+                        if (typeof feature === 'object') {
+                            Object.keys(feature).forEach(subname => {
+                                feature[subname] = safeFeature(feature[subname]);
+                                if (!isProduction) {
+                                    console.log(connid, 'STREAM', streamId, 'TRACK', trackId, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                                }
+                                streamFeatures[fname + capitalize(subname)] = feature[subname];
+                            });
+                        }  else {
+                            feature = safeFeature(feature);
+                            if (!isProduction) {
+                                console.log(connid, 'STREAM', streamId, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
+                            }
+                            streamFeatures[fname] = feature;
                         }
-                        trackFeatures[fname] = feature;
                     }
-                }
-            });
+                });
+            }
             if (canUseProcessSend && isProduction) {
-                process.send({url, clientid, connid, clientFeatures, connectionFeatures, trackFeatures});
+                process.send({url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures});
             }
         }
         delete client.peerConnections[connid]; // save memory
