@@ -7,12 +7,7 @@
 // 3) features which are specific to a track.
 // The second type of feature is contained in this file.
 
-const {extractTracks} = require('./utils');
-
-function capitalize(str) {
-    return str[0].toUpperCase() + str.substr(1);
-}
-
+const {capitalize, mode, standardizedMoment} = require('./utils');
 function getPeerConnectionConfig(peerConnectionLog) {
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'create') {
@@ -107,36 +102,6 @@ function extractLastVideoStat(peerConnectionLog, type) {
         }
     });
     return count;
-}
-
-// determine mode (most common) element in a series.
-function mode(series) {
-    var modes = {};
-    series.forEach(item => {
-        if (!modes[item]) modes[item] = 0;
-        modes[item]++;
-    });
-
-    var value = -1;
-    var max = -1;
-    Object.keys(modes).forEach(key => {
-        if (modes[key] > max) {
-            max = modes[key];
-            value = key;
-        }
-    });
-    return value;
-}
-
-// Calculate standardized moment.
-// order=1: 0
-// order=2: variance
-// order=3: skewness
-// order=4: kurtosis
-function standardizedMoment(series, order) {
-    var len = series.length || 1;
-    var mean = series.reduce((a, b) => a + b, 0) / len;
-    return series.reduce((a, b) => a + Math.pow(b - mean, order), 0) / len;
 }
 
 // extracts the central moment from video statistics.
@@ -1169,98 +1134,3 @@ module.exports = {
         return false;
     },
 };
-
-['audio', 'video'].forEach(kind => {
-    ['send', 'recv'].forEach(direction => {
-        module.exports[kind + capitalize(direction)] = function(client, peerConnectionLog) {
-            var track = extractTrack(peerConnectionLog, kind, direction);
-            if (!track.length) return;
-            var feature = {};
-            ['audioLevel', 'googJitterReceived',
-                'googRtt', 'googEncodeUsagePercent',
-                'googCurrentDelayMs', 'googJitterBufferMs',
-                'googPreferredJitterBufferMs', 'googJitterBufferMs',
-                'googDecodeMs', 'googMaxDecodeMs',
-                'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
-            ].forEach(stat => {
-                if (typeof track[0][stat] === 'undefined') return;
-                var series = track.map(item => parseInt(item[stat], 10));
-
-                feature[stat + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-
-                feature[stat + 'Max'] = Math.max.apply(null, series);
-                feature[stat + 'Min'] = Math.min.apply(null, series);
-
-                feature[stat + 'Variance'] = standardizedMoment(series, 2);
-                feature[stat + 'Skewness'] = standardizedMoment(series, 3);
-                feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
-            });
-            ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
-               'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(stat => {
-                if (typeof track[0][stat] === 'undefined') return;
-                // mode, max, min
-                var series = track.map(item => parseInt(item[stat], 10));
-
-                feature[stat + 'Max'] = Math.max.apply(null, series);
-                feature[stat + 'Min'] = Math.min.apply(null, series);
-                feature[stat + 'Mode'] = mode(series);
-            });
-
-            ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(stat => {
-                if (typeof track[0][stat] === 'undefined') return;
-                var series = track.map(item => (item[stat] === 'true' ? 1 : 0));
-
-                feature[stat + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-                feature[stat + 'Max'] = Math.max.apply(null, series);
-                feature[stat + 'Min'] = Math.min.apply(null, series);
-                feature[stat + 'Mode'] = mode(series);
-            });
-
-            // RecentMax is over a 10s window.
-            ['googResidualEchoLikelihoodRecentMax'].forEach(stat => {
-                if (typeof track[0][stat] === 'undefined') return;
-
-                var series = track.map(item => parseFloat(item[stat], 10));
-
-                feature[stat + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-                feature[stat + 'Max'] = Math.max.apply(null, series);
-
-                feature[stat + 'Variance'] = standardizedMoment(series, 2);
-                feature[stat + 'Skewness'] = standardizedMoment(series, 3);
-                feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
-            });
-
-            // stats for which we are interested in the difference between values.
-            ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(stat => {
-                var i;
-                var conversionFactor = stat.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
-                if (typeof track[0][stat] === 'undefined') return;
-                var series = track.map(item => parseInt(item[stat], 10));
-                var dt = track.map(item => item.timestamp);
-                // calculate the difference
-                for (i = 1; i < series.length; i++) {
-                    series[i - 1] = series[i] - series[i - 1];
-                    dt[i - 1] = dt[i] - dt[i - 1];
-                }
-                series.length = series.length - 1;
-                dt.length = dt.length - 1;
-                for (i = 0; i < series.length; i++) {
-                    series[i] = Math.floor(series[i] * 1000 / dt[i]) * conversionFactor;
-                }
-
-                // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
-
-                feature[stat + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-                feature[stat + 'Max'] = Math.max.apply(null, series);
-                feature[stat + 'Min'] = Math.min.apply(null, series);
-                feature[stat + 'Mode'] = mode(series);
-
-                feature[stat + 'Variance'] = standardizedMoment(series, 2);
-                feature[stat + 'Skewness'] = standardizedMoment(series, 3);
-                feature[stat + 'Kurtosis'] = standardizedMoment(series, 4);
-            });
-            return feature;
-        };
-    });
-});

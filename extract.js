@@ -90,31 +90,36 @@ function generateFeatures(url, client, clientid) {
                 }
             }
         });
-        // delete client.peerConnections[connid]; // save memory
-        if (!isProduction) return;
-        if (canUseProcessSend) {
-            process.send({url, clientid, connid, clientFeatures, connectionFeatures});
-        } else {
-            console.log(url, clientid, connid, clientFeatures, connectionFeatures);
-        }
-    });
 
-    Object.keys(client.peerConnections).forEach(connid => {
-        if (connid === 'null') return; // ignore the null connid
-        const conn = client.peerConnections[connid];
-        const trackFeatures = {};
         const tracks = extractTracks(conn);
         for (const [trackId, {kind, direction, stats}] of tracks.entries()) {
+            const trackFeatures = {trackId};
             Object.keys(trackfeatures).forEach(fname => {
                 let feature = trackfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
                 if (feature !== undefined) {
                     feature = safeFeature(feature);
-                    if (!isProduction) {
-                        console.log(connid, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
+                    if (typeof feature === 'object') {
+                        Object.keys(feature).forEach(subname => {
+                            feature[subname] = safeFeature(feature[subname]);
+                            if (!isProduction) {
+                                console.log(connid, 'TRACK', trackId, 'FEATURE', fname + capitalize(subname), '=>', safeFeature(feature[subname]));
+                            }
+                            trackFeatures[fname + capitalize(subname)] = feature[subname];
+                        });
+                    }  else {
+                        feature = safeFeature(feature);
+                        if (!isProduction) {
+                            console.log(connid, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
+                        }
+                        trackFeatures[fname] = feature;
                     }
                 }
             });
+            if (canUseProcessSend && isProduction) {
+                process.send({url, clientid, connid, clientFeatures, connectionFeatures, trackFeatures});
+            }
         }
+        delete client.peerConnections[connid]; // save memory
     });
 }
 
