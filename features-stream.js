@@ -80,7 +80,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
                 return;
             }
             const conversionFactor = statName.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
-            const series = stats.map(item => parseInt(item[statName], 10));
+            let series = stats.map(item => parseInt(item[statName], 10));
             const dt = stats.map(item => item.timestamp);
             // calculate the difference
             for (let i = 1; i < series.length; i++) {
@@ -94,7 +94,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
             }
 
             // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-            series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
+            series = series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
 
             feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
             feature[statName + 'Max'] = Math.max.apply(null, series);
@@ -152,7 +152,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
             if (typeof stats[0][statName] === 'undefined') {
                 return;
             }
-            const series = stats.map(item => parseInt(item[statName], 10));
+            let series = stats.map(item => parseInt(item[statName], 10));
             const dt = stats.map(item => item.timestamp);
             // calculate the difference
             for (let i = 1; i < series.length; i++) {
@@ -166,7 +166,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
             }
 
             // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-            series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
+            series = series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
 
             feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
             feature[statName + 'Max'] = Math.max.apply(null, series);
