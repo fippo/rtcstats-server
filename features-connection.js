@@ -1108,8 +1108,10 @@ module.exports = {
             feature[capitalize(stat) + 'Min'] = Math.min.apply(null, series);
 
             feature[capitalize(stat) + 'Variance'] = standardizedMoment(series, 2);
+            /*
             feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 3);
             feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 4);
+            */
         });
         return feature;
     },
