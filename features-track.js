@@ -24,114 +24,166 @@ module.exports = {
 };
 
 /* these features operate on stats of each track, in send and recv direction */
-['audio', 'video'].forEach(statKind => {
+module.exports.audio = function({kind, direction, trackId, stats}) {
+    const feature = {};
     ['send', 'recv'].forEach(statDirection => {
-        module.exports[statKind + capitalize(statDirection)] = function({kind, direction, trackId, stats}) {
-            if (kind !== statKind || direction !== statDirection) {
+        if (kind !== 'audio' || direction !== statDirection) {
+            return;
+        }
+        ['audioLevel', 'googJitterReceived',
+            'googRtt', 'googEncodeUsagePercent',
+            'googCurrentDelayMs', 'googJitterBufferMs',
+            'googPreferredJitterBufferMs', 'googJitterBufferMs',
+            'googDecodeMs', 'googMaxDecodeMs',
+            'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
+        ].forEach(statName => {
+            if (kind !== 'audio' || typeof stats[0][statName] === 'undefined') {
                 return;
             }
-            const feature = {};
-            ['audioLevel', 'googJitterReceived',
-                'googRtt', 'googEncodeUsagePercent',
-                'googCurrentDelayMs', 'googJitterBufferMs',
-                'googPreferredJitterBufferMs', 'googJitterBufferMs',
-                'googDecodeMs', 'googMaxDecodeMs',
-                'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
-            ].forEach(statName => {
-                if (kind !== 'audio' || typeof stats[0][statName] === 'undefined') {
-                    return;
-                }
-                const series = stats.map(item => parseInt(item[statName], 10));
+            const series = stats.map(item => parseInt(item[statName], 10));
 
-                feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            if (statName === 'audioLevel') {
+                statName = 'level';
+            }
+            feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
 
-                feature[statName + 'Max'] = Math.max.apply(null, series);
-                feature[statName + 'Min'] = Math.min.apply(null, series);
+            feature[statName + 'Max'] = Math.max.apply(null, series);
+            feature[statName + 'Min'] = Math.min.apply(null, series);
 
-                feature[statName + 'Variance'] = standardizedMoment(series, 2);
-                feature[statName + 'Skewness'] = standardizedMoment(series, 3);
-                feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
-            });
-            ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
-               'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(statName => {
-                if (kind !== 'video' || typeof stats[0][statName] === 'undefined') {
-                    return;
-                }
-                // mode, max, min
-                const series = stats.map(item => parseInt(item[statName], 10));
-
-                feature[statName + 'Max'] = Math.max.apply(null, series);
-                feature[statName + 'Min'] = Math.min.apply(null, series);
-                feature[statName + 'Mode'] = mode(series);
-            });
-
-            ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(statName => {
-                if (kind !== 'video' || typeof stats[0][statName] === 'undefined') {
-                    return;
-                }
-                const series = stats.map(item => (item[statName] === 'true' ? 1 : 0));
-
-                feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-                feature[statName + 'Max'] = Math.max.apply(null, series);
-                feature[statName + 'Min'] = Math.min.apply(null, series);
-                feature[statName + 'Mode'] = mode(series);
-            });
-
-            // RecentMax is over a 10s window.
-            ['googResidualEchoLikelihoodRecentMax'].forEach(statName => {
-                if (kind !== 'audio' || typeof stats[0][statName] === 'undefined') {
-                    return;
-                }
-
-                const series = stats.map(item => parseFloat(item[statName], 10));
-
-                feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-                feature[statName + 'Max'] = Math.max.apply(null, series);
-
-                feature[statName + 'Variance'] = standardizedMoment(series, 2);
-                feature[statName + 'Skewness'] = standardizedMoment(series, 3);
-                feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
-            });
-
-            // statNames for which we are interested in the difference between values.
-            ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(statName => {
-                if (typeof stats[0][statName] === 'undefined') {
-                    return;
-                }
-                let i;
-                const conversionFactor = statName.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
-                if (typeof stats[0][statName] === 'undefined') {
-                    return;
-                }
-                const series = stats.map(item => parseInt(item[statName], 10));
-                const dt = stats.map(item => item.timestamp);
-                // calculate the difference
-                for (i = 1; i < series.length; i++) {
-                    series[i - 1] = series[i] - series[i - 1];
-                    dt[i - 1] = dt[i] - dt[i - 1];
-                }
-                series.length = series.length - 1;
-                dt.length = dt.length - 1;
-                for (i = 0; i < series.length; i++) {
-                    series[i] = Math.floor(series[i] * 1000 / dt[i]) * conversionFactor;
-                }
-
-                // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
-
-                feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
-                feature[statName + 'Max'] = Math.max.apply(null, series);
-                feature[statName + 'Min'] = Math.min.apply(null, series);
-                feature[statName + 'Mode'] = mode(series);
-
-                feature[statName + 'Variance'] = standardizedMoment(series, 2);
-                feature[statName + 'Skewness'] = standardizedMoment(series, 3);
-                feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
-            });
-            if (Object.keys(feature).length === 0) {
+            feature[statName + 'Variance'] = standardizedMoment(series, 2);
+            /*
+            feature[statName + 'Skewness'] = standardizedMoment(series, 3);
+            feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
+            */
+        });
+        // RecentMax is over a 10s window.
+        ['googResidualEchoLikelihoodRecentMax'].forEach(statName => {
+            if (kind !== 'audio' || typeof stats[0][statName] === 'undefined') {
                 return;
             }
-            return feature;
-        };
+
+            const series = stats.map(item => parseFloat(item[statName], 10));
+
+            feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[statName + 'Max'] = Math.max.apply(null, series);
+
+            feature[statName + 'Variance'] = standardizedMoment(series, 2);
+            /*
+            feature[statName + 'Skewness'] = standardizedMoment(series, 3);
+            feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
+            */
+        });
+
+        // statNames for which we are interested in the difference between values.
+        // Also these have the same name for audio and video so we need to include the kind.
+        ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(statName => {
+            if (typeof stats[0][statName] === 'undefined') {
+                return;
+            }
+            const conversionFactor = statName.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
+            const series = stats.map(item => parseInt(item[statName], 10));
+            const dt = stats.map(item => item.timestamp);
+            // calculate the difference
+            for (let i = 1; i < series.length; i++) {
+                series[i - 1] = series[i] - series[i - 1];
+                dt[i - 1] = dt[i] - dt[i - 1];
+            }
+            series.length = series.length - 1;
+            dt.length = dt.length - 1;
+            for (let i = 0; i < series.length; i++) {
+                series[i] = Math.floor(series[i] * 1000 / dt[i]) * conversionFactor;
+            }
+
+            // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+            series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
+
+            feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[statName + 'Max'] = Math.max.apply(null, series);
+            feature[statName + 'Min'] = Math.min.apply(null, series);
+            feature[statName + 'Mode'] = mode(series);
+
+            feature[statName + 'Variance'] = standardizedMoment(series, 2);
+            /*
+            feature[statName + 'Skewness'] = standardizedMoment(series, 3);
+            feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
+            */
+        });
     });
-});
+    if (Object.keys(feature).length === 0) {
+        return;
+    }
+    return feature;
+};
+
+module.exports.video = function({kind, direction, trackId, stats}) {
+    const feature = {};
+    ['send', 'recv'].forEach(statDirection => {
+        if (kind !== 'video' || direction !== statDirection) {
+            return;
+        }
+        ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
+           'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(statName => {
+            if (typeof stats[0][statName] === 'undefined') {
+                return;
+            }
+            // mode, max, min
+            const series = stats.map(item => parseInt(item[statName], 10));
+
+            feature[statName + 'Max'] = Math.max.apply(null, series);
+            feature[statName + 'Min'] = Math.min.apply(null, series);
+            feature[statName + 'Mode'] = mode(series);
+        });
+
+        ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(statName => {
+            if (typeof stats[0][statName] === 'undefined') {
+                return;
+            }
+            const series = stats.map(item => (item[statName] === 'true' ? 1 : 0));
+
+            feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[statName + 'Max'] = Math.max.apply(null, series);
+            feature[statName + 'Min'] = Math.min.apply(null, series);
+            feature[statName + 'Mode'] = mode(series);
+        });
+
+        // statNames for which we are interested in the difference between values.
+        // Also these have the same name for audio and video so we need to include the kind.
+        ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(statName => {
+            const conversionFactor = statName.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
+            if (typeof stats[0][statName] === 'undefined') {
+                return;
+            }
+            const series = stats.map(item => parseInt(item[statName], 10));
+            const dt = stats.map(item => item.timestamp);
+            // calculate the difference
+            for (let i = 1; i < series.length; i++) {
+                series[i - 1] = series[i] - series[i - 1];
+                dt[i - 1] = dt[i] - dt[i - 1];
+            }
+            series.length = series.length - 1;
+            dt.length = dt.length - 1;
+            for (let i = 0; i < series.length; i++) {
+                series[i] = Math.floor(series[i] * 1000 / dt[i]) * conversionFactor;
+            }
+
+            // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+            series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
+
+            feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[statName + 'Max'] = Math.max.apply(null, series);
+            feature[statName + 'Min'] = Math.min.apply(null, series);
+            feature[statName + 'Mode'] = mode(series);
+
+            feature[statName + 'Variance'] = standardizedMoment(series, 2);
+            /*
+            feature[statName + 'Skewness'] = standardizedMoment(series, 3);
+            feature[statName + 'Kurtosis'] = standardizedMoment(series, 4);
+            */
+        });
+    });
+    if (Object.keys(feature).length === 0) {
+        return;
+    }
+    return feature;
+};
+
