@@ -286,6 +286,9 @@ module.exports = {
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
         for (var i = 0; i < peerConnectionConfig.iceServers.length; i++) {
             var urls = peerConnectionConfig.iceServers[i].urls || [];
+            if (typeof urls === 'string') {
+                urls = [urls];
+            }
             for (var j = 0; j < urls.length; j++) {
                 if (urls[j].indexOf('stun:') === 0) return true;
             }
