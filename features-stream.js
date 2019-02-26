@@ -11,7 +11,6 @@ const {capitalize, mode, standardizedMoment} = require('./utils');
 // each feature expects {kind, direction, trackId, stats} as argument.
 module.exports = {
     numberOfStats: ({stats}) => stats.length, 
-    kind: ({kind}) => kind,
     direction: ({direction}) => direction,
     duration: ({kind, direction, trackId, stats}) => {
         if (stats.length < 2) {

@@ -19,7 +19,7 @@ function safeFeature(feature) {
 
 const connectionfeatures = require('./features-connection');
 const clientfeatures = require('./features-client');
-const trackfeatures = require('./features-track');
+const streamfeatures = require('./features-stream');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
 const {extractTracks, extractStreams} = require('./utils');
@@ -96,8 +96,8 @@ function generateFeatures(url, client, clientid) {
         for (const [streamId, tracks] of streams.entries()) {
             const streamFeatures = {streamId};
             for (const {trackId, kind, direction, stats} of tracks) {
-                Object.keys(trackfeatures).forEach(fname => {
-                    let feature = trackfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
+                Object.keys(streamfeatures).forEach(fname => {
+                    let feature = streamfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
                     if (feature !== undefined) {
                         feature = safeFeature(feature);
                         if (typeof feature === 'object') {
