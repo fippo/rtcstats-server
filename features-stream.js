@@ -96,10 +96,9 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
             // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
             series = series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
 
-            feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
             feature[statName + 'Max'] = Math.max.apply(null, series);
             feature[statName + 'Min'] = Math.min.apply(null, series);
-            feature[statName + 'Mode'] = mode(series);
 
             feature[statName + 'Variance'] = standardizedMoment(series, 2);
             /*
@@ -168,10 +167,9 @@ module.exports.video = function({kind, direction, trackId, stats}) {
             // filter negative values -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
             series = series.filter(x => isFinite(x) && !isNaN(x) && x >= 0);
 
-            feature[statName + 'Delta' + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
+            feature[statName + 'Mean'] = series.reduce((a, b) => a + b, 0) / series.length;
             feature[statName + 'Max'] = Math.max.apply(null, series);
             feature[statName + 'Min'] = Math.min.apply(null, series);
-            feature[statName + 'Mode'] = mode(series);
 
             feature[statName + 'Variance'] = standardizedMoment(series, 2);
             /*
