@@ -36,7 +36,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
             'googDecodeMs', 'googMaxDecodeMs',
             'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
         ].forEach(statName => {
-            if (kind !== 'audio' || typeof stats[0][statName] === 'undefined') {
+            if (typeof stats[0][statName] === 'undefined') {
                 return;
             }
             const series = stats.map(item => parseInt(item[statName], 10));
@@ -57,7 +57,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
         });
         // RecentMax is over a 10s window.
         ['googResidualEchoLikelihoodRecentMax'].forEach(statName => {
-            if (kind !== 'audio' || typeof stats[0][statName] === 'undefined') {
+            if (typeof stats[0][statName] === 'undefined') {
                 return;
             }
 
