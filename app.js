@@ -134,7 +134,8 @@ function run(keys) {
             origin: upgradeReq.headers['origin'],
             url: referer,
             userAgent: ua,
-            time: Date.now()
+            time: Date.now(),
+            fileFormat: 2,
         };
         tempStream.write(JSON.stringify(meta) + '\n');
 
