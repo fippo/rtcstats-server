@@ -66,10 +66,9 @@ CREATE TABLE features (
     configuredwithturntcp boolean,
     configuredwithturntls boolean,
     configuredwithturnudp boolean,
-    configuredcertificate boolean,
-    sdpsemantics: character varying(32),
-    calledaddtrack: boolean,
-    calledaddstream: boolean
+    sdpsemantics character varying(32),
+    calledaddtrack boolean,
+    calledaddstream boolean,
 
     localcreatedelay integer,
     maxstreams integer,
@@ -207,10 +206,10 @@ CREATE TABLE features (
     audiopacketslostmin real,
     audiopacketslostvariance real,
 
-    videodgoogframewidthsentmax real,
+    videogoogframewidthsentmax real,
     videogoogframewidthsentmin real,
     videogoogframewidthsentmode real,
-    videodgoogframeheightsentmax real,
+    videogoogframeheightsentmax real,
     videogoogframeheightsentmin real,
     videogoogframeheightsentmode real,
 
@@ -223,21 +222,12 @@ CREATE TABLE features (
     videobytessentmin real,
     videobytessentvariance real,
 
-    videodgoogframewidthreceivedmax real,
+    videogoogframewidthreceivedmax real,
     videogoogframewidthreceivedmin real,
     videogoogframewidthreceivedmode real,
-    videodgoogframeheightreceivedmax real,
+    videogoogframeheightreceivedmax real,
     videogoogframeheightreceivedmin real,
     videogoogframeheightreceivedmode real,
-
-    videopacketssentmean real,
-    videopacketssentmax real,
-    videopacketssentmin real,
-    videopacketssentvariance real,
-    videobytessentmean real,
-    videobytessentmax real,
-    videobytessentmin real,
-    videobytessentvariance real,
 
     videopacketsreceivedmean real,
     videopacketsreceivedmax real,
