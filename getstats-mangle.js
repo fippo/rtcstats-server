@@ -3,6 +3,9 @@ module.exports = function(stats) {
   // Mangle chrome stats to spec stats. Just chrome stats.
   let needsMangling = false;
   Object.keys(stats).forEach(id => {
+      if (!stats[id].id) {
+        stats[id].id = id; // backfill, might have been removed by client.
+      }
       if (stats[id].type === 'googComponent') {
           needsMangling = true;
       }
