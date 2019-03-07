@@ -9,10 +9,14 @@ module.exports = function(config) {
       Bucket: config.s3.bucket
     }
   });
-
+  const configured = !!config.s3.bucket;
 
   return {
     put: function(key, data) {
+      if (!configured) {
+        console.log('no bucket configured for storage');
+        return;
+      }
       zlib.gzip(data, (err, data) => {
         if (err) {
           console.log("Error gzipping data: ", err);
