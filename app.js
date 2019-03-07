@@ -163,12 +163,10 @@ function run(keys) {
                 case 'navigator.mediaDevices.getUserMedia':
                 case 'navigator.mediaDevices.getUserMediaOnSuccess':
                 case 'navigator.mediaDevices.getUserMediaOnFailure':
-                    data.time = Date.now();
                     tempStream.write(JSON.stringify(data) + '\n');
                     break;
                 default:
                     obfuscate(data);
-                    data.time = Date.now();
                     tempStream.write(JSON.stringify(data) + '\n');
                     break;
                 }
