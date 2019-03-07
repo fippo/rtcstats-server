@@ -144,13 +144,7 @@ function run(keys) {
             process.nextTick(() => {
                 const city = cityLookup.get(forwardedFor);
                 if (tempStream) {
-                    tempStream.write(JSON.stringify({
-                        0: 'location',
-                        1: null,
-                        2: city,
-                        time: Date.now()
-                        }) + '\n'
-                    );
+                    tempStream.write(JSON.stringify(['location', null, city, Date.now()]) + '\n');
                 }
             });
         }
