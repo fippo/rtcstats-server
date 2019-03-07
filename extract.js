@@ -147,6 +147,9 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                 case 'userfeedback': // TODO: might be renamed
                     client.feedback = data[2];
                     break;
+                case 'tags': // experiment variation tags
+                    client.tags = data[2];
+                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':

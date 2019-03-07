@@ -8,6 +8,8 @@ CREATE TABLE features (
     connectionid character varying(255),
     streamid character varying(255),
 
+    tags character varying(1023),
+
     origin character varying(255),
     pageurl character varying(4096),
 

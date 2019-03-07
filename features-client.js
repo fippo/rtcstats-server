@@ -246,5 +246,9 @@ module.exports = {
         var feature = {};
         feature[client.feedback.mediaType] = client.feedback.score;
         return feature;
+    },
+
+    tags: function(client) {
+        return client.tags;
     }
 };
