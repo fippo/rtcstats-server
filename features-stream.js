@@ -36,7 +36,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
             'googDecodeMs', 'googMaxDecodeMs',
             'googMinPlayoutDelayMs', 'googRenderDelayMs', 'googTargetDelayMs'
         ].forEach(statName => {
-            if (typeof stats[0][statName] === 'undefined') {
+            if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
             const series = stats.map(item => parseInt(item[statName], 10));
@@ -57,7 +57,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
         });
         // RecentMax is over a 10s window.
         ['googResidualEchoLikelihoodRecentMax'].forEach(statName => {
-            if (typeof stats[0][statName] === 'undefined') {
+            if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
 
@@ -76,7 +76,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
         // statNames for which we are interested in the difference between values.
         // Also these have the same name for audio and video so we need to include the kind.
         ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(statName => {
-            if (typeof stats[0][statName] === 'undefined') {
+            if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
             const conversionFactor = statName.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
@@ -121,7 +121,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
         }
         ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
            'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(statName => {
-            if (typeof stats[0][statName] === 'undefined') {
+            if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
             // mode, max, min
@@ -133,7 +133,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
         });
 
         ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(statName => {
-            if (typeof stats[0][statName] === 'undefined') {
+            if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
             const series = stats.map(item => (item[statName] === 'true' ? 1 : 0));
@@ -148,7 +148,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
         // Also these have the same name for audio and video so we need to include the kind.
         ['packetsReceived', 'packetsSent', 'packetsLost', 'bytesSent', 'bytesReceived'].forEach(statName => {
             const conversionFactor = statName.indexOf('bytes') === 0 ? 8 : 1; // we want bits/second
-            if (typeof stats[0][statName] === 'undefined') {
+            if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
             let series = stats.map(item => parseInt(item[statName], 10));
