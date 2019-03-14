@@ -251,5 +251,8 @@ CREATE TABLE features (
     videogoogbandwidthlimitedresolutionmean real,
     videogoogbandwidthlimitedresolutionmax real,
     videogoogbandwidthlimitedresolutionmin real,
-    videogoogbandwidthlimitedresolutionmode real
+    videogoogbandwidthlimitedresolutionmode real,
+
+    audiocodec character varying(64),
+    videocodec character varying(64)
 );

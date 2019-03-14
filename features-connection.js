@@ -104,32 +104,6 @@ function extractLastVideoStat(peerConnectionLog, type) {
     return count;
 }
 
-// extract the codec used. Has to happen after the connection is up and packets have
-// been received or sent.
-function getCodec(peerConnectionLog, kind, direction) { 
-    var codecName;
-    var connected = false;
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'oniceconnectionstatechange') {
-            if (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed') {
-                connected = true;
-            }
-        }
-        if (!connected) continue;
-        if (peerConnectionLog[i].type !== 'getStats') continue;
-        var statsReport = peerConnectionLog[i].value;
-        Object.keys(statsReport).forEach(id => {
-            var report = statsReport[id];
-            if (report.type === 'ssrc' && (report.kind === kind || report.mediaType === kind) &&
-              report.googCodecName && report.googCodecName.length
-              && id.indexOf(direction) !== -1) {
-                codecName = report.googCodecName;
-            }
-        });
-        if (codecName) return codecName;
-    }
-}
-
 // extract a local/remote audio or video track.
 function extractTrack(peerConnectionLog, kind, direction) {
     const allTracks = extractTracks(peerConnectionLog);

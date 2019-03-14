@@ -29,6 +29,12 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
         if (kind !== 'audio' || direction !== statDirection) {
             return;
         }
+        ['codec'].forEach(statName => {
+            const codecName = stats.filter(stat => !!stat.googCodecName).map(stat => stat.googCodecName)[0];
+            if (codecName !== '') {
+                feature[statName] = codecName;
+            }
+        });
         ['audioLevel', 'googJitterReceived',
             'googRtt', 'googEncodeUsagePercent',
             'googCurrentDelayMs', 'googJitterBufferMs',
@@ -119,6 +125,12 @@ module.exports.video = function({kind, direction, trackId, stats}) {
         if (kind !== 'video' || direction !== statDirection) {
             return;
         }
+        ['codec'].forEach(statName => {
+            const codecName = stats.filter(stat => !!stat.googCodecName).map(stat => stat.googCodecName)[0];
+            if (codecName !== '') {
+                feature[statName] = codecName;
+            }
+        });
         ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
            'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(statName => {
             if (!stats.length || typeof stats[0][statName] === 'undefined') {
