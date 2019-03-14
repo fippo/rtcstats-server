@@ -57,8 +57,8 @@ class ProcessQueue {
             });
         });
         p.on('message', (msg) => {
-            const {url, clientid, connid, clientFeatures, connectionFeatures} = msg;
-            Database.put(url, clientid, connid, clientFeatures, connectionFeatures);
+            const {url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures} = msg;
+            Database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
         });
         p.on('error', () => {
             this.numProc--;

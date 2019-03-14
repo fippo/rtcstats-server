@@ -22,7 +22,7 @@ module.exports = function(config) {
   }
 
   return {
-    put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures) {
+    put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures, streamFeatures) {
       const d = new Date().getTime();
       const item = {
         Date: d - (d % (86400 * 1000)), // just the UTC day
@@ -36,6 +36,9 @@ module.exports = function(config) {
         item[key] = value;
       });
       _.forEach(connectionFeatures, (value, key) => {
+        item[key] = value;
+      });
+      _.forEach(streamFeatures, (value, key) => {
         item[key] = value;
       });
 
