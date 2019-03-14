@@ -104,31 +104,6 @@ function extractLastVideoStat(peerConnectionLog, type) {
     return count;
 }
 
-// extracts the central moment from video statistics.
-function extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, kind) {
-    var series = [];
-    for (var i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
-            Object.keys(statsReport).forEach(id => {
-                var report = statsReport[id];
-                if (report.type === 'ssrc' && (report.kind === kind || report.mediaType === kind) && report[statName]) {
-                    series.push(parseInt(report[statName], 10));
-                }
-            });
-        }
-    }
-    return series.length ? standardizedMoment(series, order) : undefined;
-}
-
-function extractCentralMomentFromVideoStat(peerConnectionLog, statName, order) {
-    return extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, 'video');
-}
-
-function extractCentralMomentFromAudioStat(peerConnectionLog, statName, order) {
-    return extractCentralMomentFromSsrcStat(peerConnectionLog, statName, order, 'audio');
-}
-
 // extract the codec used. Has to happen after the connection is up and packets have
 // been received or sent.
 function getCodec(peerConnectionLog, kind, direction) { 
