@@ -150,6 +150,9 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                 case 'tags': // experiment variation tags
                     client.tags = data[2];
                     break;
+                case 'wsconnect':
+                    client.websocketConnectionTime = data[2];
+                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
