@@ -254,5 +254,8 @@ CREATE TABLE features (
     videogoogbandwidthlimitedresolutionmode real,
 
     audiocodec character varying(64),
-    videocodec character varying(64)
+    videocodec character varying(64),
+
+    websocketconnectiontime integer,
+    sendingduration integer
 );
