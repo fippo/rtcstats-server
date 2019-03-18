@@ -250,5 +250,8 @@ module.exports = {
 
     tags: function(client) {
         return client.tags;
+    },
+    websocketConnectionTime: function(client) {
+        return client.websocketConnectionTime;
     }
 };
