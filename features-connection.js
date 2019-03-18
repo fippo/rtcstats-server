@@ -7,7 +7,9 @@
 // 3) features which are specific to a track.
 // The second type of feature is contained in this file.
 
-const {capitalize, mode, standardizedMoment} = require('./utils');
+const {capitalize, standardizedMoment} = require('./utils');
+const SDPUtils = require('sdp');
+
 function getPeerConnectionConfig(peerConnectionLog) {
     for (var i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'create') {
@@ -184,6 +186,31 @@ module.exports = {
     lifeTime: function(client, peerConnectionLog) {
         const lifeTime = new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime() - new Date(peerConnectionLog[0].time).getTime();
         return lifeTime > 0 ? lifeTime : null;
+    },
+
+    sendingDuration: function(client, peerConnectionLog) {
+        let sendingDuration = 0;
+        let prevTime = peerConnectionLog[0].timestamp;
+        let prevSending = false;
+        for (var i = 0; i < peerConnectionLog.length; i++) {
+            const log = peerConnectionLog[i];
+            if (log.type !== 'setLocalDescription') {
+                continue;
+            }
+            const sections = SDPUtils.getMediaSections((log.value && log.value.sdp) || '');
+            const direction =  SDPUtils.getDirection(sections.length ? sections[0] : '');
+            const logTime = log.timestamp;
+            const logSending = ['sendonly', 'sendrecv'].includes(direction);
+            if (prevSending) {
+                sendingDuration += logTime - prevTime;
+            }
+            prevTime = logTime;
+            prevSending = logSending;
+        }
+        if (prevSending) {
+            sendingDuration += peerConnectionLog[peerConnectionLog.length - 1].timestamp - prevTime;
+        }
+        return sendingDuration;
     },
 
     // the webrtc platform type -- webkit or moz
