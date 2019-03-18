@@ -192,21 +192,20 @@ module.exports = {
         let sendingDuration = 0;
         let prevTime = peerConnectionLog[0].timestamp;
         let prevSending = false;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            const log = peerConnectionLog[i];
-            if (log.type !== 'setLocalDescription') {
-                continue;
+
+        peerConnectionLog.forEach(({type, value, timestamp}) => {
+            if (type !== 'setLocalDescription') {
+                return;
             }
-            const sections = SDPUtils.getMediaSections((log.value && log.value.sdp) || '');
-            const direction =  SDPUtils.getDirection(sections.length ? sections[0] : '');
-            const logTime = log.timestamp;
+            const sections = SDPUtils.getMediaSections(value.sdp);
+            const direction = SDPUtils.getDirection(sections[0]);
             const logSending = ['sendonly', 'sendrecv'].includes(direction);
             if (prevSending) {
-                sendingDuration += logTime - prevTime;
+                sendingDuration += timestamp - prevTime;
             }
-            prevTime = logTime;
+            prevTime = timestamp;
             prevSending = logSending;
-        }
+        });
         if (prevSending) {
             sendingDuration += peerConnectionLog[peerConnectionLog.length - 1].timestamp - prevTime;
         }
