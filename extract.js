@@ -161,6 +161,7 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                 case 'navigator.mediaDevices.getUserMediaOnFailure':
                     client.getUserMedia.push({
                         time: time,
+                        timestamp: time.getTime(),
                         type: data[0],
                         value: data[2]
                     });
@@ -180,8 +181,9 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                     }
                     client.peerConnections[data[1]].push({
                         time: time,
+                        timestamp: time.getTime(),
                         type: data[0],
-                        value: data[2]
+                        value: data[2],
                     });
                     break;
                 }
