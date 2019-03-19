@@ -97,7 +97,7 @@ function generateFeatures(url, client, clientid) {
             const streamFeatures = {streamId};
             for (const {trackId, kind, direction, stats} of tracks) {
                 Object.keys(streamfeatures).forEach(fname => {
-                    let feature = streamfeatures[fname].apply(null, [{kind, direction, trackId, stats}]);
+                    let feature = streamfeatures[fname].apply(null, [{kind, direction, trackId, stats, peerConnectionLog: conn}]);
                     if (feature !== undefined) {
                         feature = safeFeature(feature);
                         if (typeof feature === 'object') {
