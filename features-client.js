@@ -253,7 +253,7 @@ module.exports = {
     },
     websocketConnectionTime: function(client) {
         return client.websocketConnectionTime;
-    }
+    },
 
     websocketError: function(client) {
         return client.websocketError;
