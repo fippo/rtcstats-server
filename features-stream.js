@@ -20,6 +20,19 @@ module.exports = {
         const last = stats[stats.length - 1];
         return last.timestamp.getTime() - first.timestamp.getTime();
     },
+    active: ({kind, direction, trackId, stats}) => {
+        if (stats.length < 2) {
+            return 0;
+        }
+        const statName = direction === 'send' ? 'bytesSent' : 'bytesReceived';
+        let duration = 0;
+        for (let i = 1; i < stats.length; i++) {
+            if (stats[i][statName] !== stats[i - 1][statName]) {
+                duration += stats[i].timestamp.getTime() - stats[i - 1].timestamp.getTime();
+            }
+        }
+        return duration;
+    },
 };
 
 /* these features operate on stats of each track, in send and recv direction */
