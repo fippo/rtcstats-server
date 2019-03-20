@@ -257,5 +257,7 @@ CREATE TABLE features (
     videocodec character varying(64),
 
     websocketconnectiontime integer,
-    sendingduration integer
+    sendingduration integer,
+    websocketerror character varying(255),
+    active integer
 );
