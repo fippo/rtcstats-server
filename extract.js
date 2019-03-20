@@ -153,6 +153,9 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                 case 'wsconnect':
                     client.websocketConnectionTime = data[2];
                     break;
+                case 'wsconnecterror':
+                    client.websocketError = data[2];
+                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
