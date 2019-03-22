@@ -24,6 +24,7 @@ function obfuscateCandidate(candidate) {
     const cand = SDPUtils.parseCandidate(candidate);
     if (cand.type !== 'relay') {
         cand.ip = obfuscateIP(cand.ip);
+        cand.address = obfuscateIP(cand.address);
     }
     if (cand.relatedAddress) {
         cand.relatedAddress = obfuscateIP(cand.relatedAddress);
