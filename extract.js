@@ -66,6 +66,13 @@ function generateFeatures(url, client, clientid) {
             }
         }
     });
+    if (Object.keys(client.peerConnections).length === 0) {
+        // we only have GUM and potentially GUM errors.
+        if (canUseProcessSend && isProduction) {
+            process.send({url, clientid, connid: '', clientFeatures});
+        }
+    }
+
     Object.keys(client.peerConnections).forEach(connid => {
         if (connid === 'null') return; // ignore the null connid
         const conn = client.peerConnections[connid];
