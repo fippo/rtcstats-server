@@ -259,5 +259,6 @@ CREATE TABLE features (
     websocketconnectiontime integer,
     sendingduration integer,
     websocketerror character varying(255),
-    active integer
+    active integer,
+    firstcandidatepairlocalnetworktype character varying(255)
 );
