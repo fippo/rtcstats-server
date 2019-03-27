@@ -435,6 +435,20 @@ module.exports = {
         }
     },
 
+    // This calculates the time between the first SRD and resolving.
+    timeForFirstSetRemoteDescription: function(client, peerConnectionLog) {
+        let srd;
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'setRemoteDescription') {
+                srd = peerConnectionLog[i];
+            } else if (peerConnectionLog[i].type === 'setRemoteDescriptionOnSuccess') {
+                if (srd) {
+                    return peerConnectionLog[i].timestamp - srd.timestamp;
+                }
+            }
+        }
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         var usingIceLite = false;
