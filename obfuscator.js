@@ -22,7 +22,7 @@ function obfuscateIP(ip) {
 // selecting/grouping sessions by TURN server.
 function obfuscateCandidate(candidate) {
     const cand = SDPUtils.parseCandidate(candidate);
-    if (cand.type !== 'relay') {
+    if (!(cand.type === 'relay' || cand.protocol === 'ssltcp')) {
         cand.ip = obfuscateIP(cand.ip);
         cand.address = obfuscateIP(cand.address);
     }
