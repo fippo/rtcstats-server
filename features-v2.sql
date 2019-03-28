@@ -261,5 +261,5 @@ CREATE TABLE features (
     websocketerror character varying(255),
     active integer,
     firstcandidatepairlocalnetworktype character varying(255),
-    timeforsetfirstremotedescription integer,
+    timeforfirstsetremotedescription integer,
 );
