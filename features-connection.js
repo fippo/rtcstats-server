@@ -988,6 +988,28 @@ module.exports = {
         return feature;
     },
 
+    bytesTotal: function(client, peerConnectionLog) {
+        // TODO: does this reset during a restart? See
+        // https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
+        let lastReport;
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            const {type, value} = peerConnectionLog[i];
+            if (type !== 'getStats') continue;
+            Object.keys(value).forEach(id => {
+                const report = value[id];
+                if (report.type === 'candidate-pair' && report.selected === true) {
+                    lastReport = report;
+                }
+            });
+        }
+        if (lastReport) {
+            return {
+                sent: lastReport.bytesSent,
+                received: lastReport.bytesReceived,
+            };
+        }
+    },
+
     firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
         for (var i = 0; i < peerConnectionLog.length; i++) {

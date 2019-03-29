@@ -159,6 +159,9 @@ CREATE TABLE features (
     statsmeanroundtriptime integer,
     statsmeansendingbitrate integer,
 
+    bytestotalsent integer,
+    bytestotalreceived integer,
+
     direction character varying(4),
     numberofstats integer,
     duration integer,
