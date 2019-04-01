@@ -1,4 +1,7 @@
 {
   "phabricator.uri": "https://lifeonair.phacility.com/",
-  "repository.callsign": "RTCSTATSERVER"
+  "repository.callsign": "RTCSTATSERVER",
+  "load": [
+    "arcanist/pinterest-linters"
+  ]
 }
