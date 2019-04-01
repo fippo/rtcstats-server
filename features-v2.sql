@@ -68,6 +68,7 @@ CREATE TABLE features (
     configuredwithturntcp boolean,
     configuredwithturntls boolean,
     configuredwithturnudp boolean,
+    configuredsdes boolean,
     sdpsemantics character varying(32),
     calledaddtrack boolean,
     calledaddstream boolean,

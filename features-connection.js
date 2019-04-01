@@ -353,6 +353,12 @@ module.exports = {
         return peerConnectionConfig ? peerConnectionConfig.certificates !== undefined : false;
     },
 
+    // was the peerconnection created with non-spec SDES?
+    configuredSDES: function(client, peerConnectionLog) {
+        const constraints = getPeerConnectionConstraints(peerConnectionLog) || {};
+        return constraints && constraints.mandatory && constraints.mandatory.DtlsSrtpKeyAgreement === false;
+    },
+
     sdpSemantics: function(client, peerConnectionLog) {
         var peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         return peerConnectionConfig ? peerConnectionConfig.sdpSemantics : '';
