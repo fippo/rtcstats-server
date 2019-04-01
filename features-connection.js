@@ -400,6 +400,25 @@ module.exports = {
         return peerConnectionLog.filter(entry => entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed')).length > 0;
     },
 
+    // ICE connected but connectionState not indicates a DTLS failure
+    dtlsFailure: function(client, peerConnectionLog) {
+        let iceConnected = false;
+        let connected = false;
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) {
+                iceConnected = true;
+            }
+            if (peerConnectionLog[i].type === 'onconnectionstatechange' && peerConnectionLog[i].value === 'connected') {
+                connected = true;
+            }
+        }
+        if (iceConnected && !connected) {
+            return false;
+        } else if (iceConnected && connected) {
+            return true;
+        }
+    },
+
     // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
     // This calculates the delay between SRD and addIceCandidate which should allow
     // correlation with ICE failures caused by this.

@@ -96,6 +96,7 @@ CREATE TABLE features (
     icerestartsuccess boolean,
     icerestartfollowedbysetremotedescription boolean,
     icerestartfollowedbyrelaycandidate boolean,
+    dtlsfailure boolean,
     timebetweensetlocaldescriptionandonicecandidate integer,
     timebetweensetremotedescriptionandaddicecandidate integer,
     numberofcandidatepairchanges integer,
