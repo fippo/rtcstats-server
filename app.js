@@ -21,6 +21,12 @@ const Store = require('./store')({
 let server;
 const tempPath = 'temp';
 
+const prom = require('prom-client');
+const connected = new prom.Gauge({
+  name: 'websocket_connections',
+  help: 'number of open websocket connections',
+});
+
 class ProcessQueue {
     constructor() {
         this.maxProc = os.cpus().length;
@@ -69,7 +75,7 @@ class ProcessQueue {
         console.log('process Q:', this.numProc);
     }
 }
-var q = new ProcessQueue();
+const q = new ProcessQueue();
 
 function setupWorkDirectory() {
     try {
@@ -99,10 +105,14 @@ function run(keys) {
     server.on('request', (request, response) => {
         // look at request.url
         switch (request.url) {
-        case "/healthcheck":
+        case '/healthcheck':
             response.writeHead(200);
             response.end();
-            return;
+            break;
+        case '/metrics':
+            response.writeHead(200, {'Content-Type': prom.contentType});
+            response.end(prom.register.metrics());
+            break;
         default:
             response.writeHead(404);
             response.end();
@@ -111,6 +121,7 @@ function run(keys) {
 
     const wss = new WebSocketServer({ server: server });
     wss.on('connection', (client, upgradeReq) => {
+        connected.inc();
         let numberOfEvents = 0;
         // the url the client is coming from
         const referer = upgradeReq.headers['origin'] + upgradeReq.url;
@@ -176,6 +187,7 @@ function run(keys) {
         });
 
         client.on('close', () => {
+            connected.dec();
             tempStream.end();
             tempStream = null;
         });
