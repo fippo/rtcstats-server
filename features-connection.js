@@ -824,8 +824,27 @@ module.exports = {
     },
 
     // how long does it take to establish the connection?
-    // TODO: also figure out connection type so we don't lump relayed and non-relayed connections
     connectionTime: function(client, peerConnectionLog) {
+        var first;
+        var second;
+        for (first = 0; first < peerConnectionLog.length; first++) {
+            if (peerConnectionLog[first].type === 'onconnectionstatechange' &&
+                peerConnectionLog[first].value === 'connecting') break;
+        }
+        if (first < peerConnectionLog.length) {
+            for (second = first + 1; second < peerConnectionLog.length; second++) {
+                if (peerConnectionLog[second].type === 'onconnectionstatechange' &&
+                    peerConnectionLog[second].value === 'connected') break;
+            }
+            if (second < peerConnectionLog.length) {
+                return (new Date(peerConnectionLog[second].time).getTime() -
+                    new Date(peerConnectionLog[first].time).getTime());
+            }
+        }
+    },
+
+    // how long does it take to establish the ice connection?
+    iceConnectionTime: function(client, peerConnectionLog) {
         var first;
         var second;
         for (first = 0; first < peerConnectionLog.length; first++) {

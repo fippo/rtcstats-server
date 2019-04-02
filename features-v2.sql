@@ -104,6 +104,7 @@ CREATE TABLE features (
     numberoflocalicecandidates integer,
     numberofremoteicecandidates integer,
     connectiontime integer,
+    iceconnectiontime integer,
     numberofinterfaces integer,
     firstcandidatepairtype character varying(255),
     firstcandidatepairlocaltype character varying(255),
