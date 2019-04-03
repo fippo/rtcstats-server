@@ -861,7 +861,6 @@ module.exports = {
                     new Date(peerConnectionLog[first].time).getTime());
             }
         }
-        return -1;
     },
 
     // how long does it take to create a local offer/answer (mostly DTLS key generation)
