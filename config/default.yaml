@@ -1,5 +1,6 @@
 server:
     port: 3000
+    metrics:
 
 s3:
     accessKeyId:

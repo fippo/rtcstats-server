@@ -2,15 +2,17 @@
 const fs = require('fs');
 const config = require('config');
 const uuid = require('uuid');
-const obfuscate = require('./obfuscator');
 const os = require('os');
 const child_process = require('child_process');
+const http = require('http');
+const https = require('https');
 
 const WebSocketServer = require('ws').Server;
 
 const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
+const obfuscate = require('./obfuscator');
 const Database = require('./database')({
     firehose: config.get('firehose'),
 });
@@ -93,9 +95,9 @@ function run(keys) {
     setupWorkDirectory();
 
     if (keys === undefined) {
-      server = require('http').Server(() => { });
+      server = http.Server(() => { });
     } else {
-      server = require('https').Server({
+      server = https.Server({
           key: keys.serviceKey,
           cert: keys.certificate,
       }, () => { });
@@ -109,15 +111,29 @@ function run(keys) {
             response.writeHead(200);
             response.end();
             break;
-        case '/metrics':
-            response.writeHead(200, {'Content-Type': prom.contentType});
-            response.end(prom.register.metrics());
-            break;
         default:
             response.writeHead(404);
             response.end();
         }
     });
+
+    const metricsPort = config.get('server').metrics;
+    console.log('metrics port?', metricsPort);
+    if (metricsPort) {
+        const metricsServer = http.Server();
+        metricsServer.listen(config.get('server').metrics);
+        metricsServer.on('request', (request, response) => {
+            switch (request.url) {
+            case '/metrics':
+                response.writeHead(200, {'Content-Type': prom.contentType});
+                response.end(prom.register.metrics());
+                break;
+            default:
+                response.writeHead(404);
+                response.end();
+            }
+        });
+    }
 
     const wss = new WebSocketServer({ server: server });
     wss.on('connection', (client, upgradeReq) => {
