@@ -33,6 +33,13 @@ module.exports = {
         }
         return duration;
     },
+    qpSum: ({kind, stats}) => {
+        if (kind !== 'video' || !stats.length) {
+            return;
+        }
+        const last = stats[stats.length - 1];
+        return last.qpSum;
+    },
 };
 
 /* these features operate on stats of each track, in send and recv direction */
