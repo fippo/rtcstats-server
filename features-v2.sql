@@ -260,6 +260,7 @@ CREATE TABLE features (
     videogoogbandwidthlimitedresolutionmode real,
 
     qpsum real,
+    framecount real,
 
     audiocodec character varying(64),
     videocodec character varying(64),

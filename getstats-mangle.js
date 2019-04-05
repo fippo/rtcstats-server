@@ -64,9 +64,6 @@ module.exports = function(stats) {
         if (standardStats.googFrameRateReceived) {
           standardStats.framesReceived = 0;
         }
-        if (standardStats.googFrameRateDecoded) {
-          standardStats.framesDecoded = 0;
-        }
         // FIXME: both on sender and receiver?
         if (standardStats.kind === 'video' || standardStats.mediaType === 'video') {
           standardStats.framesDropped = 0;
