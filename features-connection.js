@@ -80,8 +80,7 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
             }
         }
         if (second < peerConnectionLog.length) {
-            return (new Date(peerConnectionLog[second].time).getTime() -
-                new Date(peerConnectionLog[first].time).getTime());
+            return peerConnectionLog[second].timestamp - peerConnectionLog[first].timestamp;
         }
     }
 }
@@ -171,20 +170,20 @@ module.exports = {
     startTime: function(client, peerConnectionLog) {
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'create') {
-                return new Date(peerConnectionLog[i].time).getTime();
+                return peerConnectionLog[i].timestamp;
             }
         }
     },
 
     // when did the session end
     stopTime: function(client, peerConnectionLog) {
-        return new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime();
+        return peerConnectionLog[peerConnectionLog.length - 1].timestamp;
     },
 
     // how long did the peerconnection live?
     // not necessarily connected which is different from session duration
     lifeTime: function(client, peerConnectionLog) {
-        const lifeTime = new Date(peerConnectionLog[peerConnectionLog.length - 1].time).getTime() - new Date(peerConnectionLog[0].time).getTime();
+        const lifeTime = peerConnectionLog[peerConnectionLog.length - 1].timestamp - peerConnectionLog[0].timestamp;
         return lifeTime > 0 ? lifeTime : null;
     },
 
@@ -433,10 +432,10 @@ module.exports = {
         var srd;
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'setRemoteDescription') {
-                srd = peerConnectionLog[i].time;
+                srd = peerConnectionLog[i];
             } else if (peerConnectionLog[i].type === 'addIceCandidate') {
                 if (srd) {
-                    return new Date(peerConnectionLog[i].time).getTime() - new Date(srd).getTime();
+                    return peerConnectionLog[i].timestamp - srd.timestamp;
                 } else {
                     return -1;
                 }
@@ -449,10 +448,10 @@ module.exports = {
         var sld;
         for (var i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'setLocalDescription') {
-                sld = peerConnectionLog[i].time;
+                sld = peerConnectionLog[i];
             } else if (peerConnectionLog[i].type === 'onicecandidate') {
                 if (sld) {
-                    return new Date(peerConnectionLog[i].time).getTime() - new Date(sld).getTime();
+                    return peerConnectionLog[i].timestamp - sld.timestamp;
                 } else {
                     return -1; // should not happen but...
                 }
@@ -673,8 +672,7 @@ module.exports = {
                 if (peerConnectionLog[second].type === 'onicecandidate' && peerConnectionLog[second].value === null) break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() -
-                    new Date(peerConnectionLog[first].time).getTime());
+                return peerConnectionLog[second].timestamp - peerConnectionLog[first].timestamp;
             }
         }
     },
@@ -837,8 +835,7 @@ module.exports = {
                     peerConnectionLog[second].value === 'connected') break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() -
-                    new Date(peerConnectionLog[first].time).getTime());
+                return peerConnectionLog[second].timestamp - peerConnectionLog[first].timestamp;
             }
         }
     },
@@ -857,8 +854,7 @@ module.exports = {
                     (peerConnectionLog[second].value === 'connected' || peerConnectionLog[second].value === 'completed')) break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() -
-                    new Date(peerConnectionLog[first].time).getTime());
+                return peerConnectionLog[second].timestamp - peerConnectionLog[first].timestamp;
             }
         }
     },
@@ -876,8 +872,7 @@ module.exports = {
                 if (peerConnectionLog[second].type === peerConnectionLog[first].type + 'OnSuccess') break;
             }
             if (second < peerConnectionLog.length) {
-                return (new Date(peerConnectionLog[second].time).getTime() -
-                    new Date(peerConnectionLog[first].time).getTime());
+                return peerConnectionLog[second].timestamp - peerConnectionLog[first].timestamp;
             }
         }
         return -1;
@@ -912,7 +907,7 @@ module.exports = {
             var entry = peerConnectionLog[i];
             if (entry.type === 'oniceconnectionstatechange') {
                 if ((entry.value === 'connected' || entry.value === 'completed') && startTime === -1) {
-                    startTime = new Date(entry.time).getTime();
+                    startTime = entry.timestamp;
                     break;
                 }
             }
@@ -920,7 +915,7 @@ module.exports = {
         if (startTime > 0) {
             // TODO: this is too simplistic. What if the ice connection state went to failed?
             for (var j = peerConnectionLog.length - 1; j > i; j--) {
-                endTime = new Date(peerConnectionLog[j].time).getTime();
+                endTime = peerConnectionLog[j].timestamp;
                 if (startTime < endTime && endTime > 0) {
                     return endTime - startTime;
                 }

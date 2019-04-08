@@ -172,10 +172,10 @@ module.exports = {
         var first;
         for (var i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                first = gum[i].time;
+                first = gum[i];
             } else if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
                 if (first) {
-                    return new Date(gum[i].time).getTime() - new Date(first).getTime();
+                    return gum[i].timestamp - first.timestamp;
                 } else {
                     return -1;
                 }
@@ -188,10 +188,10 @@ module.exports = {
         var first;
         for (var i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                first = gum[i].time;
+                first = gum[i];
             } else if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnFailure' || gum[i].type === 'getUserMediaOnFailure') {
                 if (first) {
-                    return new Date(gum[i].time).getTime() - new Date(first).getTime();
+                    return gum[i].timestamp - fіrst.timestamp;
                 } else {
                     return -1;
                 }
