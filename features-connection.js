@@ -7,7 +7,7 @@
 // 3) features which are specific to a track.
 // The second type of feature is contained in this file.
 
-const {capitalize, standardizedMoment} = require('./utils');
+const {capitalize, standardizedMoment, timeBetween} = require('./utils');
 const SDPUtils = require('sdp');
 
 function getPeerConnectionConfig(peerConnectionLog) {
@@ -429,48 +429,17 @@ module.exports = {
     // correlation with ICE failures caused by this.
     // returns -1 if addIceCandidate is called before setRemoteDescription
     timeBetweenSetRemoteDescriptionAndAddIceCandidate: function(client, peerConnectionLog) {
-        var srd;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'setRemoteDescription') {
-                srd = peerConnectionLog[i];
-            } else if (peerConnectionLog[i].type === 'addIceCandidate') {
-                if (srd) {
-                    return peerConnectionLog[i].timestamp - srd.timestamp;
-                } else {
-                    return -1;
-                }
-            }
-        }
+        return timeBetween(peerConnectionLog, ['setRemoteDescription'], ['addIceCandidate']);
     },
 
     // This calculates the delay between SLD and onicecandidate.
     timeBetweenSetLocalDescriptionAndOnIceCandidate: function(client, peerConnectionLog) {
-        var sld;
-        for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'setLocalDescription') {
-                sld = peerConnectionLog[i];
-            } else if (peerConnectionLog[i].type === 'onicecandidate') {
-                if (sld) {
-                    return peerConnectionLog[i].timestamp - sld.timestamp;
-                } else {
-                    return -1; // should not happen but...
-                }
-            }
-        }
+        return timeBetween(peerConnectionLog, ['setLocalDescription'], ['onicecandidate']);
     },
 
     // This calculates the time between the first SRD and resolving.
     timeForFirstSetRemoteDescription: function(client, peerConnectionLog) {
-        let srd;
-        for (let i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'setRemoteDescription') {
-                srd = peerConnectionLog[i];
-            } else if (peerConnectionLog[i].type === 'setRemoteDescriptionOnSuccess') {
-                if (srd) {
-                    return peerConnectionLog[i].timestamp - srd.timestamp;
-                }
-            }
-        }
+        return timeBetween(peerConnectionLog, ['setRemoteDescription'], ['setRemoteDescriptionOnSuccess']);
     },
 
     // is the session using ICE lite?

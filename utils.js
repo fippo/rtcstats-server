@@ -92,6 +92,22 @@ function extractTracks(peerConnectionLog) {
     return tracks;
 }
 
+function timeBetween(logs, startEvents, endEvents) {
+    var first;
+    for (var i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        if (startEvents.includes(log.type)) {
+            first = log;
+        } else if (endEvents.includes(log.type)) {
+            if (first) {
+                return log.timestamp - first.timestamp;
+            } else {
+                return -1;
+            }
+        }
+    }
+}
+
 function extractStreams(tracks) {
     const streams = new Map();
     for (const [trackId, {streamId}] of tracks.entries()) {
@@ -110,4 +126,5 @@ module.exports = {
     extractStreams,
     mode,
     standardizedMoment,
+    timeBetween,
 }

@@ -8,6 +8,7 @@
 // The first type of feature is contained in this file.
 
 var platform = require('platform');
+var {timeBetween} = require('./utils');
 
 module.exports = {
     origin: function(client) {
@@ -168,35 +169,19 @@ module.exports = {
     },
 
     timeBetweenGetUserMediaAndGetUserMediaSuccess: function(client) {
-        var gum = client.getUserMedia || [];
-        var first;
-        for (var i = 0; i < gum.length; i++) {
-            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                first = gum[i];
-            } else if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
-                if (first) {
-                    return gum[i].timestamp - first.timestamp;
-                } else {
-                    return -1;
-                }
-            }
-        }
+        return timeBetween(
+            client.getUserMedia || [],
+            ['navigator.mediaDevices.getUserMedia', 'getUserMedia'],
+            ['navigator.mediaDevices.getUserMediaOnSuccess', 'getUserMediaOnSuccess']
+        );
     },
 
     timeBetweenGetUserMediaAndGetUserMediaFailure: function(client) {
-        var gum = client.getUserMedia || [];
-        var first;
-        for (var i = 0; i < gum.length; i++) {
-            if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                first = gum[i];
-            } else if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnFailure' || gum[i].type === 'getUserMediaOnFailure') {
-                if (first) {
-                    return gum[i].timestamp - fіrst.timestamp;
-                } else {
-                    return -1;
-                }
-            }
-        }
+        return timeBetween(
+            client.getUserMedia || [],
+            ['navigator.mediaDevices.getUserMedia', 'getUserMedia'],
+            ['navigator.mediaDevices.getUserMediaOnFailure', 'getUserMediaOnFailure']
+        );
     },
 
     // return the label of the first audio device
