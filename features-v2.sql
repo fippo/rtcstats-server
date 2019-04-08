@@ -72,6 +72,7 @@ CREATE TABLE features (
     sdpsemantics character varying(32),
     calledaddtrack boolean,
     calledaddstream boolean,
+    closereason character varying(1024),
 
     localcreatedelay integer,
     maxstreams integer,

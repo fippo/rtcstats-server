@@ -1144,4 +1144,14 @@ module.exports = {
         }
         return false;
     },
+
+    closeReason: function(client, peerConnectionLog) {
+        /* We allow close("some reason") which is non-spec but useful */
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            const {type, value} = peerConnectionLog[i];
+            if (type === 'close') {
+                return value[0];
+            }
+        }
+    },
 };
