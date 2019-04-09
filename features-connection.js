@@ -1173,7 +1173,7 @@ module.exports = {
         /* We allow close("some reason") which is non-spec but useful */
         for (let i = 0; i < peerConnectionLog.length; i++) {
             const {type, value} = peerConnectionLog[i];
-            if (type === 'close') {
+            if (type === 'close' && value) {
                 return value[0];
             }
         }
