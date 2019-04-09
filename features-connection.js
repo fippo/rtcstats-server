@@ -1154,4 +1154,40 @@ module.exports = {
             }
         }
     },
+
+    batteryLevel: function(client, peerConnectionLog) {
+        let first;
+        let last;
+        let i;
+        for (i = 0; i < peerConnectionLog.length && !first; i++) {
+            const {type, value} = peerConnectionLog[i];
+            if (type === 'getStats') {
+                Object.keys(value).forEach(id => {
+                    const report = value[id];
+                    if (report.type === 'rtcstats-device-report') {
+                        first = report;
+                    }
+                });
+            }
+        }
+        for (let j = peerConnectionLog.length - 1; j > i && !last; j--) {
+            const {type, value} = peerConnectionLog[j];
+            if (type === 'getStats') {
+                Object.keys(value).forEach(id => {
+                    const report = value[id];
+                    if (report.type === 'rtcstats-device-report') {
+                        last = report;
+                    }
+                });
+            }
+        }
+        if (first && last && first.batteryLevel && last.batteryLevel) {
+            return {
+                beginTime: first.timestamp,
+                endTime: last.timestamp,
+                begin: first.batteryLevel,
+                end: last.batteryLevel,
+            };
+        }
+    },
 };

@@ -163,6 +163,11 @@ CREATE TABLE features (
     statsmeanroundtriptime integer,
     statsmeansendingbitrate integer,
 
+    batterylevelbegintime bigint,
+    batterylevelendtime bigint,
+    batterylevelbegin real,
+    batterylevelend real,
+
     bytestotalsent real,
     bytestotalreceived real,
 
