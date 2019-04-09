@@ -28,6 +28,14 @@ const connected = new prom.Gauge({
   name: 'websocket_connections',
   help: 'number of open websocket connections',
 });
+const processed = new prom.Counter({
+  name: 'files_processed',
+  help: 'number of files processed',
+});
+const errored = new prom.Counter({
+  name: 'files_errored',
+  help: 'number of files with errors during processing',
+});
 
 class ProcessQueue {
     constructor() {
@@ -50,6 +58,7 @@ class ProcessQueue {
         p.on('exit', () => {
             this.numProc--;
             console.log('done', clientid, this.numProc);
+            processed.inc();
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
             fs.readFile(tempPath + '/' + clientid, {encoding: 'utf-8'}, (err, data) => {
@@ -69,6 +78,7 @@ class ProcessQueue {
             Database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
         });
         p.on('error', () => {
+            errored.inc();
             this.numProc--;
             console.log('failed to spawn, rescheduling', clientid, this.numProc);
             this.q.push(clientid); // do not immediately retry
