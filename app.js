@@ -118,7 +118,6 @@ function run(keys) {
     });
 
     const metricsPort = config.get('server').metrics;
-    console.log('metrics port?', metricsPort);
     if (metricsPort) {
         const metricsServer = http.Server();
         metricsServer.listen(config.get('server').metrics);
@@ -204,6 +203,7 @@ function run(keys) {
 
         client.on('close', () => {
             connected.dec();
+            tempStream.write(JSON.stringify(['close', null, null, Date.now()]));
             tempStream.end();
             tempStream = null;
         });
