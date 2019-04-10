@@ -150,7 +150,8 @@ module.exports = {
                 }
             }
             if (gum[i].type === 'navigator.getDisplayMedia' || gum[i].type === 'navigator.mediaDevices.getDisplayMedia') {
-                return true;
+                const {value} = gum[i];
+                return value && value.video === true;
             }
         }
         return false;

@@ -169,6 +169,10 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                 case 'navigator.mediaDevices.getUserMedia':
                 case 'navigator.mediaDevices.getUserMediaOnSuccess':
                 case 'navigator.mediaDevices.getUserMediaOnFailure':
+                case 'navigator.getDisplayMedia':
+                case 'navigator.getDisplayMediaOnSucces':
+                case 'navigator.mediaDevices.getDisplayMedia':
+                case 'navigator.mediaDevices.getDisplayMediaOnSuccess':
                     client.getUserMedia.push({
                         time: time,
                         timestamp: time.getTime(),
