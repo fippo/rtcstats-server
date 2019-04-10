@@ -7,7 +7,7 @@
 // 3) features which are specific to a track.
 // The second type of feature is contained in this file.
 
-const {capitalize, standardizedMoment, timeBetween} = require('./utils');
+const {capitalize, standardizedMoment, timeBetween, isIceConnected} = require('./utils');
 const SDPUtils = require('sdp');
 
 function getPeerConnectionConfig(peerConnectionLog) {
@@ -385,7 +385,7 @@ module.exports = {
         var i = 0;
         var connected = false;
         for (; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) {
+            if (isIceConnected(peerConnectionLog[i])) {
                 connected = true;
                 break;
             }
@@ -402,7 +402,7 @@ module.exports = {
 
     // did ice connect/complete?
     ICEConnectedOrCompleted: function(client, peerConnectionLog) {
-        return peerConnectionLog.filter(entry => entry.type === 'oniceconnectionstatechange' && (entry.value === 'connected' || entry.value === 'completed')).length > 0;
+        return peerConnectionLog.filter(entry => isIceConnected(entry)).length > 0;
     },
 
     // ICE connected but connectionState not indicates a DTLS failure
@@ -410,7 +410,7 @@ module.exports = {
         let iceConnected = false;
         let connected = false;
         for (let i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) {
+            if (isIceConnected(peerConnectionLog[i])) {
                 iceConnected = true;
             }
             if (peerConnectionLog[i].type === 'onconnectionstatechange' && peerConnectionLog[i].value === 'connected') {
@@ -506,8 +506,9 @@ module.exports = {
         }
         if (iceRestart) {
             for (; i < peerConnectionLog.length; i++) {
-                if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
-                    (peerConnectionLog[i].value === 'connected' || peerConnectionLog[i].value === 'completed')) return true;
+                if (isIceConnection(peerCOnnectionLog[i])) {
+                    return true;
+                }
             }
         }
         return false;
@@ -819,8 +820,9 @@ module.exports = {
         }
         if (first < peerConnectionLog.length) {
             for (second = first + 1; second < peerConnectionLog.length; second++) {
-                if (peerConnectionLog[second].type === 'oniceconnectionstatechange' &&
-                    (peerConnectionLog[second].value === 'connected' || peerConnectionLog[second].value === 'completed')) break;
+                if (isIceConnected(peerConnectionLog[second])) {
+                    break;
+                }
             }
             if (second < peerConnectionLog.length) {
                 return peerConnectionLog[second].timestamp - peerConnectionLog[first].timestamp;
@@ -873,12 +875,9 @@ module.exports = {
         var endTime = -1;
         var i;
         for (i = 0; i < peerConnectionLog.length; i++) {
-            var entry = peerConnectionLog[i];
-            if (entry.type === 'oniceconnectionstatechange') {
-                if ((entry.value === 'connected' || entry.value === 'completed') && startTime === -1) {
-                    startTime = entry.timestamp;
-                    break;
-                }
+            if (isIceConnected(peerConnectionLog[i]) && startTime === -1) {
+                startTime = peerConnectionLog[i].timestamp;
+                break;
             }
         }
         if (startTime > 0) {
@@ -1020,9 +1019,9 @@ module.exports = {
     firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
         for (var i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
-                (peerConnectionLog[i].value=== 'connected'
-                || peerConnectionLog[i].value === 'completed')) break;
+            if (isIceConnected(peerConnectionLog[i])) {
+                break;
+            }
         }
         for (; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
@@ -1053,9 +1052,9 @@ module.exports = {
     networkType: function(client, peerConnectionLog) {
         let i;
         for (i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
-                (peerConnectionLog[i].value === 'connected'
-                || peerConnectionLog[i].value === 'completed')) break;
+            if (isIceConnected(peerConnectionLog[i])) {
+                break;
+            }
         }
         for (; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;

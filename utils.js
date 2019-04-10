@@ -120,10 +120,15 @@ function extractStreams(tracks) {
     return streams;
 }
 
+function isIceConnected({type, value}) {
+    return type === 'oniceconnectionstatechange' && ['connected', 'completed'].includes(value);
+}
+
 module.exports = {
     capitalize,
     extractTracks,
     extractStreams,
+    isIceConnected,
     mode,
     standardizedMoment,
     timeBetween,
