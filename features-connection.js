@@ -184,7 +184,7 @@ module.exports = {
     // not necessarily connected which is different from session duration
     lifeTime: function(client, peerConnectionLog) {
         const lifeTime = peerConnectionLog[peerConnectionLog.length - 1].timestamp - peerConnectionLog[0].timestamp;
-        return lifeTime > 0 ? lifeTime : null;
+        return lifeTime > 0 ? lifeTime : undefined;
     },
 
     sendingDuration: function(client, peerConnectionLog) {
