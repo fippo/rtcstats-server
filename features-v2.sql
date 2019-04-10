@@ -114,6 +114,8 @@ CREATE TABLE features (
     firstcandidatepairremoteipaddress character varying(255),
     firstcandidatepairlocaltypepreference integer,
     firstcandidatepairremotetypepreference integer,
+    firstcandidatepairlocalnetworktype character varying(255),
+    networktype character varying(255),
     gatheredhost boolean,
     gatheredstun boolean,
     gatheredturntcp boolean,
@@ -275,6 +277,5 @@ CREATE TABLE features (
     sendingduration integer,
     websocketerror character varying(255),
     active integer,
-    firstcandidatepairlocalnetworktype character varying(255),
     timeforfirstsetremotedescription integer,
 );

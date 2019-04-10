@@ -1049,6 +1049,30 @@ module.exports = {
         }
     },
 
+    // extracts the cellular network type, a non-standard stat.
+    networkType: function(client, peerConnectionLog) {
+        let i;
+        for (i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'oniceconnectionstatechange' &&
+                (peerConnectionLog[i].value === 'connected'
+                || peerConnectionLog[i].value === 'completed')) break;
+        }
+        for (; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type !== 'getStats') continue;
+            const statsReport = peerConnectionLog[i].value;
+            let deviceReport;
+            Object.keys(statsReport).forEach(id => {
+                const report = statsReport[id];
+                if (report.type === 'rtcstats-device-report') {
+                    deviceReport = report;
+                }
+            });
+            if (deviceReport && deviceReport.networkType) {
+                return deviceReport.networkType;
+            }
+        }
+    },
+
     // how did the selected candidate pair change? Could happen e.g. because of an ice restart
     // so there should be a strong correlation.
     numberOfCandidatePairChanges: function(client, peerConnectionLog) {
