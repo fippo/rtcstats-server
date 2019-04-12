@@ -1018,26 +1018,44 @@ module.exports = {
 
     firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
-        for (var i = 0; i < peerConnectionLog.length; i++) {
+        let i;
+        for (i = 0; i < peerConnectionLog.length; i++) {
             if (isIceConnected(peerConnectionLog[i])) {
                 break;
             }
         }
         for (; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
-            var pair = null;
+            const statsReport = peerConnectionLog[i].value;
+            let pair = null;
             Object.keys(statsReport).forEach(id => {
                 const report = statsReport[id];
-                const localCandidate = statsReport[report.localCandidateId];
-                const remoteCandidate = statsReport[report.remoteCandidateId];
-                if (report.type === 'candidate-pair' && report.selected === true && localCandidate && remoteCandidate) {
+                // spec. Also Chrome with mangled stats.
+                if (report.type === 'transport' && report.selectedCandidatePairId) {
+                    const candidatePair = statsReport[report.selectedCandidatePairId];
+                    const localCandidate = statsReport[candidatePair.localCandidateId];
+                    const remoteCandidate = statsReport[candidatePair.remoteCandidateId];
                     pair = {
                         type: localCandidate.candidateType + ';' + remoteCandidate.candidateType, // mostly for backward compat reasons
                         localType: localCandidate.candidateType,
                         remoteType: remoteCandidate.candidateType,
-                        localIPAddress: localCandidate.ipAddress,
-                        remoteIPAddress: remoteCandidate.ipAddress,
+                        localIPAddress: localCandidate.address || localCandidate.ip || localCandidate.ipAddress,
+                        remoteIPAddress: remoteCandidate.address || remoteCandidate.ip || remoteCandidate.ipAddress,
+                        localTypePreference: localCandidate.priority >> 24,
+                        remoteTypePreference: remoteCandidate.priority >> 24,
+                        localNetworkType: localCandidate.networkType
+                    };
+                }
+                // Firefox.
+                if (report.type === 'candidate-pair' && report.selected === true) {
+                    const localCandidate = statsReport[report.localCandidateId];
+                    const remoteCandidate = statsReport[report.remoteCandidateId];
+                    pair = {
+                        type: localCandidate.candidateType + ';' + remoteCandidate.candidateType, // mostly for backward compat reasons
+                        localType: localCandidate.candidateType,
+                        remoteType: remoteCandidate.candidateType,
+                        localIPAddress: localCandidate.address || localCandidate.ip || localCandidate.ipAddress,
+                        remoteIPAddress: remoteCandidate.address || remoteCandidate.ip || remoteCandidate.ipAddress,
                         localTypePreference: localCandidate.priority >> 24,
                         remoteTypePreference: remoteCandidate.priority >> 24,
                         localNetworkType: localCandidate.networkType
