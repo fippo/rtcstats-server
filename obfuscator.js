@@ -51,12 +51,12 @@ function obfuscateSDP(sdp) {
 function obfuscateStats(stats) {
     Object.keys(stats).forEach(id => {
         const report = stats[id];
-        if (report.ipAddress && report.candidateType !== 'relayed') {
-            report.ipAddress = obfuscateIP(report.ipAddress);
-        }
-        if (report.address && report.candidateType !== 'relayed') {
-            report.address = obfuscateIP(report.address);
-        }
+        // obfuscate different variants of how the ip is contained in different stats / versions.
+        ['ipAddress', 'ip', 'address'].forEach((address) => {
+            if (report[address] && report.candidateType !== 'relayed') {
+                report[address] = obfuscateIP(report[address]);
+            }
+        });
         ['googLocalAddress', 'googRemoteAddress'].forEach(name => {
             // contains both address and port
             let port;
