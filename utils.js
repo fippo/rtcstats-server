@@ -6,14 +6,14 @@ function capitalize(str) {
 
 // determine mode (most common) element in a series.
 function mode(series) {
-    var modes = {};
+    const modes = {};
     series.forEach(item => {
         if (!modes[item]) modes[item] = 0;
         modes[item]++;
     });
 
-    var value = -1;
-    var max = -1;
+    let value = -1;
+    let max = -1;
     Object.keys(modes).forEach(key => {
         if (modes[key] > max) {
             max = modes[key];
@@ -29,8 +29,8 @@ function mode(series) {
 // order=3: skewness
 // order=4: kurtosis
 function standardizedMoment(series, order) {
-    var len = series.length || 1;
-    var mean = series.reduce((a, b) => a + b, 0) / len;
+    const len = series.length || 1;
+    const mean = series.reduce((a, b) => a + b, 0) / len;
     return series.reduce((a, b) => a + Math.pow(b - mean, order), 0) / len;
 }
 
@@ -93,8 +93,8 @@ function extractTracks(peerConnectionLog) {
 }
 
 function timeBetween(logs, startEvents, endEvents) {
-    var first;
-    for (var i = 0; i < logs.length; i++) {
+    let first;
+    for (let i = 0; i < logs.length; i++) {
         const log = logs[i];
         if (startEvents.includes(log.type)) {
             first = log;

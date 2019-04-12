@@ -7,8 +7,8 @@
 // 3) features which are specific to a track.
 // The first type of feature is contained in this file.
 
-var platform = require('platform');
-var {timeBetween} = require('./utils');
+const platform = require('platform');
+const {timeBetween} = require('./utils');
 
 module.exports = {
     origin: function(client) {
@@ -17,8 +17,8 @@ module.exports = {
 
     browser: function(client) {
         if (!(client.userAgent && client.userAgent.length)) return;
-        var ua = platform.parse(client.userAgent);
-        var parts = {
+        const ua = platform.parse(client.userAgent);
+        const parts = {
             name: ua.name || 'unknown',
             version: ua.version || '-1',
             os: ua.os.toString(),
@@ -52,8 +52,8 @@ module.exports = {
 
     // did the page use the old getUserMedia?
     calledLegacyGetUserMedia: function(client) {
-        var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'getUserMedia') return true;
         }
         return false;
@@ -61,8 +61,8 @@ module.exports = {
 
     // did the page use the new navigator.mediaDevices.getUserMedia?
     calledMediadevicesGetUserMedia: function(client) {
-        var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia') return true;
         }
         return false;
@@ -73,8 +73,8 @@ module.exports = {
 
     // was there at least one getUserMedia success?
     getUserMediaSuccess: function(client) {
-        var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
                 return true;
             }
@@ -84,8 +84,8 @@ module.exports = {
 
     // was there at least one getUserMedia error? If so, what was the error?
     getUserMediaError: function(client) {
-        var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnFailure' || gum[i].type === 'getUserMediaOnFailure') {
                 return gum[i].value;
             }
@@ -95,11 +95,11 @@ module.exports = {
 
     // did the client ever request audio?
     calledGetUserMediaRequestingAudio: function(client) {
-        var gum = client.getUserMedia || [];
-        var requested = false;
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        let requested = false;
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                var options = gum[i].value;
+                const options = gum[i].value;
                 if (options.audio && options.audio !== false) requested = true;
             }
         }
@@ -111,11 +111,11 @@ module.exports = {
     //      mozMediaSource || mediaSource in FF (look for window || screen?)
     //      mandatory.chromeMediaSource: desktop in chrome
     calledGetUserMediaRequestingVideo: function(client) {
-        var gum = client.getUserMedia || [];
-        var requested = false;
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        let requested = false;
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                var options = gum[i].value;
+                const options = gum[i].value;
                 if (options.video === true) {
                     requested = true;
                     break;
@@ -134,10 +134,10 @@ module.exports = {
     // did the client ever request the screen?
     // also returns the type even though (in chrome) that is not relevant.
     calledGetUserMediaRequestingScreen: function(client) {
-        var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                var options = gum[i].value;
+                const options = gum[i].value;
                 if (options.video && typeof options.video === 'object') {
                     // Firefox
                     if (options.video.mozMediaSource || options.video.mediaSource) {
@@ -157,11 +157,11 @@ module.exports = {
     },
 
     calledGetUserMediaRequestingAEC3: function(client) {
-        var gum = client.getUserMedia || [];
-        var requested = false;
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        let requested = false;
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMedia' || gum[i].type === 'getUserMedia') {
-                var options = gum[i].value;
+                const options = gum[i].value;
                 if (options.audio && options.audio.echoCancellationType === 'aec3') requested = true;
             }
         }
@@ -186,12 +186,12 @@ module.exports = {
 
     // return the label of the first audio device
     firstAudioTrackLabel: function(client) {
-        var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        const gum = client.getUserMedia || [];
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
-                var stream = gum[i].value;
-                var tracks = stream && stream.tracks || [];
-                for (var j = 0; j < tracks.length; j++) {
+                const stream = gum[i].value;
+                const tracks = stream && stream.tracks || [];
+                for (let j = 0; j < tracks.length; j++) {
                     if (tracks[j].kind === 'audio') {
                         return tracks[j].label;
                     }
@@ -204,11 +204,11 @@ module.exports = {
     firstVideoTrackLabel: function(client) {
         var gum = client.getUserMedia || [];
         var gum = client.getUserMedia || [];
-        for (var i = 0; i < gum.length; i++) {
+        for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
-                var stream = gum[i].value;
-                var tracks = stream && stream.tracks || [];
-                for (var j = 0; j < tracks.length; j++) {
+                const stream = gum[i].value;
+                const tracks = stream && stream.tracks || [];
+                for (let j = 0; j < tracks.length; j++) {
                     if (tracks[j].kind === 'video') {
                         return tracks[j].label;
                     }
@@ -228,7 +228,7 @@ module.exports = {
 
     userfeedback: function(client) {
         if (!client.feedback) return;
-        var feature = {};
+        const feature = {};
         feature[client.feedback.mediaType] = client.feedback.score;
         return feature;
     },
