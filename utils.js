@@ -59,28 +59,31 @@ function extractTracks(peerConnectionLog) {
         const {type, value} = peerConnectionLog[i];
         if (type === 'addStream') {
             const {streamId, tracks: listOfTracks} = extractFromStreamFormat(value);
+            const direction = 'send';
             listOfTracks.forEach(({kind, trackId}) => {
-                tracks.set(trackId, {kind, streamId, trackId, direction: 'send', stats: []});
+                tracks.set(direction + ':' + trackId, {kind, streamId, trackId, direction, stats: []});
             });
         } else if (type === 'addTrack' || type === 'ontrack') {
             const direction = type === 'addTrack' ? 'send' : 'recv';
             const {kind, trackId, streamId} = extractFromTrackFormat(value);
-            tracks.set(trackId, {kind, streamId, trackId, direction, stats: []});
+            tracks.set(direction + ':' + trackId, {kind, streamId, trackId, direction, stats: []});
         } else if (type === 'getStats') {
             Object.keys(value).forEach(id => {
                 const report = value[id];
                 if (report.type === 'ssrc') {
                     const {trackIdentifier} =  report;
-                    if (tracks.has(trackIdentifier)) {
+                    const direction = id.endsWith('_recv') ? 'recv' : 'send';
+                    const key = direction + ':' + trackIdentifier;
+                    if (tracks.has(key)) {
                         if (!report.timestamp) {
                             report.timestamp = peerConnectionLog[i].time;
                         } else {
                             report.timestamp = new Date(report.timestamp);
                         }
-                        const currentStats = tracks.get(trackIdentifier).stats;
+                        const currentStats = tracks.get(key).stats;
                         const lastStat = currentStats[currentStats.length - 1];
                         if (!lastStat || (report.timestamp.getTime() - lastStat.timestamp.getTime() > 0)) {
-                            tracks.get(trackIdentifier).stats.push(report);
+                            tracks.get(key).stats.push(report);
                         }
                     } else if (trackIdentifier !== undefined) {
                         console.log('NO ONTRACK FOR', trackIdentifier, report.ssrc);
