@@ -51,6 +51,10 @@ function obfuscateSDP(sdp) {
 function obfuscateStats(stats) {
     Object.keys(stats).forEach(id => {
         const report = stats[id];
+        if (!report) {
+            console.warn('no report for', id, stats);
+            return;
+        }
         // obfuscate different variants of how the ip is contained in different stats / versions.
         ['ipAddress', 'ip', 'address'].forEach((address) => {
             if (report[address] && report.candidateType !== 'relayed') {
