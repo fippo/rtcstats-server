@@ -442,6 +442,16 @@ module.exports = {
         return timeBetween(peerConnectionLog, ['setRemoteDescription'], ['setRemoteDescriptionOnSuccess']);
     },
 
+    // This calculates the time between the second SRD and resolving.
+    timeForSecondSetRemoteDescription: function(client, peerConnectionLog) {
+        let i;
+        for (i = 0; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'setRemoteDescriptionOnSuccess') {
+                return timeBetween(peerConnectionLog.slice(i + 1), ['setRemoteDescription'], ['setRemoteDescriptionOnSuccess']);
+            }
+        }
+    },
+
     // is the session using ICE lite?
     usingICELite: function(client, peerConnectionLog) {
         let usingIceLite = false;

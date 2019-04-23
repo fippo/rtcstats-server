@@ -101,6 +101,8 @@ CREATE TABLE features (
     dtlsfailure boolean,
     timebetweensetlocaldescriptionandonicecandidate integer,
     timebetweensetremotedescriptionandaddicecandidate integer,
+    timeforfirstsetremotedescription integer,
+    timeforsecondsetremotedescription integer,
     numberofcandidatepairchanges integer,
     numberoflocalicecandidates integer,
     numberofremoteicecandidates integer,
@@ -277,5 +279,4 @@ CREATE TABLE features (
     sendingduration integer,
     websocketerror character varying(255),
     active integer,
-    timeforfirstsetremotedescription integer,
 );
