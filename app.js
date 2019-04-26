@@ -207,7 +207,7 @@ function run(keys) {
                     break;
                 }
             } catch(e) {
-                console.error('invalid json message received', e);
+                console.error('error while processing', e, msg);
             }
         });
 
