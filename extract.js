@@ -158,7 +158,7 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                     client.tags = data[2];
                     break;
                 case 'wsconnect':
-                    client.websocketConnectionTime = data[2];
+                    client.websocketConnectionTime = data[2] >>> 0;
                     break;
                 case 'wsconnecterror':
                     client.websocketError = data[2];
