@@ -442,7 +442,7 @@ module.exports = {
         return timeBetween(peerConnectionLog, ['setRemoteDescription'], ['setRemoteDescriptionOnSuccess']);
     },
     // determines whether the first setRemoteDescription resulted in an ontrack event.
-    ontrackAfterFirstRemoteDescription: function(client, peerConnectionLog) {
+    ontrackAfterFirstSetRemoteDescription: function(client, peerConnectionLog) {
         let i;
         for (i = 0; i < peerConnectionLog.length; i++) { // search for setRemoteDescription.
             if (peerConnectionLog[i].type === 'setRemoteDescription') {
