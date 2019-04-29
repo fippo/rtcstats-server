@@ -441,6 +441,23 @@ module.exports = {
     timeForFirstSetRemoteDescription: function(client, peerConnectionLog) {
         return timeBetween(peerConnectionLog, ['setRemoteDescription'], ['setRemoteDescriptionOnSuccess']);
     },
+    // determines whether the first setRemoteDescription resulted in an ontrack event.
+    ontrackAfterFirstRemoteDescription: function(client, peerConnectionLog) {
+        let i;
+        for (i = 0; i < peerConnectionLog.length; i++) { // search for setRemoteDescription.
+            if (peerConnectionLog[i].type === 'setRemoteDescription') {
+                break;
+            }
+        }
+        for(; i < peerConnectionLog.length; i++) {
+            if (peerConnectionLog[i].type === 'ontrack') {
+                return true;
+            }
+            if (peerConnectionLog[i].type === 'setRemoteDescriptionOnSuccess') {
+                return false;
+            }
+        }
+    },
 
     // This calculates the time between the second SRD and resolving.
     timeForSecondSetRemoteDescription: function(client, peerConnectionLog) {

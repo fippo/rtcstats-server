@@ -102,6 +102,7 @@ CREATE TABLE features (
     timebetweensetlocaldescriptionandonicecandidate integer,
     timebetweensetremotedescriptionandaddicecandidate integer,
     timeforfirstsetremotedescription integer,
+    ontrackafterfirstsetremotedescription boolean,
     timeforsecondsetremotedescription integer,
     numberofcandidatepairchanges integer,
     numberoflocalicecandidates integer,
