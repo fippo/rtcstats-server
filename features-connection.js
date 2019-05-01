@@ -1022,6 +1022,33 @@ module.exports = {
         return feature;
     },
 
+    stunRTTInitial30s: function(client, peerConnectionLog) {
+        let startTime;
+        const rtts = [];
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            const {type, value, timestamp} = peerConnectionLog[i];
+            if (type !== 'getStats') continue;
+            if (!startTime) {
+                startTime = timestamp;
+            }
+            Object.keys(value).forEach(id => {
+                const report = value[id];
+                if (report.type === 'candidate-pair' && report.selected === true) {
+                    rtts.push(report.roundTripTime);
+                }
+            });
+            if (timestamp - startTime > 30*1000) {
+                break;
+            }
+        }
+        if (rtts.length > 2) {
+            return {
+                mean: Math.floor(rtts.reduce((a, b) => a + b, 0) / rtts.length),
+                max: Math.max.apply(null, rtts),
+            }
+        }
+    },
+
     bytesTotal: function(client, peerConnectionLog) {
         // TODO: does this reset during a restart? See
         // https://bugs.chromium.org/p/webrtc/issues/detail?id=5361

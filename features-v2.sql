@@ -164,8 +164,10 @@ CREATE TABLE features (
     bweavailableincomingbitratemin real,
     bweavailableincomingbitratevariance real,
 
-    statsmeanreceivingbitrate integer,
     statsmeanroundtriptime integer,
+    stunRTTInitial30sMean integer,
+    stunRTTInitial30sMax integer,
+    statsmeanreceivingbitrate integer,
     statsmeansendingbitrate integer,
 
     batterylevelbegintime bigint,
