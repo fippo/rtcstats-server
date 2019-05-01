@@ -39,7 +39,7 @@ module.exports = {
     },
     location: function(client) {
         if (!client.location) return;
-        var location = client.location;
+        const {location} = client;
         return {
             lon: location.location.longitude,
             lat: location.location.latitude,
@@ -203,8 +203,7 @@ module.exports = {
 
     // return the label of the first video device
     firstVideoTrackLabel: function(client) {
-        var gum = client.getUserMedia || [];
-        var gum = client.getUserMedia || [];
+        const gum = client.getUserMedia || [];
         for (let i = 0; i < gum.length; i++) {
             if (gum[i].type === 'navigator.mediaDevices.getUserMediaOnSuccess' || gum[i].type === 'getUserMediaOnSuccess') {
                 const stream = gum[i].value;

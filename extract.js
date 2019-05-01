@@ -133,7 +133,7 @@ function generateFeatures(url, client, clientid) {
     });
 }
 
-var clientid = process.argv[2];
+const clientid = process.argv[2];
 const path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
     if (!err) {

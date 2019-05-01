@@ -120,7 +120,7 @@ function extractBWE(peerConnectionLog) {
     const reports = [];
     for (let i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'getStats') {
-            var statsReport = peerConnectionLog[i].value;
+            const statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(id => {
                 const report = statsReport[id];
                 if (report.type === 'VideoBwe') {
@@ -922,7 +922,8 @@ module.exports = {
     mediaTypes: function(client, peerConnectionLog) {
         // looking for SRD/SLD is easier than tracking createDataChannel + addStreams
         // TODO: also look for value.type=answer and handle rejected m-lines?
-        for (var i = 0; i < peerConnectionLog.length; i++) {
+        let i;
+        for (i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'setLocalDescription' ||
                 peerConnectionLog[i].type === 'setRemoteDescription') break;
         }
@@ -946,7 +947,7 @@ module.exports = {
         let dtlsCipher;
         for (let i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
+            const statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(id => {
                 const report = statsReport[id];
                 if (report.type === 'googComponent' && report.dtlsCipher) {
@@ -962,7 +963,7 @@ module.exports = {
         let srtpCipher;
         for (let i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
+            const statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(id => {
                 const report = statsReport[id];
                 if (report.type === 'googComponent' && report.srtpCipher) {
@@ -1123,7 +1124,7 @@ module.exports = {
         const selectedCandidatePairList = [null];
         for (let i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
+            const statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(id => {
                 const report = statsReport[id];
                 if (report.type === 'candidate-pair' && report.selected === true) {
@@ -1145,11 +1146,11 @@ module.exports = {
         const interfaceTypesList = [null];
         for (let i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type !== 'getStats') continue;
-            var statsReport = peerConnectionLog[i].value;
+            const statsReport = peerConnectionLog[i].value;
             Object.keys(statsReport).forEach(id => {
                 const report = statsReport[id];
                 if (report.type === 'candidate-pair' && report.selected === true && statsReport[report.localCandidateId]) {
-                    var type = statsReport[report.localCandidateId].networkType;
+                    const type = statsReport[report.localCandidateId].networkType;
                     if (type && type !== interfaceTypesList[interfaceTypesList.length - 1]) {
                         interfaceTypesList.push(type);
                     }
