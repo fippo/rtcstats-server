@@ -25,15 +25,15 @@ const tempPath = 'temp';
 
 const prom = require('prom-client');
 const connected = new prom.Gauge({
-  name: 'websocket_connections',
+  name: 'rtcstats_websocket_connections',
   help: 'number of open websocket connections',
 });
 const processed = new prom.Counter({
-  name: 'files_processed',
+  name: 'rtcstats_files_processed',
   help: 'number of files processed',
 });
 const errored = new prom.Counter({
-  name: 'files_errored',
+  name: 'rtcstats_files_errored',
   help: 'number of files with errors during processing',
 });
 
