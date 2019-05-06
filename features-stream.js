@@ -10,7 +10,7 @@
 const {capitalize, mode, standardizedMoment} = require('./utils');
 // each feature expects {kind, direction, trackId, stats} as argument.
 module.exports = {
-    numberOfStats: ({stats}) => stats.length, 
+    numberOfStats: ({stats}) => stats.length,
     direction: ({direction}) => direction,
     duration: ({kind, direction, trackId, stats}) => {
         if (stats.length < 2) {
@@ -160,7 +160,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
             }
         });
         ['googFrameHeightInput', 'googFrameHeightSent', 'googFrameWidthInput', 'googFrameWidthSent',
-           'googFrameHeightReceived', 'googFrameWidthReceived'].forEach(statName => {
+           'googFrameHeightReceived', 'googFrameWidthReceived', 'googInterframeDelayMax'].forEach(statName => {
             if (!stats.length || typeof stats[0][statName] === 'undefined') {
                 return;
             }
@@ -169,7 +169,7 @@ module.exports.video = function({kind, direction, trackId, stats}) {
 
             feature[statName + 'Max'] = Math.max.apply(null, series);
             feature[statName + 'Min'] = Math.min.apply(null, series);
-            feature[statName + 'Mode'] = mode(series);
+            feature[statName + 'Mean'] = mode(series);
         });
 
         ['googCpuLimitedResolution', 'googBandwidthLimitedResolution'].forEach(statName => {

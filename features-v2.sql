@@ -229,10 +229,28 @@ CREATE TABLE features (
 
     videogoogframewidthsentmax real,
     videogoogframewidthsentmin real,
-    videogoogframewidthsentmode real,
+    videogoogframewidthsentmean real,
     videogoogframeheightsentmax real,
     videogoogframeheightsentmin real,
-    videogoogframeheightsentmode real,
+    videogoogframeheightsentmean real,
+
+    videogoogframewidthinputmax real,
+    videogoogframewidthinputmin real,
+    videogoogframewidthinputmean real,
+    videogoogframeheightinputmax real,
+    videogoogframeheightinputmin real,
+    videogoogframeheightinputmean real,
+
+    videogoogframewidthreceivedmax real,
+    videogoogframewidthreceivedmin real,
+    videogoogframewidthreceivedmean real,
+    videogoogframeheightreceivedmax real,
+    videogoogframeheightreceivedmin real,
+    videogoogframeheightreceivedmean real,
+
+    videogooginterframedelaymaxmax real,
+    videogooginterframedelaymaxmin real,
+    videogooginterframedelaymaxmean real,
 
     videopacketssentmean real,
     videopacketssentmax real,
@@ -242,13 +260,6 @@ CREATE TABLE features (
     videobytessentmax real,
     videobytessentmin real,
     videobytessentvariance real,
-
-    videogoogframewidthreceivedmax real,
-    videogoogframewidthreceivedmin real,
-    videogoogframewidthreceivedmode real,
-    videogoogframeheightreceivedmax real,
-    videogoogframeheightreceivedmin real,
-    videogoogframeheightreceivedmode real,
 
     videopacketsreceivedmean real,
     videopacketsreceivedmax real,

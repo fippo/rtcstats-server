@@ -356,6 +356,7 @@
       "googAdaptationChanges": "0",
       "ssrc": 248537258,
       "googFirsReceived": "0",
+      "googInterframeDelayMax": "50",
       "packetsSent": 0,
       "bytesSent": 0,
       "mediaType": "video",
