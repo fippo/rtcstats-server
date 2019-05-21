@@ -74,7 +74,7 @@ function generateFeatures(url, client, clientid) {
     }
 
     Object.keys(client.peerConnections).forEach(connid => {
-        if (connid === 'null') return; // ignore the null connid
+        if (connid === 'null' || connid === '') return; // ignore the null connid and empty strings
         const conn = client.peerConnections[connid];
         const connectionFeatures = {};
         Object.keys(connectionfeatures).forEach(fname => {
