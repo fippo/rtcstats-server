@@ -55,10 +55,14 @@ class ProcessQueue {
         const clientid = this.q.shift();
         if (!clientid) return;
         const p = child_process.fork('extract.js', [clientid]);
-        p.on('exit', () => {
+        p.on('exit', (code) => {
             this.numProc--;
-            console.log('done', clientid, this.numProc);
-            processed.inc();
+            console.log('done', clientid, this.numProc, 'code=' + code);
+            if (code === 0) {
+                processed.inc();
+            } else {
+                errored.inc();
+            }
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
             fs.readFile(tempPath + '/' + clientid, {encoding: 'utf-8'}, (err, data) => {
@@ -78,7 +82,6 @@ class ProcessQueue {
             Database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
         });
         p.on('error', () => {
-            errored.inc();
             this.numProc--;
             console.log('failed to spawn, rescheduling', clientid, this.numProc);
             this.q.push(clientid); // do not immediately retry
