@@ -13,7 +13,7 @@ const SDPUtils = require('sdp');
 function getPeerConnectionConfig(peerConnectionLog) {
     for (let i = 0; i < peerConnectionLog.length; i++) {
         if (peerConnectionLog[i].type === 'create') {
-            return peerConnectionLog[i].value;
+            return peerConnectionLog[i].value || {nullConfig: true};
         }
     }
 }
