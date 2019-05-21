@@ -424,6 +424,24 @@ module.exports = {
         }
     },
 
+    iceconnectionstateCheckingBeforeSRD: function(client, peerConnectionLog) {
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=959128#c65
+        // Sometimes, iceconnectionstatechange can fire before
+        // SRD/addIceCandidate. This happens when we are offering and
+        // the remote does a valid stun ping to the port before the answer
+        // arrives.
+        let hadSRD = false;
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            const {type, value} = peerConnectionLog[i];
+            if (type === 'setRemoteDescription') {
+                hadSRD = true;
+            } else if (type === 'oniceconnectionstatechange' && value === 'checking') {
+                return !hadSRD;
+            }
+        }
+    },
+
+
     // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
     // This calculates the delay between SRD and addIceCandidate which should allow
     // correlation with ICE failures caused by this.

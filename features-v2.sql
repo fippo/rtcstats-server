@@ -98,6 +98,7 @@ CREATE TABLE features (
     icerestartsuccess boolean,
     icerestartfollowedbysetremotedescription boolean,
     icerestartfollowedbyrelaycandidate boolean,
+    iceconnectionstatecheckingbeforesrd boolean,
     dtlsfailure boolean,
     timebetweensetlocaldescriptionandonicecandidate integer,
     timebetweensetremotedescriptionandaddicecandidate integer,
