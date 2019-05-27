@@ -179,9 +179,11 @@ function run(keys) {
         tempStream.write(JSON.stringify(meta) + '\n');
 
         const forwardedFor = upgradeReq.headers['x-forwarded-for'];
-        if (forwardedFor) {
+        const {remoteAddress} = upgradeReq.connection;
+        const address = forwardedFor || remoteAddress;
+        if (address) {
             process.nextTick(() => {
-                const city = cityLookup.get(forwardedFor);
+                const city = cityLookup.get(address);
                 if (tempStream) {
                     tempStream.write(JSON.stringify(['location', null, city, Date.now()]) + '\n');
                 }
