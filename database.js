@@ -51,8 +51,6 @@ module.exports = function(config) {
         }, (err, data) => {
           if (err) {
             console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
-          } else {
-            console.log("Successfully firehosed data");
           }
         });
       }

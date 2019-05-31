@@ -24,8 +24,6 @@ module.exports = function(config) {
           s3bucket.upload({ Key: key + '.gz', Body: data }, (err, data) => {
             if (err) {
               console.log("Error uploading data: ", err);
-            } else {
-              console.log("Successfully uploaded data to myBucket/myKey");
             }
           });
         }

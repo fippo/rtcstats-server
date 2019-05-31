@@ -87,7 +87,9 @@ class ProcessQueue {
             this.q.push(clientid); // do not immediately retry
         });
         this.numProc++;
-        console.log('process Q:', this.numProc);
+        if (this.numProc > 10) {
+            console.log('process Q:', this.numProc);
+        }
     }
 }
 const q = new ProcessQueue();
