@@ -180,6 +180,10 @@ function run(keys) {
 
         const forwardedFor = upgradeReq.headers['x-forwarded-for'];
         const {remoteAddress} = upgradeReq.connection;
+
+        // Temporary debug.
+        console.log('request origin', {forwardedFor, remoteAddress});
+
         const address = forwardedFor || remoteAddress;
         if (address) {
             process.nextTick(() => {
