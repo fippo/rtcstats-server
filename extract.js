@@ -136,75 +136,77 @@ function generateFeatures(url, client, clientid) {
 const clientid = process.argv[2];
 const path = 'temp/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
-    if (!err) {
-        const baseStats = {};
-        const lines = data.split('\n');
-        const client = JSON.parse(lines.shift());
-        client.peerConnections = {};
-        client.getUserMedia = [];
-        lines.forEach(line => {
-            if (line.length) {
-                const data = JSON.parse(line);
-                const time = new Date(data.time || data[3]);
-                delete data.time;
-                switch(data[0]) {
-                case 'location':
-                    client.location = data[2];
-                    break;
-                case 'userfeedback': // TODO: might be renamed
-                    client.feedback = data[2];
-                    break;
-                case 'tags': // experiment variation tags
-                    client.tags = data[2];
-                    break;
-                case 'wsconnect':
-                    client.websocketConnectionTime = data[2] >>> 0;
-                    break;
-                case 'wsconnecterror':
-                    client.websocketError = data[2];
-                    break;
-                case 'getUserMedia':
-                case 'getUserMediaOnSuccess':
-                case 'getUserMediaOnFailure':
-                case 'navigator.mediaDevices.getUserMedia':
-                case 'navigator.mediaDevices.getUserMediaOnSuccess':
-                case 'navigator.mediaDevices.getUserMediaOnFailure':
-                case 'navigator.getDisplayMedia':
-                case 'navigator.getDisplayMediaOnSucces':
-                case 'navigator.mediaDevices.getDisplayMedia':
-                case 'navigator.mediaDevices.getDisplayMediaOnSuccess':
-                    client.getUserMedia.push({
-                        time: time,
-                        timestamp: time.getTime(),
-                        type: data[0],
-                        value: data[2]
-                    });
-                    break;
-                default:
-                    if (!client.peerConnections[data[1]]) {
-                        client.peerConnections[data[1]] = [];
-                        baseStats[data[1]] = {};
-                    }
-                    if (data[0] === 'getstats') { // delta-compressed
-                        data[2] = statsDecompressor(baseStats[data[1]], data[2]);
-                        baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
-                    }
-                    if (data[0] === 'getStats' || data[0] === 'getstats') {
-                        data[2] = statsMangler(data[2]);
-                        data[0] = 'getStats';
-                    }
-                    client.peerConnections[data[1]].push({
-                        time: time,
-                        timestamp: time.getTime(),
-                        type: data[0],
-                        value: data[2],
-                    });
-                    break;
-                }
-            }
-        });
-
-        dump(client.url, client, clientid, data);
-        generateFeatures(client.url, client, clientid);
+    if (err) {
+        console.error(err, path);
+        return;
     }
+    const baseStats = {};
+    const lines = data.split('\n');
+    const client = JSON.parse(lines.shift());
+    client.peerConnections = {};
+    client.getUserMedia = [];
+    lines.forEach(line => {
+        if (line.length) {
+            const data = JSON.parse(line);
+            const time = new Date(data.time || data[3]);
+            delete data.time;
+            switch(data[0]) {
+            case 'location':
+                client.location = data[2];
+                break;
+            case 'userfeedback': // TODO: might be renamed
+                client.feedback = data[2];
+                break;
+            case 'tags': // experiment variation tags
+                client.tags = data[2];
+                break;
+            case 'wsconnect':
+                client.websocketConnectionTime = data[2] >>> 0;
+                break;
+            case 'wsconnecterror':
+                client.websocketError = data[2];
+                break;
+            case 'getUserMedia':
+            case 'getUserMediaOnSuccess':
+            case 'getUserMediaOnFailure':
+            case 'navigator.mediaDevices.getUserMedia':
+            case 'navigator.mediaDevices.getUserMediaOnSuccess':
+            case 'navigator.mediaDevices.getUserMediaOnFailure':
+            case 'navigator.getDisplayMedia':
+            case 'navigator.getDisplayMediaOnSucces':
+            case 'navigator.mediaDevices.getDisplayMedia':
+            case 'navigator.mediaDevices.getDisplayMediaOnSuccess':
+                client.getUserMedia.push({
+                    time: time,
+                    timestamp: time.getTime(),
+                    type: data[0],
+                    value: data[2]
+                });
+                break;
+            default:
+                if (!client.peerConnections[data[1]]) {
+                    client.peerConnections[data[1]] = [];
+                    baseStats[data[1]] = {};
+                }
+                if (data[0] === 'getstats') { // delta-compressed
+                    data[2] = statsDecompressor(baseStats[data[1]], data[2]);
+                    baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
+                }
+                if (data[0] === 'getStats' || data[0] === 'getstats') {
+                    data[2] = statsMangler(data[2]);
+                    data[0] = 'getStats';
+                }
+                client.peerConnections[data[1]].push({
+                    time: time,
+                    timestamp: time.getTime(),
+                    type: data[0],
+                    value: data[2],
+                });
+                break;
+            }
+        }
+    });
+
+    dump(client.url, client, clientid, data);
+    generateFeatures(client.url, client, clientid);
 });
