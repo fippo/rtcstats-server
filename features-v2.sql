@@ -108,6 +108,7 @@ CREATE TABLE features (
     numberofcandidatepairchanges integer,
     numberoflocalicecandidates integer,
     numberofremoteicecandidates integer,
+    numberoflocalsimulcaststreams integer,
     connectiontime integer,
     iceconnectiontime integer,
     numberofinterfaces integer,

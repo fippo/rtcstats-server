@@ -636,15 +636,28 @@ module.exports = {
 
     usingSimulcast: function(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type === 'setLocalDescription') {
-                const value = peerConnectionLog[i].value;
-                const simulcast = value && value.sdp && (value.sdp.indexOf('a=ssrc-group:SIM') !== -1 || value.sdp.indexOf('a=simulcast:') !== -1);
+            const {type, value} = peerConnectionLog[i];
+            if (type === 'setLocalDescription') {
+                const simulcast = value && value.sdp && (value.sdp.indexOf('a=ssrc-group:SIM ') !== -1 || value.sdp.indexOf('a=simulcast:') !== -1);
                 if (simulcast) {
                     return true;
                 }
             }
         }
         return false;
+    },
+    numberOfLocalSimulcastStreams: function(client, peerConnectionLog) {
+        for (let i = 0; i < peerConnectionLog.length; i++) {
+            const {type, value} = peerConnectionLog[i];
+            if (type === 'setLocalDescription') {
+                const simulcast = value && value.sdp && (value.sdp.indexOf('a=ssrc-group:SIM ') !== -1); // Chrome-only definition.
+                if (simulcast) {
+                    const line = SDPUtils.splitLines(value.sdp)
+                        .filter(line => line.indexOf('a=ssrc-group:SIM ') === 0);
+                    return line[0].substr(17).split(' ').length;
+                }
+            }
+        }
     },
 
     // was there a setLocalDescription failure?
