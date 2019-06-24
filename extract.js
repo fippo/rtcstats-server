@@ -189,11 +189,6 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
                     baseStats[data[1]] = {};
                 }
                 if (data[0] === 'getstats') { // delta-compressed
-                    if (data[2].values) { // workaround for RtcStats.java bug.
-                        const {timestamp, values} = data[2];
-                        data[2] = values;
-                        data[2].timestamp = timestamp;
-                    }
                     data[2] = statsDecompressor(baseStats[data[1]], data[2]);
                     baseStats[data[1]] = JSON.parse(JSON.stringify(data[2]));
                 }

@@ -209,6 +209,11 @@ function run(keys) {
                     tempStream.write(JSON.stringify(data) + '\n');
                     break;
                 default:
+                    if (data[0] === 'getstats' && data[2].values) { // workaround for RtcStats.java bug.
+                        const {timestamp, values} = data[2];
+                        data[2] = values;
+                        data[2].timestamp = timestamp;
+                    }
                     obfuscate(data);
                     tempStream.write(JSON.stringify(data) + '\n');
                     break;
