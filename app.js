@@ -199,6 +199,11 @@ function run(keys) {
                 const data = JSON.parse(msg);
 
                 numberOfEvents++;
+
+                if (data[0].endsWith('OnError')) {
+                    // monkey-patch java/swift sdk bugs.
+                    data[0] = data[0].replace('OnError', 'OnFailure');
+                }
                 switch(data[0]) {
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
