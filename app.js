@@ -208,6 +208,17 @@ function run(keys) {
                 case 'navigator.mediaDevices.getUserMediaOnFailure':
                     tempStream.write(JSON.stringify(data) + '\n');
                     break;
+                case 'constraints':
+                    if (data[2].constraintsOptional) { // workaround for RtcStats.java bug.
+                        data[2].optional = [];
+                        Object.keys(data[2].constraintsOptional).forEach(key => {
+                            const pair = {};
+                            pair[key] = data[2].constraintsOptional[key]
+                        });
+                        delete data[2].constraintsOptional;
+                    }
+                    tempStream.write(JSON.stringify(data) + '\n');
+                    break;
                 default:
                     if (data[0] === 'getstats' && data[2].values) { // workaround for RtcStats.java bug.
                         const {timestamp, values} = data[2];
