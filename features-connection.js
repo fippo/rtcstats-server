@@ -732,6 +732,7 @@ module.exports = {
                 }
             }
         }
+        return false;
     },
 
     // was a local TURN/UDP relay candidate gathered?
