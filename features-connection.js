@@ -823,8 +823,12 @@ module.exports = {
                 if (cand.candidate) {
                     const ip = cand.candidate.split(' ')[4];
                     if (ip.indexOf('192.168.') === 0) gathered.prefix16 = true;
-                    else if (ip.indexOf('172.16.') === 0) gathered.prefix12 = true;
-                    else if (ip.indexOf('10.') === 0) gathered.prefix10 = true;
+                    else if (ip.indexOf('172.') === 0) {
+                        const secondByte = ip.split('.')[1] >>> 0;
+                        if (secondByte >= 16 && secondByte <= 31) {
+                            gathered.prefix12 = true;
+                        }
+                    } else if (ip.indexOf('10.') === 0) gathered.prefix10 = true;
                 }
             }
         }
