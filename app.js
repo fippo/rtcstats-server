@@ -75,7 +75,7 @@ class ProcessQueue {
                 fs.unlink(tempStreamPath(clientid, peerConnectionId), () => {
                     // we're good...
                 });
-                Store.put(clientid, data);
+                Store.put(`${clientid}-${peerConnectionId}`, data);
             });
         });
         p.on('message', (msg) => {
