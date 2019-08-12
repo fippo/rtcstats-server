@@ -12,6 +12,7 @@ const WebSocketServer = require('ws').Server;
 const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
+const {tempStreamPath, tempPath} = require('./utils');
 const obfuscate = require('./obfuscator');
 const Database = require('./database')({
     firehose: config.get('firehose'),
@@ -21,7 +22,6 @@ const Store = require('./store')({
 });
 
 let server;
-const tempPath = 'temp';
 
 const prom = require('prom-client');
 const connected = new prom.Gauge({
@@ -55,7 +55,7 @@ class ProcessQueue {
         const next = this.q.shift();
         if (!next) return;
         const {clientid, peerConnectionId} = next;
-        const p = child_process.fork('extract.js', [clientid]);
+        const p = child_process.fork('extract.js', [clientid, peerConnectionId]);
         p.on('exit', (code) => {
             this.numProc--;
             console.log('done', clientid, this.numProc, 'code=' + code);
@@ -107,10 +107,6 @@ function setupWorkDirectory() {
     fs.mkdirSync(tempPath);
 }
 
-function tempStreamPath(clientid, peerConnectionId) {
-    return `${tempPath}/${clientid}-${peerConnectionId}`;
-}
-
 function run(keys) {
     setupWorkDirectory();
 
@@ -157,7 +153,6 @@ function run(keys) {
     const wss = new WebSocketServer({ server: server });
     wss.on('connection', (client, upgradeReq) => {
         connected.inc();
-        let numberOfEvents = 0;
         // the url the client is coming from
         const referer = upgradeReq.headers['origin'] + upgradeReq.url;
         // TODO: check against known/valid urls
@@ -187,13 +182,7 @@ function run(keys) {
                 const streamPath = tempStreamPath(clientid, peerConnectionId);
                 tempStream = fs.createWriteStream(streamPath);
                 tempStream.on('finish', () => {
-                    if (numberOfEvents > 0) {
-                        q.enqueue(clientid, peerConnectionId);
-                    } else {
-                        fs.unlink(streamPath, () => {
-                            // we're good...
-                        });
-                    }
+                    q.enqueue(clientid, peerConnectionId);
                 });
                 tempStream.write(JSON.stringify(meta()) + '\n');
                 const forwardedFor = upgradeReq.headers['x-forwarded-for'];
@@ -212,7 +201,7 @@ function run(keys) {
             if(tempStream.writable) {
                 tempStream.write(JSON.stringify(data) + '\n');
             } else {
-                console.error("Unable to write to stream: ", clientid, peerConnectionId);
+                console.error("Unable to write to stream: ", data, clientid, peerConnectionId);
             }
         }
 
@@ -232,7 +221,7 @@ function run(keys) {
             if (!peerConnectionId) return;
             clearTimeout(timeouts[peerConnectionId]);
             // Allow time for remaining events to come in
-            setTimeout(() => {
+            timeouts[peerConnectionId] = setTimeout(() => {
                 closeStream(peerConnectionId);
             }, 5000);
         }
@@ -243,15 +232,15 @@ function run(keys) {
             try {
                 const data = JSON.parse(msg);
                 const peerConnectionId = data[1];
-                numberOfEvents++;
 
                 if (data[0].endsWith('OnError')) {
                     // monkey-patch java/swift sdk bugs.
                     data[0] = data[0].replace('OnError', 'OnFailure');
                 }
                 switch(data[0]) {
-                case 'close': 
+                case 'close':
                     handlePeerConnectionEnd(peerConnectionId);
+                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
@@ -289,9 +278,7 @@ function run(keys) {
         client.on('close', () => {
             connected.dec();
             const remainingStreams = Object.keys(tempStreams);
-            remainingStreams.forEach(pcId => {
-                closeStream(pcId);
-            });
+            remainingStreams.forEach(closeStream);
         });
     });
 }

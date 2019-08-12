@@ -22,7 +22,7 @@ const clientfeatures = require('./features-client');
 const streamfeatures = require('./features-stream');
 const statsDecompressor = require('./getstats-deltacompression').decompress;
 const statsMangler = require('./getstats-mangle');
-const {extractTracks, extractStreams} = require('./utils');
+const {extractTracks, extractStreams, tempStreamPath} = require('./utils');
 
 // dumps all peerconnections.
 function dump(url, client, clientid, data) {
@@ -134,7 +134,8 @@ function generateFeatures(url, client, clientid) {
 }
 
 const clientid = process.argv[2];
-const path = 'temp/' + clientid;
+const peerConnectionId = process.argv[3];
+const path = tempStreamPath(clientid, peerConnectionId);
 fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
     if (err) {
         console.error(err, path);
