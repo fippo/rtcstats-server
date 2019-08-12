@@ -211,7 +211,7 @@ function run(keys) {
             }
             let tempStream = tempStreams[peerConnectionId];
             if (tempStream) {
-                write(JSON.stringify(['close', null, null, Date.now()]), peerConnectionId);
+                write(['close', peerConnectionId, null, Date.now()], peerConnectionId);
                 tempStream.end();
             }
         }
