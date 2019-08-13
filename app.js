@@ -240,7 +240,6 @@ function run(keys) {
                 switch(data[0]) {
                 case 'close':
                     handlePeerConnectionEnd(peerConnectionId);
-                    break;
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
