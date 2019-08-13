@@ -127,6 +127,12 @@ function isIceConnected({type, value}) {
     return type === 'oniceconnectionstatechange' && ['connected', 'completed'].includes(value);
 }
 
+const tempPath = 'temp';
+
+function tempStreamPath(clientid, peerConnectionId) {
+    return `${tempPath}/${clientid}-${peerConnectionId}`;
+}
+
 module.exports = {
     capitalize,
     extractTracks,
@@ -135,4 +141,6 @@ module.exports = {
     mode,
     standardizedMoment,
     timeBetween,
+    tempStreamPath,
+    tempPath
 }

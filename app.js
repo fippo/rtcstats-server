@@ -12,6 +12,7 @@ const WebSocketServer = require('ws').Server;
 const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
+const {tempStreamPath, tempPath} = require('./utils');
 const obfuscate = require('./obfuscator');
 const Database = require('./database')({
     firehose: config.get('firehose'),
@@ -21,7 +22,6 @@ const Store = require('./store')({
 });
 
 let server;
-const tempPath = 'temp';
 
 const prom = require('prom-client');
 const connected = new prom.Gauge({
@@ -43,8 +43,8 @@ class ProcessQueue {
         this.q = [];
         this.numProc = 0;
     }
-    enqueue(clientid) {
-        this.q.push(clientid);
+    enqueue(clientid, peerConnectionId) {
+        this.q.push({clientid, peerConnectionId});
         if (this.numProc < this.maxProc) {
             process.nextTick(this.process.bind(this));
         } else {
@@ -52,9 +52,10 @@ class ProcessQueue {
         }
     }
     process() {
-        const clientid = this.q.shift();
-        if (!clientid) return;
-        const p = child_process.fork('extract.js', [clientid]);
+        const next = this.q.shift();
+        if (!next) return;
+        const {clientid, peerConnectionId} = next;
+        const p = child_process.fork('extract.js', [clientid, peerConnectionId]);
         p.on('exit', (code) => {
             this.numProc--;
             console.log('done', clientid, this.numProc, 'code=' + code);
@@ -65,16 +66,16 @@ class ProcessQueue {
             }
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
-            fs.readFile(tempPath + '/' + clientid, {encoding: 'utf-8'}, (err, data) => {
+            fs.readFile(tempStreamPath(clientid, peerConnectionId), {encoding: 'utf-8'}, (err, data) => {
                 if (err) {
                     console.error('Could not open file for store upload', err);
                     return;
                 }
                 // remove the file
-                fs.unlink(tempPath + '/' + clientid, () => {
+                fs.unlink(tempStreamPath(clientid, peerConnectionId), () => {
                     // we're good...
                 });
-                Store.put(clientid, data);
+                Store.put(`${clientid}-${peerConnectionId}`, data);
             });
         });
         p.on('message', (msg) => {
@@ -84,7 +85,7 @@ class ProcessQueue {
         p.on('error', () => {
             this.numProc--;
             console.log('failed to spawn, rescheduling', clientid, this.numProc);
-            this.q.push(clientid); // do not immediately retry
+            this.q.push({clientid, peerConnectionId}); // do not immediately retry
         });
         this.numProc++;
         if (this.numProc > 10) {
@@ -152,44 +153,77 @@ function run(keys) {
     const wss = new WebSocketServer({ server: server });
     wss.on('connection', (client, upgradeReq) => {
         connected.inc();
-        let numberOfEvents = 0;
         // the url the client is coming from
         const referer = upgradeReq.headers['origin'] + upgradeReq.url;
         // TODO: check against known/valid urls
 
         const ua = upgradeReq.headers['user-agent'];
         const clientid = uuid.v4();
-        let tempStream = fs.createWriteStream(tempPath + '/' + clientid);
-        tempStream.on('finish', () => {
-            if (numberOfEvents > 0) {
-                q.enqueue(clientid);
-            } else {
-                fs.unlink(tempPath + '/' + clientid, () => {
-                    // we're good...
-                });
+
+        const meta = () => {
+            return {
+                path: upgradeReq.url,
+                origin: upgradeReq.headers['origin'],
+                url: referer,
+                userAgent: ua,
+                time: Date.now(),
+                fileFormat: 2
             }
-        });
+        }
 
-        const meta = {
-            path: upgradeReq.url,
-            origin: upgradeReq.headers['origin'],
-            url: referer,
-            userAgent: ua,
-            time: Date.now(),
-            fileFormat: 2,
-        };
-        tempStream.write(JSON.stringify(meta) + '\n');
-
-        const forwardedFor = upgradeReq.headers['x-forwarded-for'];
-        const {remoteAddress} = upgradeReq.connection;
-        const address = forwardedFor || remoteAddress;
-        if (address) {
-            process.nextTick(() => {
-                const city = cityLookup.get(address);
-                if (tempStream) {
-                    tempStream.write(JSON.stringify(['location', null, city, Date.now()]) + '\n');
+        const tempStreams = {}
+        const write = (data, peerConnectionId) => {
+            if (!peerConnectionId) {
+                return;
+            }
+            let tempStream = tempStreams[peerConnectionId];
+            if (!tempStream) {
+                //Create new temp file
+                const streamPath = tempStreamPath(clientid, peerConnectionId);
+                tempStream = fs.createWriteStream(streamPath);
+                tempStream.on('finish', () => {
+                    q.enqueue(clientid, peerConnectionId);
+                });
+                tempStream.write(JSON.stringify(meta()) + '\n');
+                const forwardedFor = upgradeReq.headers['x-forwarded-for'];
+                const {remoteAddress} = upgradeReq.connection;
+                const address = forwardedFor || remoteAddress;
+                if (address) {
+                    process.nextTick(() => {
+                        const city = cityLookup.get(address);
+                        if (tempStream) {
+                            write(['location', null, city, Date.now()], peerConnectionId);
+                        }
+                    });
                 }
-            });
+                tempStreams[peerConnectionId] = tempStream;
+            }
+            if(tempStream.writable) {
+                tempStream.write(JSON.stringify(data) + '\n');
+            } else {
+                console.error("Unable to write to stream: ", data, clientid, peerConnectionId);
+            }
+        }
+
+        const closeStream = (peerConnectionId) => {
+            if (!peerConnectionId) {
+                return;
+            }
+            let tempStream = tempStreams[peerConnectionId];
+            if (tempStream) {
+                write(['close', peerConnectionId, null, Date.now()], peerConnectionId);
+                tempStream.end();
+            }
+        }
+
+        const timeouts = {};
+        const handlePeerConnectionEnd = (peerConnectionId) => {
+            if (!peerConnectionId) return;
+            clearTimeout(timeouts[peerConnectionId]);
+            // Allow time for remaining events to come in
+            timeouts[peerConnectionId] = setTimeout(() => {
+                closeStream(peerConnectionId);
+            }, 5000);
         }
 
         console.log('connected', ua, referer, clientid);
@@ -197,21 +231,22 @@ function run(keys) {
         client.on('message', msg => {
             try {
                 const data = JSON.parse(msg);
-
-                numberOfEvents++;
+                const peerConnectionId = data[1];
 
                 if (data[0].endsWith('OnError')) {
                     // monkey-patch java/swift sdk bugs.
                     data[0] = data[0].replace('OnError', 'OnFailure');
                 }
                 switch(data[0]) {
+                case 'close':
+                    handlePeerConnectionEnd(peerConnectionId);
                 case 'getUserMedia':
                 case 'getUserMediaOnSuccess':
                 case 'getUserMediaOnFailure':
                 case 'navigator.mediaDevices.getUserMedia':
                 case 'navigator.mediaDevices.getUserMediaOnSuccess':
                 case 'navigator.mediaDevices.getUserMediaOnFailure':
-                    tempStream.write(JSON.stringify(data) + '\n');
+                    write(data, peerConnectionId);
                     break;
                 case 'constraints':
                     if (data[2].constraintsOptional) { // workaround for RtcStats.java bug.
@@ -222,7 +257,7 @@ function run(keys) {
                         });
                         delete data[2].constraintsOptional;
                     }
-                    tempStream.write(JSON.stringify(data) + '\n');
+                    write(data, peerConnectionId);
                     break;
                 default:
                     if (data[0] === 'getstats' && data[2].values) { // workaround for RtcStats.java bug.
@@ -231,7 +266,7 @@ function run(keys) {
                         data[2].timestamp = timestamp;
                     }
                     obfuscate(data);
-                    tempStream.write(JSON.stringify(data) + '\n');
+                    write(data, peerConnectionId);
                     break;
                 }
             } catch(e) {
@@ -241,9 +276,8 @@ function run(keys) {
 
         client.on('close', () => {
             connected.dec();
-            tempStream.write(JSON.stringify(['close', null, null, Date.now()]));
-            tempStream.end();
-            tempStream = null;
+            const remainingStreams = Object.keys(tempStreams);
+            remainingStreams.forEach(closeStream);
         });
     });
 }
