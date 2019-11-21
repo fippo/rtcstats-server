@@ -5,7 +5,6 @@ const uuid = require('uuid');
 const os = require('os');
 const child_process = require('child_process');
 const http = require('http');
-const https = require('https');
 
 const WebSocketServer = require('ws').Server;
 
@@ -24,14 +23,17 @@ let server;
 const tempPath = 'temp';
 
 const prom = require('prom-client');
+
 const connected = new prom.Gauge({
   name: 'rtcstats_websocket_connections',
   help: 'number of open websocket connections',
 });
+
 const processed = new prom.Counter({
   name: 'rtcstats_files_processed',
   help: 'number of files processed',
 });
+
 const errored = new prom.Counter({
   name: 'rtcstats_files_errored',
   help: 'number of files with errors during processing',
@@ -96,47 +98,49 @@ const q = new ProcessQueue();
 
 function setupWorkDirectory() {
     try {
-        fs.readdirSync(tempPath).forEach(fname => {
-            fs.unlinkSync(tempPath + '/' + fname);
-        });
-        fs.rmdirSync(tempPath);
+        if (fs.existsSync(tempPath)) {
+            fs.readdirSync(tempPath).forEach(fname => {
+                try {
+                    console.debug(`Removing file ${tempPath + '/' + fname}`)
+                    fs.unlinkSync(tempPath + '/' + fname);
+                } catch(e) {
+                    console.error(`Error while unlinking file ${fname} - ${e.message}`);
+                }
+            });
+        } else {
+            console.debug(`Creating working dir ${tempPath}`)
+            fs.mkdirSync(tempPath);
+        }
     } catch(e) {
-        console.error('work dir does not exist');
+        console.error(`Error while accessing working dir ${tempPath} - ${e.message}`);
     }
-    fs.mkdirSync(tempPath);
 }
 
-function run(keys) {
-    setupWorkDirectory();
+function setupHttpServer(port, keys) {
+    const options = !!keys ? {
+        key: keys.serviceKey,
+        cert: keys.certificate,
+    }: {}
 
-    if (keys === undefined) {
-      server = http.Server(() => { });
-    } else {
-      server = https.Server({
-          key: keys.serviceKey,
-          cert: keys.certificate,
-      }, () => { });
-    }
+    const server = http.Server(options, () => {})
+        .on('request', (request, response) => {
+            switch (request.url) {
+            case '/healthcheck':
+                response.writeHead(200);
+                response.end();
+                break;
+            default:
+                response.writeHead(404);
+                response.end();
+            }
+        })
+        .listen(port);
+    return server;
+}
 
-    server.listen(config.get('server').port);
-    server.on('request', (request, response) => {
-        // look at request.url
-        switch (request.url) {
-        case '/healthcheck':
-            response.writeHead(200);
-            response.end();
-            break;
-        default:
-            response.writeHead(404);
-            response.end();
-        }
-    });
-
-    const metricsPort = config.get('server').metrics;
-    if (metricsPort) {
-        const metricsServer = http.Server();
-        metricsServer.listen(config.get('server').metrics);
-        metricsServer.on('request', (request, response) => {
+function setupMetricsServer(port) {
+    const metricsServer = http.Server()
+        .on('request', (request, response) => {
             switch (request.url) {
             case '/metrics':
                 response.writeHead(200, {'Content-Type': prom.contentType});
@@ -146,10 +150,13 @@ function run(keys) {
                 response.writeHead(404);
                 response.end();
             }
-        });
-    }
+        })
+        .listen(port);
+    return metricsServer;
+}
 
-    const wss = new WebSocketServer({ server: server });
+function setupWebSocketsServer(server) {
+    const wss = new WebSocketServer({ server });
     wss.on('connection', (client, upgradeReq) => {
         connected.inc();
         let numberOfEvents = 0;
@@ -202,7 +209,7 @@ function run(keys) {
 
                 if (data[0].endsWith('OnError')) {
                     // monkey-patch java/swift sdk bugs.
-                    data[0] = data[0].replace('OnError', 'OnFailure');
+                    data[0] = data[0].replace(/OnError$/, 'OnFailure');
                 }
                 switch(data[0]) {
                 case 'getUserMedia':
@@ -246,6 +253,18 @@ function run(keys) {
             tempStream = null;
         });
     });
+}
+
+function run(keys) {
+    setupWorkDirectory();
+
+    server = setupHttpServer(config.get('server').port, keys);
+
+    if (config.get('server').metrics) {
+        setupMetricsServer(config.get('server').metrics);
+    }
+
+    setupWebSocketsServer(server);
 }
 
 function stop() {
