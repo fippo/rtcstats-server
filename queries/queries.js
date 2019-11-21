@@ -798,6 +798,21 @@ function failedSFU() {
     });
 }
 
+function restart() {
+    query("SELECT [day], count(*), icerestart, browsertype FROM features WHERE  icerestart = 't' GROUP BY day, icerestart, browsertype ORDER BY day ASC")
+    .then(res => {
+        const series = {}
+        res.rows.forEach((row) => {
+            const key = row.icerestart + '-' + row.browsertype;
+            if (!series[key]) series[key] = [];
+            series[key].push([new Date(row.day).getTime(), parseInt(row.count, 10)])
+        });
+        graph(series, {
+            title: 'ice restarts by browser'
+        });
+    });
+}
+
 function failedFirefox() {
     query("SELECT [day], count(*), browsermajorversion FROM features WHERE icefailure = 't' and usingicelite = 'f' and icefailuresubsequent = 'f' and browsername = 'Firefox' and browsermajorversion >= 59 and browsermajorversion <= 69 group by day, browsermajorversion ORDER BY day ASC")
     .then(res => {
