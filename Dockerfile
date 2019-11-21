@@ -1,21 +1,29 @@
-FROM node:10
+FROM node:10.15.3-alpine
+
+RUN apk add --no-cache git && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apk /usr/share/man /tmp/*
+
 
 ENV app rtcstats-server
 
-RUN useradd $app \
-  && mkdir /home/$app \
-  && chown $app:$app /home/$app \
-  && mkdir -p /var/log/$app /$app \
-  && chown $app:$app /var/log/$app /$app
 WORKDIR /$app
-COPY . /$app
 
+RUN adduser --disabled-password $app
 RUN chown -R $app:$app /$app
 
 USER $app
 
+COPY . /$app
+
 RUN npm install
 
-VOLUME ["/var/log/$app"]
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s \
+  CMD curl --silent --fail http://localhost:3000/healthcheck \
+  || exit 1
+
 EXPOSE 3000
-CMD ["npm", "start"]
+
+ENTRYPOINT [ "npm" ]
+
+CMD [ "start" ]
