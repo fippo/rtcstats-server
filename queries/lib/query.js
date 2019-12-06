@@ -47,7 +47,7 @@ function query(q) {
             pending--;
             if (err) {
                 console.error(err);
-                return reject();
+                return reject(err);
             }
             resolve(res);
             if (pending === 0) {
