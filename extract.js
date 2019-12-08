@@ -11,8 +11,10 @@ function capitalize(str) {
 function safeFeature(feature) {
     if (typeof feature === 'number' && isNaN(feature)) feature = -1;
     if (typeof feature === 'number' && !isFinite(feature)) feature = -2;
+    /*
     if (feature === false) feature = 0;
     if (feature === true) feature = 1;
+    */
 
     return feature;
 }
