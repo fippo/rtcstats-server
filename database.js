@@ -31,9 +31,7 @@ module.exports = function(config) {
         PageUrl: pageUrl,
       };
 
-      Object.keys(clientFeatures).forEach(key => item[key] = clientFeatures[key]);
-      Object.keys(connectionFeatures).forEach(key => item[key] = connectionFeatures[key]);
-      Object.keys(streamFeatures).forEach(key => item[key] = streamFeatures[key]);
+      Object.assign(item, clientFeatures, connectionFeatures, streamFeatures);
 
       if (firehose) {
         firehose.putRecord({
