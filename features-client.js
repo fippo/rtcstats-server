@@ -90,7 +90,6 @@ module.exports = {
                 return gum[i].value;
             }
         }
-        return false;
     },
 
     // did the client ever request audio?
