@@ -1,5 +1,4 @@
 const AWS = require('aws-sdk');
-const _ = require('lodash');
 
 function lower(obj) {
   let key, keys = Object.keys(obj);
@@ -32,15 +31,9 @@ module.exports = function(config) {
         PageUrl: pageUrl,
       };
 
-      _.forEach(clientFeatures, (value, key) => {
-        item[key] = value;
-      });
-      _.forEach(connectionFeatures, (value, key) => {
-        item[key] = value;
-      });
-      _.forEach(streamFeatures, (value, key) => {
-        item[key] = value;
-      });
+      Object.keys(clientFeatures).forEach(key => item[key] = clientFeatures[key]);
+      Object.keys(connectionFeatures).forEach(key => item[key] = connectionFeatures[key]);
+      Object.keys(streamFeatures).forEach(key => item[key] = streamFeatures[key]);
 
       if (firehose) {
         firehose.putRecord({
