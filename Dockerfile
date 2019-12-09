@@ -1,7 +1,7 @@
 FROM node:10.15.3-alpine
 
 RUN apk add --no-cache git && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apk /usr/share/man /tmp/*
+  rm -rf /var/lib/apt/lists/* /var/cache/apk /usr/share/man /tmp/*
 
 
 ENV app rtcstats-server
@@ -13,7 +13,7 @@ RUN chown -R $app:$app /$app
 
 USER $app
 
-COPY . /$app
+COPY --chown=$app:$app . /$app
 
 RUN npm install
 
