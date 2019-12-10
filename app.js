@@ -15,7 +15,7 @@ const obfuscate = require('./obfuscator');
 const database = require('./database/redshift-firehose.js')({
     firehose: config.get('firehose'),
 });
-const Store = require('./store')({
+const store = require('./store/s3.js')({
   s3: config.get('s3'),
 });
 
@@ -76,7 +76,7 @@ class ProcessQueue {
                 fs.unlink(tempPath + '/' + clientid, () => {
                     // we're good...
                 });
-                Store.put(clientid, data);
+                store.put(clientid, data);
             });
         });
         p.on('message', (msg) => {
