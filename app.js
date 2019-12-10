@@ -67,17 +67,15 @@ class ProcessQueue {
             }
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
-            fs.readFile(tempPath + '/' + clientid, {encoding: 'utf-8'}, (err, data) => {
-                if (err) {
-                    console.error('Could not open file for store upload', err);
-                    return;
-                }
-                // remove the file
-                fs.unlink(tempPath + '/' + clientid, () => {
-                    // we're good...
-                });
-                store.put(clientid, data);
-            });
+            const path = tempPath + '/' + clientid;
+            store.put(clientid, path);
+                .then(() => {
+                    fs.unlink(path, () => {}));
+                })
+                .catch((err) => {
+                    console.error('Error storing', path, err);
+                    fs.unlink(path, () => {}));
+                })
         });
         p.on('message', (msg) => {
             const {url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures} = msg;
