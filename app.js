@@ -12,7 +12,7 @@ const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
 const obfuscate = require('./obfuscator');
-const Database = require('./database')({
+const database = require('./database/redshift-firehose.js')({
     firehose: config.get('firehose'),
 });
 const Store = require('./store')({
@@ -81,7 +81,7 @@ class ProcessQueue {
         });
         p.on('message', (msg) => {
             const {url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures} = msg;
-            Database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
+            database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
         });
         p.on('error', () => {
             this.numProc--;
