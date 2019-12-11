@@ -68,13 +68,13 @@ class ProcessQueue {
             if (this.numProc < 0) this.numProc = 0;
             if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
             const path = tempPath + '/' + clientid;
-            store.put(clientid, path);
+            store.put(clientid, path)
                 .then(() => {
-                    fs.unlink(path, () => {}));
+                    fs.unlink(path, () => {});
                 })
                 .catch((err) => {
                     console.error('Error storing', path, err);
-                    fs.unlink(path, () => {}));
+                    fs.unlink(path, () => {});
                 })
         });
         p.on('message', (msg) => {
