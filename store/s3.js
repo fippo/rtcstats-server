@@ -38,7 +38,6 @@ module.exports = function(config) {
           });
         });
       });
-    });
     },
   };
 }
