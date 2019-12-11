@@ -1,5 +1,7 @@
-const AWS = require('aws-sdk');
 const zlib = require('zlib');
+const fs = require('fs');
+
+const AWS = require('aws-sdk');
 
 module.exports = function(config) {
   AWS.config = config.s3;
@@ -12,22 +14,31 @@ module.exports = function(config) {
   const configured = !!config.s3.bucket;
 
   return {
-    put: function(key, data) {
-      if (!configured) {
-        console.log('no bucket configured for storage');
-        return;
-      }
-      zlib.gzip(data, (err, data) => {
-        if (err) {
-          console.log("Error gzipping data: ", err);
-        } else {
-          s3bucket.upload({ Key: key + '.gz', Body: data }, (err, data) => {
+    put: function(key, filename) {
+      return new Promise((resolve, reject) => {
+        if (!configured) {
+          console.log('no bucket configured for storage');
+          return resolve(); // not an error.
+        }
+        fs.readFile(filename, {encoding: 'utf-8'}, (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+          zlib.gzip(data, (err, data) => {
             if (err) {
-              console.log("Error uploading data: ", err);
+              return reject(err);
+            } else {
+              s3bucket.upload({ Key: key + '.gz', Body: data }, (err, data) => {
+                if (err) {
+                  return reject(err);
+                }
+                resolve();
+              });
             }
           });
-        }
-      })
+        });
+      });
+    });
     },
   };
 }
