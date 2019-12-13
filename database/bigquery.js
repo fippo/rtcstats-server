@@ -75,7 +75,7 @@ module.exports = function(config) {
             };
 
             Object.assign(item, clientFeatures, connectionFeatures, streamFeatures);
-            if (config.gcp.fields.length) {
+            if (config.gcp.fields && config.gcp.fields.length) {
                 Object.keys(item).forEach(key => {
                     if (!config.gcp.fields.includes(key.toLowerCase())) {
                         delete item[key]

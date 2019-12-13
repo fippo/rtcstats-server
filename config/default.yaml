@@ -16,6 +16,9 @@ firehose:
 
 gcp:
     bucket:
+    dataset:
+    table:
+    features:
 
 appenders:
     - type: file

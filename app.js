@@ -12,12 +12,30 @@ const maxmind = require('maxmind');
 const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
 
 const obfuscate = require('./obfuscator');
-const database = require('./database/redshift-firehose.js')({
-    firehose: config.get('firehose'),
-});
-const store = require('./store/s3.js')({
-  s3: config.get('s3'),
-});
+
+// Configure database, fall back to redshift-firehose.
+let database;
+if (config.gcp && (config.gcp.dataset && config.gcp.table)) {
+    database = require('./database/bigquery.js')({gcp: config.gcp});
+}
+if (!database) {
+    database = require('./database/redshift-firehose.js')({
+        firehose: config.get('firehose'),
+    });
+}
+
+// Configure store, fall back to S3
+let store;
+if (config.gcp && config.gcp.bucket) {
+    store = require('./store/gcp.js')({
+        s3: config.get('gcp'),
+    });
+}
+if (!store) {
+    store = require('./store/s3.js')({
+        s3: config.get('s3'),
+    });
+}
 
 let server;
 const tempPath = 'temp';
