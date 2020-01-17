@@ -13,7 +13,7 @@ const obfuscate = require('./obfuscator');
 // Configure database, fall back to redshift-firehose.
 let database;
 if (config.gcp && (config.gcp.dataset && config.gcp.table)) {
-    database = require('./database/bigquery.js')({gcp: config.gcp});
+    database = require('./database/bigquery.js')({ gcp: config.gcp });
 }
 if (!database) {
     database = require('./database/redshift-firehose.js')({
@@ -25,7 +25,7 @@ if (!database) {
 let store;
 if (config.gcp && config.gcp.bucket) {
     store = require('./store/gcp.js')({
-        s3: config.get('gcp'),
+        gcp: config.get('gcp'),
     });
 }
 if (!store) {
@@ -40,18 +40,18 @@ const tempPath = 'temp';
 const prom = require('prom-client');
 
 const connected = new prom.Gauge({
-  name: 'rtcstats_websocket_connections',
-  help: 'number of open websocket connections',
+    name: 'rtcstats_websocket_connections',
+    help: 'number of open websocket connections',
 });
 
 const processed = new prom.Counter({
-  name: 'rtcstats_files_processed',
-  help: 'number of files processed',
+    name: 'rtcstats_files_processed',
+    help: 'number of files processed',
 });
 
 const errored = new prom.Counter({
-  name: 'rtcstats_files_errored',
-  help: 'number of files with errors during processing',
+    name: 'rtcstats_files_errored',
+    help: 'number of files with errors during processing',
 });
 
 class ProcessQueue {
@@ -85,15 +85,15 @@ class ProcessQueue {
             const path = tempPath + '/' + clientid;
             store.put(clientid, path)
                 .then(() => {
-                    fs.unlink(path, () => {});
+                    fs.unlink(path, () => { });
                 })
                 .catch((err) => {
                     console.error('Error storing', path, err);
-                    fs.unlink(path, () => {});
+                    fs.unlink(path, () => { });
                 })
         });
         p.on('message', (msg) => {
-            const {url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures} = msg;
+            const { url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures } = msg;
             database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
         });
         p.on('error', () => {
@@ -116,7 +116,7 @@ function setupWorkDirectory() {
                 try {
                     console.debug(`Removing file ${tempPath + '/' + fname}`)
                     fs.unlinkSync(tempPath + '/' + fname);
-                } catch(e) {
+                } catch (e) {
                     console.error(`Error while unlinking file ${fname} - ${e.message}`);
                 }
             });
@@ -124,7 +124,7 @@ function setupWorkDirectory() {
             console.debug(`Creating working dir ${tempPath}`)
             fs.mkdirSync(tempPath);
         }
-    } catch(e) {
+    } catch (e) {
         console.error(`Error while accessing working dir ${tempPath} - ${e.message}`);
     }
 }
@@ -133,18 +133,18 @@ function setupHttpServer(port, keys) {
     const options = !!keys ? {
         key: keys.serviceKey,
         cert: keys.certificate,
-    }: {}
+    } : {}
 
-    const server = http.Server(options, () => {})
+    const server = http.Server(options, () => { })
         .on('request', (request, response) => {
             switch (request.url) {
-            case '/healthcheck':
-                response.writeHead(200);
-                response.end();
-                break;
-            default:
-                response.writeHead(404);
-                response.end();
+                case '/healthcheck':
+                    response.writeHead(200);
+                    response.end();
+                    break;
+                default:
+                    response.writeHead(404);
+                    response.end();
             }
         })
         .listen(port);
@@ -155,13 +155,13 @@ function setupMetricsServer(port) {
     const metricsServer = http.Server()
         .on('request', (request, response) => {
             switch (request.url) {
-            case '/metrics':
-                response.writeHead(200, {'Content-Type': prom.contentType});
-                response.end(prom.register.metrics());
-                break;
-            default:
-                response.writeHead(404);
-                response.end();
+                case '/metrics':
+                    response.writeHead(200, { 'Content-Type': prom.contentType });
+                    response.end(prom.register.metrics());
+                    break;
+                default:
+                    response.writeHead(404);
+                    response.end();
             }
         })
         .listen(port);
@@ -212,7 +212,7 @@ function setupWebSocketsServer(server) {
             const publicIP = ['publicIP', null, publicIPs];
             tempStream.write(JSON.stringify(publicIP) + '\n');
         } else {
-            const {remoteAddress} = upgradeReq.connection;
+            const { remoteAddress } = upgradeReq.connection;
             const publicIP = ['publicIP', null, remoteAddress];
             obfuscate(publicIP);
             tempStream.write(JSON.stringify(['publicIP', null, [publicIP[2]]]) + '\n');
@@ -230,37 +230,37 @@ function setupWebSocketsServer(server) {
                     // monkey-patch java/swift sdk bugs.
                     data[0] = data[0].replace(/OnError$/, 'OnFailure');
                 }
-                switch(data[0]) {
-                case 'getUserMedia':
-                case 'getUserMediaOnSuccess':
-                case 'getUserMediaOnFailure':
-                case 'navigator.mediaDevices.getUserMedia':
-                case 'navigator.mediaDevices.getUserMediaOnSuccess':
-                case 'navigator.mediaDevices.getUserMediaOnFailure':
-                    tempStream.write(JSON.stringify(data) + '\n');
-                    break;
-                case 'constraints':
-                    if (data[2].constraintsOptional) { // workaround for RtcStats.java bug.
-                        data[2].optional = [];
-                        Object.keys(data[2].constraintsOptional).forEach(key => {
-                            const pair = {};
-                            pair[key] = data[2].constraintsOptional[key]
-                        });
-                        delete data[2].constraintsOptional;
-                    }
-                    tempStream.write(JSON.stringify(data) + '\n');
-                    break;
-                default:
-                    if (data[0] === 'getstats' && data[2].values) { // workaround for RtcStats.java bug.
-                        const {timestamp, values} = data[2];
-                        data[2] = values;
-                        data[2].timestamp = timestamp;
-                    }
-                    obfuscate(data);
-                    tempStream.write(JSON.stringify(data) + '\n');
-                    break;
+                switch (data[0]) {
+                    case 'getUserMedia':
+                    case 'getUserMediaOnSuccess':
+                    case 'getUserMediaOnFailure':
+                    case 'navigator.mediaDevices.getUserMedia':
+                    case 'navigator.mediaDevices.getUserMediaOnSuccess':
+                    case 'navigator.mediaDevices.getUserMediaOnFailure':
+                        tempStream.write(JSON.stringify(data) + '\n');
+                        break;
+                    case 'constraints':
+                        if (data[2].constraintsOptional) { // workaround for RtcStats.java bug.
+                            data[2].optional = [];
+                            Object.keys(data[2].constraintsOptional).forEach(key => {
+                                const pair = {};
+                                pair[key] = data[2].constraintsOptional[key]
+                            });
+                            delete data[2].constraintsOptional;
+                        }
+                        tempStream.write(JSON.stringify(data) + '\n');
+                        break;
+                    default:
+                        if (data[0] === 'getstats' && data[2].values) { // workaround for RtcStats.java bug.
+                            const { timestamp, values } = data[2];
+                            data[2] = values;
+                            data[2].timestamp = timestamp;
+                        }
+                        obfuscate(data);
+                        tempStream.write(JSON.stringify(data) + '\n');
+                        break;
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error('error while processing', e, msg);
             }
         });

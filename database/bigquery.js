@@ -1,6 +1,6 @@
 const fs = require('fs');
 const EventEmitter = require("events");
-const {BigQuery} = require('@google-cloud/bigquery');
+const { BigQuery } = require('@google-cloud/bigquery');
 
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
@@ -42,8 +42,8 @@ class RecordBuffer extends EventEmitter {
 
 }
 
-module.exports = function(config) {
-    if (config.gcp) {
+module.exports = function (config) {
+    if (config) {
     } else {
         console.warn('No GCP/Bigquery configuration present. Skipping Bigquery database.')
         return;
@@ -53,18 +53,18 @@ module.exports = function(config) {
     const recordBuffer = new RecordBuffer();
     recordBuffer.on('flush', (filename) => {
         bigquery
-            .dataset(config.gcp.dataset)
-            .table(config.gcp.table)
-            .load(filename, {format: 'JSON'})
-        .then(() => {
-            if (isProduction) {
-                fs.unlink(filename, () => {});
-            }
-        })
-        .catch(e => console.error('error loading into bigquery', e));
+            .dataset(config.dataset)
+            .table(config.table)
+            .load(filename, { format: 'JSON' })
+            .then(() => {
+                if (isProduction) {
+                    fs.unlink(filename, () => { });
+                }
+            })
+            .catch(e => console.error('error loading into bigquery', e));
     });
     return {
-        put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures, streamFeatures) {
+        put: function (pageUrl, clientId, connectionId, clientFeatures, connectionFeatures, streamFeatures) {
             const d = new Date().getTime();
             const item = {
                 Date: d - (d % (86400 * 1000)), // just the UTC day
@@ -75,9 +75,9 @@ module.exports = function(config) {
             };
 
             Object.assign(item, clientFeatures, connectionFeatures, streamFeatures);
-            if (config.gcp.fields && config.gcp.fields.length) {
+            if (config.fields && config.fields.length) {
                 Object.keys(item).forEach(key => {
-                    if (!config.gcp.fields.includes(key.toLowerCase())) {
+                    if (!config.fields.includes(key.toLowerCase())) {
                         delete item[key]
                     }
                 }); // ideally we'd use .entries and .fromEntries but that is unavailable in node.
