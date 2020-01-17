@@ -3,8 +3,8 @@ const fs = require('fs');
 
 const {Storage} = require('@google-cloud/storage');
 
-module.exports = function(config) {
-  const {bucket} = config.gcp;
+module.exports = function (config) {
+  const { bucket } = config;
   const configured = !!bucket;
   const storage = new Storage();
 

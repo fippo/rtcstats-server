@@ -3,15 +3,15 @@ const fs = require('fs');
 
 const AWS = require('aws-sdk');
 
-module.exports = function(config) {
-  AWS.config = config.s3;
+module.exports = function (config) {
+  AWS.config = config;
 
   const s3bucket = new AWS.S3({
     params: {
-      Bucket: config.s3.bucket
+      Bucket: config.bucket
     }
   });
-  const configured = !!config.s3.bucket;
+  const configured = !!config.bucket;
 
   return {
     put: function(key, filename) {

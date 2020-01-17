@@ -25,7 +25,7 @@ if (!database) {
 let store;
 if (config.gcp && config.gcp.bucket) {
     store = require('./store/gcp.js')({
-        s3: config.get('gcp'),
+        gcp: config.get('gcp'),
     });
 }
 if (!store) {
