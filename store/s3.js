@@ -49,7 +49,7 @@ if (require.main === module) {
   }
   const bucket = process.argv[2];
   const filename = process.argv[3];
-  const instance = module.exports({ s3: { bucket } });
+  const instance = module.exports({ bucket });
   instance.put(filename, filename)
     .then(() => {
       console.log('uploaded ' + filename + ' to ' + bucket);

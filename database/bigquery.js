@@ -43,8 +43,7 @@ class RecordBuffer extends EventEmitter {
 }
 
 module.exports = function (config) {
-    if (config) {
-    } else {
+    if (!config) {
         console.warn('No GCP/Bigquery configuration present. Skipping Bigquery database.')
         return;
     }
