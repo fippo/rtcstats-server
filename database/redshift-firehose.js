@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 function lower(obj) {
   let key, keys = Object.keys(obj);
   let n = keys.length;
-  const newobj={};
+  const newobj = {};
   while (n--) {
     key = keys[n];
     newobj[key.toLowerCase()] = obj[key];
@@ -11,17 +11,17 @@ function lower(obj) {
   return newobj;
 }
 
-module.exports = function(config) {
+module.exports = function (config) {
   let firehose;
-  if (config.firehose && config.firehose.stream) {
-    AWS.config = config.firehose;
+  if (config && config.stream) {
+    AWS.config = config;
     firehose = new AWS.Firehose();
   } else {
     console.warn('No Firehose configuration present.  Skipping firehose storage.')
   }
 
   return {
-    put: function(pageUrl, clientId, connectionId, clientFeatures, connectionFeatures, streamFeatures) {
+    put: function (pageUrl, clientId, connectionId, clientFeatures, connectionFeatures, streamFeatures) {
       const d = new Date().getTime();
       const item = {
         Date: d - (d % (86400 * 1000)), // just the UTC day
@@ -35,7 +35,7 @@ module.exports = function(config) {
 
       if (firehose) {
         firehose.putRecord({
-          DeliveryStreamName: config.firehose.stream, /* required */
+          DeliveryStreamName: config.stream, /* required */
           Record: {
             Data: JSON.stringify(lower(item))
           },

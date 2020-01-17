@@ -13,25 +13,19 @@ const obfuscate = require('./obfuscator');
 // Configure database, fall back to redshift-firehose.
 let database;
 if (config.gcp && (config.gcp.dataset && config.gcp.table)) {
-    database = require('./database/bigquery.js')({ gcp: config.gcp });
+    database = require('./database/bigquery.js')(config.gcp);
 }
 if (!database) {
-    database = require('./database/redshift-firehose.js')({
-        firehose: config.get('firehose'),
-    });
+    database = require('./database/redshift-firehose.js')(config.firehose);
 }
 
 // Configure store, fall back to S3
 let store;
 if (config.gcp && config.gcp.bucket) {
-    store = require('./store/gcp.js')({
-        gcp: config.get('gcp'),
-    });
+    store = require('./store/gcp.js')(config.gcp);
 }
 if (!store) {
-    store = require('./store/s3.js')({
-        s3: config.get('s3'),
-    });
+    store = require('./store/s3.js')(config.s3);
 }
 
 let server;
