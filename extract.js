@@ -153,8 +153,8 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
             const time = new Date(data.time || data[3]);
             delete data.time;
             switch(data[0]) {
-            case 'location':
-                client.location = data[2];
+            case 'publicIP':
+                client.publicIP = data[2];
                 break;
             case 'userfeedback': // TODO: might be renamed
                 client.feedback = data[2];

@@ -23,13 +23,6 @@ CREATE TABLE features (
     browsermajorversion integer,
     browsertype character varying(255),
 
-    locationCountry character varying(255),
-    locationCity character varying(255),
-    locationContinent character varying(16),
-    locationLon real,
-    locationLat real,
-    locationLonLat character varying(255),
-
     calledgetusermedia boolean,
     calledlegacygetusermedia boolean,
     calledmediadevicesgetusermedia boolean,
@@ -295,4 +288,5 @@ CREATE TABLE features (
     sendingduration integer,
     websocketerror character varying(255),
     active integer,
+    useshttpproxy boolean,
 );

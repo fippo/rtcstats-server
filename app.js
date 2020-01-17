@@ -8,9 +8,6 @@ const http = require('http');
 
 const WebSocketServer = require('ws').Server;
 
-const maxmind = require('maxmind');
-const cityLookup = maxmind.open('./GeoLite2-City.mmdb');
-
 const obfuscate = require('./obfuscator');
 
 // Configure database, fall back to redshift-firehose.
@@ -204,15 +201,21 @@ function setupWebSocketsServer(server) {
         tempStream.write(JSON.stringify(meta) + '\n');
 
         const forwardedFor = upgradeReq.headers['x-forwarded-for'];
-        const {remoteAddress} = upgradeReq.connection;
-        const address = forwardedFor || remoteAddress;
-        if (address) {
-            process.nextTick(() => {
-                const city = cityLookup.get(address);
-                if (tempStream) {
-                    tempStream.write(JSON.stringify(['location', null, city, Date.now()]) + '\n');
-                }
+        if (forwardedFor) {
+            const publicIPs = [];
+            const rawIPs = forwardedFor.split(',').map(ip => {
+                const publicIP = ['publicIP', null, ip.trim()];
+                obfuscate(publicIP);
+                publicIPs.push(publicIP[2]);
+                return ip;
             });
+            const publicIP = ['publicIP', null, publicIPs];
+            tempStream.write(JSON.stringify(publicIP) + '\n');
+        } else {
+            const {remoteAddress} = upgradeReq.connection;
+            const publicIP = ['publicIP', null, remoteAddress];
+            obfuscate(publicIP);
+            tempStream.write(JSON.stringify(['publicIP', null, [publicIP[2]]]) + '\n');
         }
 
         console.log('connected', ua, referer, clientid);
