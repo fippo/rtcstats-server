@@ -14,13 +14,13 @@ module.exports = function (config) {
   const configured = !!config.bucket;
 
   return {
-    put: function(key, filename) {
+    put: function (key, filename) {
       return new Promise((resolve, reject) => {
         if (!configured) {
           console.log('no bucket configured for storage');
           return resolve(); // not an error.
         }
-        fs.readFile(filename, {encoding: 'utf-8'}, (err, data) => {
+        fs.readFile(filename, { encoding: 'utf-8' }, (err, data) => {
           if (err) {
             return reject(err);
           }
@@ -43,18 +43,18 @@ module.exports = function (config) {
 }
 
 if (require.main === module) {
-    // For manual testing of the upload
-    if (process.argv.length !== 4) {
-        console.log('usage: node ' + process.argv[1] + ' <s3-bucket-name> <file-to-upload>');
-    }
-    const bucket = process.argv[2];
-    const filename = process.argv[3];
-    const instance = module.exports({s3: {bucket}});
-    instance.put(filename, filename)
+  // For manual testing of the upload
+  if (process.argv.length !== 4) {
+    console.log('usage: node ' + process.argv[1] + ' <s3-bucket-name> <file-to-upload>');
+  }
+  const bucket = process.argv[2];
+  const filename = process.argv[3];
+  const instance = module.exports({ s3: { bucket } });
+  instance.put(filename, filename)
     .then(() => {
-        console.log('uploaded ' + filename + ' to ' + bucket);
+      console.log('uploaded ' + filename + ' to ' + bucket);
     })
     .catch((e) => {
-        console.error(e);
+      console.error(e);
     });
 }
