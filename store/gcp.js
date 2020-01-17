@@ -15,7 +15,7 @@ module.exports = function (config) {
           console.log('no bucket configured for storage');
           return resolve(); // not an error.
         }
-        return storage.bucket(bucket).upload(key, { gzip: true });
+        return storage.bucket(bucket).upload(filename, { gzip: true });
       });
     },
   };
@@ -28,7 +28,7 @@ if (require.main === module) {
   }
   const bucket = process.argv[2];
   const filename = process.argv[3];
-  const instance = module.exports({ gcp: { bucket } });
+  const instance = module.exports({ bucket });
   instance.put(filename, filename)
     .then(() => {
       console.log('uploaded ' + filename + ' to ' + bucket);
