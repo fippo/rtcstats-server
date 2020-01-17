@@ -37,18 +37,6 @@ module.exports = {
     calledGetUserMedia: function(client) {
         return client.getUserMedia && client.getUserMedia.length > 0;
     },
-    location: function(client) {
-        if (!client.location) return;
-        const {location} = client;
-        return {
-            lon: location.location.longitude,
-            lat: location.location.latitude,
-            lonLat: JSON.stringify([location.location.longitude, location.location.latitude]),
-            continent: location.continent.code,
-            country: location.country ? location.country.names.en : 'unknown county',
-            city: location.city ? location.city.names.en : 'unknown city'
-        };
-    },
 
     // did the page use the old getUserMedia?
     calledLegacyGetUserMedia: function(client) {
@@ -241,5 +229,16 @@ module.exports = {
 
     websocketError: function(client) {
         return client.websocketError;
+    },
+
+    // which public address was used - taken from rtcstats websocket.
+    // can be a list of proxies from the x-forwarded-for header,
+    // take the last one.
+    publicIPAddress: function(client) {
+        return client.publicIP[client.publicIP.length - 1];
+    },
+
+    usesHTTPProxy: function(client) {
+        return client.publicIP.length > 1;
     }
 };

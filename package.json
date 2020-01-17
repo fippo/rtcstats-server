@@ -5,8 +5,7 @@
   "main": "websocket.js",
   "scripts": {
     "test": "eslint *.js database/*.js store/*.js && node test/client.js",
-    "start": "NODE_ENV=production node app.js",
-    "postinstall": "wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz && gunzip GeoLite2-City.mmdb.gz"
+    "start": "NODE_ENV=production node app.js"
   },
   "repository": {
     "type": "git",
