@@ -53,7 +53,10 @@ module.exports = function (config) {
     }
 
     const bigquery = new BigQuery();
-    const recordBuffer = new RecordBuffer({ maxFlushTime: config.maxFlushTime || 5 * 60 * 1000, bufferSize: config.bufferSize || 100 });
+    const recordBuffer = new RecordBuffer({
+        maxFlushTime: config.maxFlushTime || 5 * 60 * 1000,
+        bufferSize: config.bufferSize || 100
+    });
     recordBuffer.on('flush', (filename) => {
         bigquery
             .dataset(config.dataset)
