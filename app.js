@@ -8,6 +8,7 @@ const http = require('http');
 
 const WebSocketServer = require('ws').Server;
 
+const logger = require('./logging');
 const obfuscate = require('./obfuscator');
 
 // Configure database, fall back to redshift-firehose.
@@ -59,7 +60,7 @@ class ProcessQueue {
         if (this.numProc < this.maxProc) {
             process.nextTick(this.process.bind(this));
         } else {
-            console.log('process Q too long:', this.numProc);
+            logger.info('process Q too long: %s', this.numProc);
         }
     }
     process() {
@@ -68,21 +69,25 @@ class ProcessQueue {
         const p = child_process.fork('extract.js', [clientid]);
         p.on('exit', (code) => {
             this.numProc--;
-            console.log('done', clientid, this.numProc, 'code=' + code);
+            logger.info(`Done clientid: <${clientid}> proc: <${this.numProc}> code: <${code}>`);
             if (code === 0) {
                 processed.inc();
             } else {
                 errored.inc();
             }
-            if (this.numProc < 0) this.numProc = 0;
-            if (this.numProc < this.maxProc) process.nextTick(this.process.bind(this));
+            if (this.numProc < 0) {
+                this.numProc = 0;
+            }
+            if (this.numProc < this.maxProc) {
+                process.nextTick(this.process.bind(this));
+            }
             const path = tempPath + '/' + clientid;
             store.put(clientid, path)
                 .then(() => {
                     fs.unlink(path, () => { });
                 })
                 .catch((err) => {
-                    console.error('Error storing', path, err);
+                    logger.error('Error storing: %s - %s', path, err);
                     fs.unlink(path, () => { });
                 })
         });
@@ -92,12 +97,12 @@ class ProcessQueue {
         });
         p.on('error', () => {
             this.numProc--;
-            console.log('failed to spawn, rescheduling', clientid, this.numProc);
+            logger.warn(`Failed to spawn, rescheduling clientid: <${clientid}> proc: <${this.numProc}>`);
             this.q.push(clientid); // do not immediately retry
         });
         this.numProc++;
         if (this.numProc > 10) {
-            console.log('process Q:', this.numProc);
+            logger.info('Process Q: %n', this.numProc);
         }
     }
 }
@@ -108,18 +113,18 @@ function setupWorkDirectory() {
         if (fs.existsSync(tempPath)) {
             fs.readdirSync(tempPath).forEach(fname => {
                 try {
-                    console.debug(`Removing file ${tempPath + '/' + fname}`)
+                    logger.debug(`Removing file ${tempPath + '/' + fname}`)
                     fs.unlinkSync(tempPath + '/' + fname);
                 } catch (e) {
-                    console.error(`Error while unlinking file ${fname} - ${e.message}`);
+                    logger.error(`Error while unlinking file ${fname} - ${e.message}`);
                 }
             });
         } else {
-            console.debug(`Creating working dir ${tempPath}`)
+            logger.debug(`Creating working dir ${tempPath}`)
             fs.mkdirSync(tempPath);
         }
     } catch (e) {
-        console.error(`Error while accessing working dir ${tempPath} - ${e.message}`);
+        logger.error(`Error while accessing working dir ${tempPath} - ${e.message}`);
     }
 }
 
@@ -212,7 +217,7 @@ function setupWebSocketsServer(server) {
             tempStream.write(JSON.stringify(['publicIP', null, [publicIP[2]]]) + '\n');
         }
 
-        console.log('connected', ua, referer, clientid);
+        logger.info('New app connected: ua: <%s>, referer: <%s>, clientid: <%s>', ua, referer, clientid);
 
         client.on('message', msg => {
             try {
@@ -255,7 +260,7 @@ function setupWebSocketsServer(server) {
                         break;
                 }
             } catch (e) {
-                console.error('error while processing', e, msg);
+                logger.error('Error while processing: %s - %s', e, msg);
             }
         });
 

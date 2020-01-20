@@ -2,14 +2,16 @@ const fs = require('fs');
 const EventEmitter = require("events");
 const { BigQuery } = require('@google-cloud/bigquery');
 
+const logger = require('../logging');
+
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 class RecordBuffer extends EventEmitter {
-    constructor(maximumTimeBetweenWrites = 5 * 60 * 1000, bufferSize = 100) {
+    constructor({ maxFlushTime, bufferSize }) {
         super();
 
-        this.maximumTimeBetweenWrites = maximumTimeBetweenWrites;
-        this.nextFlush = setTimeout(this.flush.bind(this), this.maximumTimeBetweenWrites);
+        this.maxFlushTime = maxFlushTime;
+        this.nextFlush = setTimeout(this.flush.bind(this), this.maxFlushTime);
 
         this.bufferSize = bufferSize;
         this.fileCount = 0;
@@ -25,8 +27,9 @@ class RecordBuffer extends EventEmitter {
     }
     flush() {
         clearTimeout(this.nextFlush);
-        this.nextFlush = setTimeout(this.flush.bind(this), this.maximumTimeBetweenWrites);
+        this.nextFlush = setTimeout(this.flush.bind(this), this.maxFlushTime);
         if (this.bufferedItems === 0) {
+            logger.debug('No content to flush');
             return;
         }
         const pendingFile = this.currentFile;
@@ -36,6 +39,7 @@ class RecordBuffer extends EventEmitter {
         this.currentFile = fs.createWriteStream('bigquery-' + this.fileCount);
         pendingFile.end();
         pendingFile.on('finish', () => {
+            logger.debug(`Flushing file ${pendingFile.path}`);
             this.emit('flush', pendingFile.path);
         });
     }
@@ -49,7 +53,7 @@ module.exports = function (config) {
     }
 
     const bigquery = new BigQuery();
-    const recordBuffer = new RecordBuffer();
+    const recordBuffer = new RecordBuffer({ maxFlushTime: config.maxFlushTime || 5 * 60 * 1000, bufferSize: config.bufferSize || 100 });
     recordBuffer.on('flush', (filename) => {
         bigquery
             .dataset(config.dataset)
