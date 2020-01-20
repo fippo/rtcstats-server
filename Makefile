@@ -15,6 +15,7 @@ debug:
 	@docker run \
 		-p 3000:3000 \
 		-v $(PWD):/rtcstats-server \
+		-e DEBUG=true \
 		--entrypoint npm \
 		$(REPOSITORY):$(TAG) \
 		run watch:dev

@@ -1,7 +1,7 @@
-const zlib = require('zlib');
-const fs = require('fs');
 
 const { Storage } = require('@google-cloud/storage');
+
+const logger = require('../logging');
 
 module.exports = function (config) {
   const { bucket } = config;
@@ -12,9 +12,10 @@ module.exports = function (config) {
     put: function (key, filename) {
       return new Promise((resolve, reject) => {
         if (!configured) {
-          console.log('no bucket configured for storage');
+          logger.warn('no bucket configured for storage');
           return resolve(); // not an error.
         }
+        logger.debug(`Adding file: ${filename} to GCP bucket`);
         return storage.bucket(bucket).upload(filename, { gzip: true });
       });
     },

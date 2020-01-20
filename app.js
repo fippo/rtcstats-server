@@ -92,6 +92,7 @@ class ProcessQueue {
                 })
         });
         p.on('message', (msg) => {
+            logger.debug('Received message from child process');
             const { url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures } = msg;
             database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
         });
