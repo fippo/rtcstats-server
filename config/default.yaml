@@ -19,21 +19,8 @@ gcp:
     dataset:
     table:
     fields:
-
-appenders:
-    - type: file
-      layout:
-          type: pattern
-          pattern: "%d{ISO8601}   %5p [%t]    %m"
-      filename: rtcstats-server_access
-    - type: logLevelFilter
-      level: ERROR
-      appender:
-          type: file
-          layout:
-              type: pattern
-              pattern: "%d{ISO8601}   %5p [%t]    %m"
-          filename: rtcstats-server_error
+    maxFlushTime:
+    bufferSize:
 
 github:
     client_id: GITHUB_CLIENT_ID

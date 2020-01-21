@@ -1,5 +1,7 @@
 const AWS = require('aws-sdk');
 
+const logger = require('../logging');
+
 function lower(obj) {
   let key, keys = Object.keys(obj);
   let n = keys.length;
@@ -17,7 +19,7 @@ module.exports = function (config) {
     AWS.config = config;
     firehose = new AWS.Firehose();
   } else {
-    console.warn('No Firehose configuration present.  Skipping firehose storage.')
+    logger.warn('No Firehose configuration present.  Skipping firehose storage.')
   }
 
   return {
@@ -41,7 +43,7 @@ module.exports = function (config) {
           },
         }, (err, data) => {
           if (err) {
-            console.log("Error firehosing data: ", err, JSON.stringify(lower(item)));
+            logger.info("Error firehosing data: %s - %s", err, JSON.stringify(lower(item)));
           }
         });
       }

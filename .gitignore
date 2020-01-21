@@ -10,6 +10,7 @@ lib-cov
 *.tgz
 *.sh
 *.tap
+temp
 
 pids
 logs
