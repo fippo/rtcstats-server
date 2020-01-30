@@ -418,9 +418,9 @@ module.exports = {
             }
         }
         if (iceConnected && !connected) {
-            return false;
-        } else if (iceConnected && connected) {
             return true;
+        } else if (iceConnected && connected) {
+            return false;
         }
     },
 
