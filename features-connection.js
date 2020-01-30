@@ -144,6 +144,9 @@ module.exports = {
                 return constraints[i].rtcStatsClientId;
             }
         }
+        if (client.identity) {
+            return client.identity.user;
+        }
     },
     peerIdentifier: function(client, peerConnectionLog) {
         let constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
@@ -163,6 +166,9 @@ module.exports = {
             if (constraints[i].rtcStatsConferenceId) {
                 return constraints[i].rtcStatsConferenceId;
             }
+        }
+        if (client.identity) {
+            return client.identity.conference;
         }
     },
 
