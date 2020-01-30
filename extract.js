@@ -168,6 +168,9 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
             case 'wsconnecterror':
                 client.websocketError = data[2];
                 break;
+            case 'identity': // identity meta-information when its not possible to feed into RTCPeerConnection.
+                client.identity = data[2];
+                break;
             case 'getUserMedia':
             case 'getUserMediaOnSuccess':
             case 'getUserMediaOnFailure':
