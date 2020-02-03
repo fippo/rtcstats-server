@@ -557,7 +557,7 @@ module.exports = {
         }
         if (iceRestart) {
             for (; i < peerConnectionLog.length; i++) {
-                if (isIceConnection(peerCOnnectionLog[i])) {
+                if (isIceConnected(peerConnectionLog[i])) {
                     return true;
                 }
             }
