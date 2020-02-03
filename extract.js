@@ -1,5 +1,4 @@
 const fs = require('fs');
-const config = require('config');
 
 const canUseProcessSend = !!process.send;
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
@@ -27,7 +26,7 @@ const statsMangler = require('./getstats-mangle');
 const {extractTracks, extractStreams} = require('./utils');
 
 // dumps all peerconnections.
-function dump(url, client, clientid, data) {
+function dump(url, client) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
     if (!isProduction) {
@@ -212,6 +211,6 @@ fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
         }
     });
 
-    dump(client.url, client, clientid, data);
+    dump(client.url, client);
     generateFeatures(client.url, client, clientid);
 });

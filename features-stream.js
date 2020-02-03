@@ -7,12 +7,12 @@
 // 3) features which are specific to a track.
 // The third type of feature is contained in this file.
 
-const {capitalize, mode, standardizedMoment} = require('./utils');
+const {mode, standardizedMoment} = require('./utils');
 // each feature expects {kind, direction, trackId, stats} as argument.
 module.exports = {
     numberOfStats: ({stats}) => stats.length,
     direction: ({direction}) => direction,
-    duration: ({kind, direction, trackId, stats}) => {
+    duration: ({stats}) => {
         if (stats.length < 2) {
             return 0;
         }
@@ -20,7 +20,7 @@ module.exports = {
         const last = stats[stats.length - 1];
         return last.timestamp.getTime() - first.timestamp.getTime();
     },
-    active: ({kind, direction, trackId, stats}) => {
+    active: ({direction, stats}) => {
         if (stats.length < 2) {
             return 0;
         }
@@ -51,7 +51,7 @@ module.exports = {
 };
 
 /* these features operate on stats of each track, in send and recv direction */
-module.exports.audio = function({kind, direction, trackId, stats}) {
+module.exports.audio = function({kind, direction, stats}) {
     const feature = {};
     ['send', 'recv'].forEach(statDirection => {
         if (kind !== 'audio' || direction !== statDirection) {
@@ -147,7 +147,7 @@ module.exports.audio = function({kind, direction, trackId, stats}) {
     return feature;
 };
 
-module.exports.video = function({kind, direction, trackId, stats}) {
+module.exports.video = function({kind, direction, stats}) {
     const feature = {};
     ['send', 'recv'].forEach(statDirection => {
         if (kind !== 'video' || direction !== statDirection) {

@@ -199,7 +199,7 @@ module.exports = function(stats) {
   // Step 2: fix things spanning multiple reports.
   Object.keys(standardReport).forEach(id => {
     const report = standardReport[id];
-    let other, newId, sdp;
+    let other, newId;
     switch (report.type) {
       case 'googCandidatePair':
         report.type = 'candidate-pair';
