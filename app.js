@@ -130,7 +130,7 @@ function setupWorkDirectory() {
 }
 
 function setupHttpServer(port, keys) {
-    const options = !!keys ? {
+    const options = keys ? {
         key: keys.serviceKey,
         cert: keys.certificate,
     } : {}
@@ -203,11 +203,10 @@ function setupWebSocketsServer(server) {
         const forwardedFor = upgradeReq.headers['x-forwarded-for'];
         if (forwardedFor) {
             const publicIPs = [];
-            const rawIPs = forwardedFor.split(',').map(ip => {
+            forwardedFor.split(',').forEach(ip => {
                 const publicIP = ['publicIP', null, ip.trim()];
                 obfuscate(publicIP);
                 publicIPs.push(publicIP[2]);
-                return ip;
             });
             const publicIP = ['publicIP', null, publicIPs];
             tempStream.write(JSON.stringify(publicIP) + '\n');

@@ -28,7 +28,7 @@ module.exports = function (config) {
             if (err) {
               return reject(err);
             } else {
-              s3bucket.upload({ Key: key + '.gz', Body: data }, (err, data) => {
+              s3bucket.upload({ Key: key + '.gz', Body: data }, (err) => {
                 if (err) {
                   return reject(err);
                 }

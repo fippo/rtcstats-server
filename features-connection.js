@@ -85,37 +85,6 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     }
 }
 
-function extractLastVideoStat(peerConnectionLog, type) {
-    let statsReport;
-    for (let i = peerConnectionLog.length - 1; i >= 0; i--) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            statsReport = peerConnectionLog[i].value;
-            break;
-        }
-    }
-    if (!statsReport) return;
-    let count;
-    Object.keys(statsReport).forEach(id => {
-        // type outbound-rtp && kind video
-        const report = statsReport[id];
-        if (report.type === 'outbound-rtp' && (report.kind === 'video' || report.mediaType === 'video')) {
-            count = report[type];
-        }
-    });
-    return count;
-}
-
-// extract a local/remote audio or video track.
-function extractTrack(peerConnectionLog, kind, direction) {
-    const allTracks = extractTracks(peerConnectionLog);
-    for (const [trackId, value] of allTracks.entries()) {
-        if (value.kind === kind && value.direction === direction) {
-            return value.stats;
-        }
-    }
-    return [];
-}
-
 function extractBWE(peerConnectionLog) {
     const reports = [];
     for (let i = 0; i < peerConnectionLog.length; i++) {
@@ -288,7 +257,7 @@ module.exports = {
     },
     // was TURN/UDP configured in the peerconnection config?
     configuredWithTURNUDP: function(client, peerConnectionLog) {
-        const peerConnectionConfig = client.config;
+        const peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         if (!(peerConnectionConfig && peerConnectionConfig.iceServers)) return;
         for (let i = 0; i < peerConnectionConfig.iceServers.length; i++) {
             const urls = peerConnectionConfig.iceServers[i].urls || [];
@@ -376,9 +345,7 @@ module.exports = {
 
     // was an ice failure detected.
     ICEFailure: function(client, peerConnectionLog) {
-        let i = 0;
-        const iceRestart = false;
-        for (; i < peerConnectionLog.length; i++) {
+        for (let i = 0; i < peerConnectionLog.length; i++) {
             if (peerConnectionLog[i].type === 'oniceconnectionstatechange' && peerConnectionLog[i].value === 'failed') {
                 return true;
             }

@@ -10,7 +10,7 @@ module.exports = function (config) {
 
   return {
     put: function (key, filename) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         if (!configured) {
           logger.warn('no bucket configured for storage');
           return resolve(); // not an error.

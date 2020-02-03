@@ -41,7 +41,7 @@ module.exports = function (config) {
           Record: {
             Data: JSON.stringify(lower(item))
           },
-        }, (err, data) => {
+        }, (err) => {
           if (err) {
             logger.info("Error firehosing data: %s - %s", err, JSON.stringify(lower(item)));
           }
