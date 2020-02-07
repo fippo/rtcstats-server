@@ -1,5 +1,7 @@
 /* feature extraction utils */
 
+const obfuscate = require('./obfuscator');
+
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
 }
@@ -127,6 +129,15 @@ function isIceConnected({type, value}) {
     return type === 'oniceconnectionstatechange' && ['connected', 'completed'].includes(value);
 }
 
+function extractPublicIP(ipsList) {
+    return ipsList.split(',').reduce((acc, ip) => {
+        const ipData = ['publicIP', null, ip.trim()];
+        obfuscate(ipData);
+        acc.push(ipData[2]);
+        return acc;
+    }, []);
+}
+
 module.exports = {
     capitalize,
     extractTracks,
@@ -135,4 +146,5 @@ module.exports = {
     mode,
     standardizedMoment,
     timeBetween,
+    extractPublicIP,
 }
