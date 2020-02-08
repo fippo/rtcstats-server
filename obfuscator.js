@@ -97,6 +97,11 @@ module.exports = function(data) {
             obfuscateStats(data[2]);
         }
         break;
+    case 'publicIP':
+        if (data[2]) {
+            data[2] = obfuscateIP(data[2]);
+        }
+        break;
     default:
         break;
     }
