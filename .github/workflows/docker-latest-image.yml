@@ -3,9 +3,6 @@ name: RTCStats-docker-latest-image
 on:
   pull_request:
     types: [closed]
-  push:
-    branches:
-      - github-action
 
 jobs:
   generate-image:
