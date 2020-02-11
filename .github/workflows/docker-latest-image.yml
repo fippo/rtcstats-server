@@ -20,5 +20,5 @@ jobs:
           fetch-depth: 1
       - name: Generate Docker image and push to Docker hub
         run: |
-          docker login -u ${{ DOCKER_HUB_USERNAME }} -p ${{ DOCKER_HUB_ACCESS_TOKEN }}
+          docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_ACCESS_TOKEN
           make push
