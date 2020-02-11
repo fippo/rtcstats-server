@@ -208,13 +208,13 @@ function setupWebSocketsServer(server) {
                 obfuscate(publicIP);
                 publicIPs.push(publicIP[2]);
             });
-            const publicIP = ['publicIP', null, publicIPs];
+            const publicIP = ['publicIP', null, publicIPs, Date.now()];
             tempStream.write(JSON.stringify(publicIP) + '\n');
         } else {
             const { remoteAddress } = upgradeReq.connection;
             const publicIP = ['publicIP', null, remoteAddress];
             obfuscate(publicIP);
-            tempStream.write(JSON.stringify(['publicIP', null, [publicIP[2]]]) + '\n');
+            tempStream.write(JSON.stringify(['publicIP', null, [publicIP[2]], Date.now()]) + '\n');
         }
 
         logger.info('New app connected: ua: <%s>, referer: <%s>, clientid: <%s>', ua, referer, clientid);
