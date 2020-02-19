@@ -172,6 +172,9 @@ module.exports = {
                 return;
             }
             const sections = SDPUtils.getMediaSections(value.sdp);
+            if (!sections.length) {
+                return;
+            }
             const direction = SDPUtils.getDirection(sections[0]);
             const logSending = ['sendonly', 'sendrecv'].includes(direction);
             if (prevSending) {
