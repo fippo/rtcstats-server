@@ -24,6 +24,7 @@ function getPeerConnectionConstraints(peerConnectionLog) {
             return peerConnectionLog[i].value;
         }
     }
+    return {};
 }
 
 function determineBrowserFromOLine(sdp) {
@@ -105,7 +106,7 @@ module.exports = {
     // client and conference identifiers, specified as optional peerconnection constraints
     // (which are not a thing any longer). See https://github.com/opentok/rtcstats/issues/28
     clientIdentifier: function(client, peerConnectionLog) {
-        let constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        let constraints = getPeerConnectionConstraints(peerConnectionLog);
         if (!constraints.optional) return;
         constraints = constraints.optional;
         for (let i = 0; i < constraints.length; i++) {
@@ -118,7 +119,7 @@ module.exports = {
         }
     },
     peerIdentifier: function(client, peerConnectionLog) {
-        let constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        let constraints = getPeerConnectionConstraints(peerConnectionLog); 
         if (!constraints.optional) return;
         constraints = constraints.optional;
         for (let i = 0; i < constraints.length; i++) {
@@ -128,7 +129,7 @@ module.exports = {
         }
     },
     conferenceIdentifier: function(client, peerConnectionLog) {
-        let constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        let constraints = getPeerConnectionConstraints(peerConnectionLog); 
         if (!constraints.optional) return;
         constraints = constraints.optional;
         for (let i = 0; i < constraints.length; i++) {
@@ -332,7 +333,7 @@ module.exports = {
 
     // was the peerconnection created with non-spec SDES?
     configuredSDES: function(client, peerConnectionLog) {
-        const constraints = getPeerConnectionConstraints(peerConnectionLog) || {};
+        const constraints = getPeerConnectionConstraints(peerConnectionLog); 
         return constraints && constraints.mandatory && constraints.mandatory.DtlsSrtpKeyAgreement === false;
     },
 
