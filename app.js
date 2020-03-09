@@ -202,13 +202,17 @@ function setupWebSocketsServer(server) {
 
         const forwardedFor = upgradeReq.headers['x-forwarded-for'];
         if (forwardedFor) {
-            const publicIPs = [];
-            forwardedFor.split(',').forEach(ip => {
+            const forwardedIPs = forwardedFor.split(',');
+            if (config.server.skipLoadBalancerIp) {
+                forwardedIPs.pop();
+            }
+            const obfuscatedIPs = forwardedIPs.map(ip => {
                 const publicIP = ['publicIP', null, ip.trim()];
                 obfuscate(publicIP);
-                publicIPs.push(publicIP[2]);
+                return publicIP[2];
             });
-            const publicIP = ['publicIP', null, publicIPs, Date.now()];
+
+            const publicIP = ['publicIP', null, obfuscatedIPs, Date.now()];
             tempStream.write(JSON.stringify(publicIP) + '\n');
         } else {
             const { remoteAddress } = upgradeReq.connection;
