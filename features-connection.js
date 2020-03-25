@@ -42,7 +42,7 @@ function determineBrowserFromOLine(sdp) {
 function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     const peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
     let typepref;
-    switch(peerConnectionConfig.browserType) {
+    switch(peerConnectionConfig && peerConnectionConfig.browserType) {
     case 'webkit':
         typepref = {
             udp: 2,
@@ -194,7 +194,7 @@ module.exports = {
     // TODO: edge, mobile platforms?
     browserType: function(client, peerConnectionLog) {
         const peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
-        return peerConnectionConfig.browserType || 'unknown';
+        return (peerConnectionConfig && peerConnectionConfig.browserType) || 'unknown';
     },
 
     // the remote platform, extracted from the remote description.
