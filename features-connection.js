@@ -41,8 +41,11 @@ function determineBrowserFromOLine(sdp) {
 
 function gatheringTimeTURN(protocol, client, peerConnectionLog) {
     const peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
+    if (!peerConnectionConfig) {
+        return;
+    }
     let typepref;
-    switch(peerConnectionConfig && peerConnectionConfig.browserType) {
+    switch(peerConnectionConfig.browserType) {
     case 'webkit':
         typepref = {
             udp: 2,
