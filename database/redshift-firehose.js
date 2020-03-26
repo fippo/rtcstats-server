@@ -43,7 +43,7 @@ module.exports = function (config) {
           },
         }, (err) => {
           if (err) {
-            logger.info("Error firehosing data: %s - %s", err, JSON.stringify(lower(item)));
+            logger.error("Error firehosing data: %s", err);
           }
         });
       }
