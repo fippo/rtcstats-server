@@ -57,9 +57,9 @@ function extractTracks(peerConnectionLog) {
     const tracks = new Map();
     for (let i = 0; i < peerConnectionLog.length; i++) {
         const {type, value} = peerConnectionLog[i];
-        if (type === 'addStream') {
+        if (type === 'addStream' || type === 'onaddstream') {
             const {streamId, tracks: listOfTracks} = extractFromStreamFormat(value);
-            const direction = 'send';
+            const direction = type === 'addStream' ? 'send' : 'recv';
             listOfTracks.forEach(({kind, trackId}) => {
                 tracks.set(direction + ':' + trackId, {kind, streamId, trackId, direction, stats: []});
             });
