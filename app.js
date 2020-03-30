@@ -268,6 +268,10 @@ function setupWebSocketsServer(server) {
             }
         });
 
+        client.on('error', e => {
+            logger.error('Websocket error: %s', e);
+        });
+
         client.on('close', () => {
             connected.dec();
             tempStream.write(JSON.stringify(['close', null, null, Date.now()]));
