@@ -6,7 +6,8 @@
   "scripts": {
     "test": "eslint *.js database/*.js store/*.js && node test/client.js",
     "start": "NODE_ENV=production node app.js",
-    "watch:dev": "nodemon --exec 'NODE_ENV=production node app.js'"
+    "watch:dev": "nodemon --exec 'NODE_ENV=debug LOG=debug node app.js'",
+    "debug": "NODE_ENV=debug LOG=debug node app.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   "dependencies": {
     "@google-cloud/bigquery": "^4.5.0",
     "@google-cloud/storage": "^4.1.3",
+    "amplitude": "^4.0.1",
     "aws-sdk": "^2.441.0",
     "bluebird": "^3.3.1",
     "config": "^1.17.1",
@@ -31,6 +33,7 @@
     "sdp": "^2.9.0",
     "uuid": "^2.0.1",
     "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2",
     "ws": "^5.1.1"
   },
   "devDependencies": {
