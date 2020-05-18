@@ -3,6 +3,8 @@ const fs = require('fs');
 
 const AWS = require('aws-sdk');
 
+const logger = require('../logging');
+
 module.exports = function (config) {
   AWS.config = config;
 
@@ -17,7 +19,7 @@ module.exports = function (config) {
     put: function (key, filename) {
       return new Promise((resolve, reject) => {
         if (!configured) {
-          console.log('no bucket configured for storage');
+          logger.warn('no bucket configured for storage');
           return resolve(); // not an error.
         }
         fs.readFile(filename, { encoding: 'utf-8' }, (err, data) => {
