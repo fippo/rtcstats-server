@@ -5,6 +5,9 @@ server:
     # its IP address as part of the X-Forwarded-For header
     skipLoadBalancerIp: false
     logLevel: info
+amplitude:
+    key: ''
+
 s3:
     accessKeyId:
     secretAccessKey:

@@ -10,6 +10,11 @@ const WorkerStatus = Object.freeze({
     RUNNING: 'RUNNING',
 });
 
+/**
+ * The WorkerPool implementation will attempt to always keep the set number of worker running, that means in case of
+ * an error or a exit due to something happening inside the worker script, it will spawn a new one.
+ * However when the processes exits from the main thread or SIGKILL/SIGTERM it will shutdown as expected.
+ */
 class WorkerPool extends EventEmitter {
     constructor(workerScriptPath, poolSize) {
         super();
@@ -36,35 +41,29 @@ class WorkerPool extends EventEmitter {
         const workerInstance = new Worker(this.workerScriptPath, { workerData: { workerID } });
         const workerMeta = { workerID, worker: workerInstance, status: WorkerStatus.IDLE };
 
-        logger.info('Created worker %s', workerMeta);
+        logger.info('Created worker %j', workerMeta);
 
         workerInstance.on('message', (message) => {
             // logger.info(`Worker message: ${JSON.stringify(message)}`);
-            this.emit( message.type, message.body);
+            this.emit(message.type, message.body);
             this._processNextTask(workerMeta);
         });
 
+        // Uncaught error thrown in the worker script, a exit event will follow so we just log the error.
         workerInstance.on('error', (error) => {
-            logger.error('Worker <%o> with error %o: ', workerMeta, error);
-            workerMeta.status = WorkerStatus.STOPPED;
-
-            // this.emit('error', error);
-            // Remove current worker from pool as it's no longer usable.
-            this._removeWorkerFromPool(workerMeta);
-
-            // Bring the worker pool back to maximum capacity
-            // TODO Regenerate should not add more workers if we are shutting down.
-            this._regenerateWorkerToPool();
+            logger.error('Worker %j with error %o: ', workerMeta, error);
         });
 
         workerInstance.on('exit', (exitCode) => {
-            logger.info('Worker %s exited with code %d.', workerMeta, exitCode);
+            logger.info('Worker %j exited with code %d.', workerMeta, exitCode);
             workerMeta.status = WorkerStatus.STOPPED;
 
             // Remove current worker from pool as it's no longer usable.
             this._removeWorkerFromPool(workerMeta);
 
-            // Bring the worker pool back to maximum capacity
+            // Bring the worker pool back to maximum capacity. When the main thread is trying to exit
+            // this won't work as the creation is queued via a setTimeout, so an infinite loop shouldn't
+            // happen.
             this._regenerateWorkerToPool();
         });
 
@@ -76,11 +75,11 @@ class WorkerPool extends EventEmitter {
             return { uuid: workerMeta.workerID, status: workerMeta.status };
         });
 
-        logger.info('Worker pool introspect: ', JSON.stringify(workerPoolInfo));
+        logger.info('Worker pool introspect: %j ', workerPoolInfo);
     }
 
     _removeWorkerFromPool(worker) {
-        logger.info('Removing worker from pool: ', JSON.stringify(worker));
+        logger.info('Removing worker from pool: %j', worker);
         const workerIndex = this.workerPool.indexOf(worker);
         if (workerIndex > -1) {
             this.workerPool.splice(workerIndex, 1);
@@ -89,6 +88,7 @@ class WorkerPool extends EventEmitter {
     }
 
     _processTask(workerMeta, task) {
+        logger.info(`Processing task %j, current queue size %d`, task, this.taskQueue.length);
         workerMeta.worker.postMessage(task);
         workerMeta.status = WorkerStatus.RUNNING;
     }
@@ -102,12 +102,16 @@ class WorkerPool extends EventEmitter {
     }
 
     _regenerateWorkerToPool() {
-        if (this.workerPool.length < this.poolSize) {
-            const workerMeta = this._addWorkerToPool();
-            this._processNextTask(workerMeta);
-        } else {
-            logger.warn('Can not add additional worker, pool is already at max capacity!');
-        }
+        // timeout is required here so the regeneration process doesn't enter an infinite loop
+        // when node.js is attempting to shutdown.
+        setTimeout(() => {
+            if (this.workerPool.length < this.poolSize) {
+                const workerMeta = this._addWorkerToPool();
+                this._processNextTask(workerMeta);
+            } else {
+                logger.warn('Can not add additional worker, pool is already at max capacity!');
+            }
+        }, 2000);
     }
 
     _getIdleWorkers() {
