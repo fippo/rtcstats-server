@@ -50,15 +50,15 @@ const connected = new prom.Gauge({
     help: 'number of open websocket connections',
 });
 
-const processed = new prom.Counter({
-    name: 'rtcstats_files_processed',
-    help: 'number of files processed',
-});
+// const processed = new prom.Counter({
+//     name: 'rtcstats_files_processed',
+//     help: 'number of files processed',
+// });
 
-const errored = new prom.Counter({
-    name: 'rtcstats_files_errored',
-    help: 'number of files with errors during processing',
-});
+// const errored = new prom.Counter({
+//     name: 'rtcstats_files_errored',
+//     help: 'number of files with errors during processing',
+// });
 
 function storeDump(clientId) {
     const path = tempPath + '/' + clientId;
@@ -140,7 +140,7 @@ function setupWorkDirectory() {
     }
 }
 
-function setupHttpServer(port, keys) {
+function setupHttpServer(port) {
     const options = {
         key: fs.readFileSync('key.pem'),
         cert: fs.readFileSync('cert.pem'),
