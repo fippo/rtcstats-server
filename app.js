@@ -10,12 +10,12 @@ const WebSocketServer = require('ws').Server;
 const config = require('config');
 const uuid = require('uuid');
 
+const AmplitudeConnector = require('./database/AmplitudeConnector');
 const logger = require('./logging');
 const obfuscate = require('./obfuscator');
 const { name: appName, version: appVersion } = require('./package');
 const { getEnvName, RequestType, ResponseType } = require('./utils');
 const WorkerPool = require('./WorkerPool');
-// const Amplitude = require('amplitude');
 
 // Configure database, fall back to redshift-firehose.
 let database;
@@ -33,6 +33,11 @@ if (config.gcp && config.gcp.bucket) {
 }
 if (!store) {
     store = require('./store/s3.js')(config.s3);
+}
+
+let amplitude;
+if (config.amplitude && config.amplitude.key) {
+    amplitude = new AmplitudeConnector(config.amplitude.key);
 }
 
 let server;
@@ -55,75 +60,7 @@ const errored = new prom.Counter({
     help: 'number of files with errors during processing',
 });
 
-// class ProcessQueue {
-//     constructor() {
-//         this.maxProc = os.cpus().length;
-//         this.q = [];
-//         this.numProc = 0;
-//     }
-//     enqueue(clientid) {
-//         this.q.push(clientid);
-//         if (this.numProc < this.maxProc) {
-//             process.nextTick(this.process.bind(this));
-//         } else {
-//             logger.info('process Q too long: %s', this.numProc);
-//         }
-//     }
-//     process() {
-//         const clientid = this.q.shift();
-//         if (!clientid) return;
-//         // const p = child_process.fork('extract.js', [clientid], {
-//         //     execArgv: process.execArgv.concat([ '--inspect-port=5800' ]),
-//         //   });
-//         const p = child_process.fork("extract.js", [clientid]);
-//         p.on('exit', (code) => {
-//             this.numProc--;
-//             logger.info(`Done clientid: <${clientid}> proc: <${this.numProc}> code: <${code}>`);
-//             if (code === 0) {
-//                 processed.inc();
-//             } else {
-//                 errored.inc();
-//             }
-//             if (this.numProc < 0) {
-//                 this.numProc = 0;
-//             }
-//             if (this.numProc < this.maxProc) {
-//                 process.nextTick(this.process.bind(this));
-//             }
-//             const path = tempPath + '/' + clientid;
-//             store
-//                 .put(clientid, path)
-//                 .then(() => {
-//                     fs.unlink(path, () => {});
-//                 })
-//                 .catch((err) => {
-//                     logger.error('Error storing: %s - %s', path, err);
-//                     fs.unlink(path, () => {});
-//                 });
-//         });
-//         p.on('message', (msg) => {
-//             logger.info('Received message from child process: ', msg);
-//             const { url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures } = msg;
-
-//             if (database) {
-//                 database.put(url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures);
-//             } else {
-//                 logger.warn('No database configured!');
-//             }
-//         });
-//         p.on('error', () => {
-//             this.numProc--;
-//             logger.warn(`Failed to spawn, rescheduling clientid: <${clientid}> proc: <${this.numProc}>`);
-//             this.q.push(clientid); // do not immediately retry
-//         });
-//         this.numProc++;
-//         if (this.numProc > 10) {
-//             logger.info('Process Q: %n', this.numProc);
-//         }
-//     }
-// }
-
-function storeDump(clientId){
+function storeDump(clientId) {
     const path = tempPath + '/' + clientId;
     store
         .put(clientId, path)
@@ -144,17 +81,19 @@ const workerScriptPath = path.join(__dirname, './extract.js');
 const workerPool = new WorkerPool(workerScriptPath, getIdealWorkerCount());
 
 workerPool.on(ResponseType.PROCESSING, (body) => {
-    logger.info('Handling PROCESSING event with body %o', body);
-    const { url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures } = body;
+    logger.debug('Handling PROCESSING event with body %j', body);
 
-    if (database) {
-        database.put(url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures);
-    } else {
-        logger.warn('No database configured!');
-    }
+    amplitude && amplitude.track(body);
+    // const { url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures } = body;
+
+    // if (database) {
+    //     database.put(url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures);
+    // } else {
+    //     logger.warn('No database configured!');
+    // }
 });
 workerPool.on(ResponseType.DONE, (body) => {
-    logger.info('Handling DONE event with body %o', body);
+    logger.debug('Handling DONE event with body %j', body);
     storeDump(body.clientId);
 });
 workerPool.on(ResponseType.ERROR, (body) => {
@@ -361,10 +300,6 @@ function setupWebSocketsServer(server) {
 function run(keys) {
     logger.info('Initializing <%s>, version <%s>, env <%s> ...', appName, appVersion, getEnvName());
 
-    // const amplitude = new Amplitude('43df878c9fd741a83e0c80bec3a5ddf4')
-    // data.event_properties = trackObject;
-
-    // amplitude.track(data);
     setupWorkDirectory();
 
     server = setupHttpServer(config.get('server').port, keys);
@@ -383,6 +318,12 @@ function stop() {
         server.close();
     }
 }
+
+// For now just log unhandled promise rejections, as the initial code did not take them into account and by default
+// node just silently eats them.
+process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled rejection: ', reason);
+});
 
 run();
 

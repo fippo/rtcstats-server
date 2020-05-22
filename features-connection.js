@@ -177,6 +177,8 @@ module.exports = {
         return lifeTime > 0 ? lifeTime : undefined;
     },
 
+    // Time in which the connection was in a potential sending state. Calculated
+    // as the difference between the first setLocalDescription call and the last PC log.
     sendingDuration: function(client, peerConnectionLog) {
         let sendingDuration = 0;
         let prevTime = peerConnectionLog[0].timestamp;

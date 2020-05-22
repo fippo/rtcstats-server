@@ -6,24 +6,39 @@ const { threadId } = require('worker_threads');
 const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
 
-const { isProduction } = require('./utils');
-
 if (!config.get('server').logLevel) {
     throw new Error('Please set the logLevel config!');
+}
+
+function getEnvName() {
+    return process.env.NODE_ENV || 'default';
+}
+
+function isProduction() {
+    return getEnvName() === 'production';
 }
 
 const { json, colorize } = format;
 const LEVEL = Symbol.for('level');
 
-function splatTransform(info) {
-    const args = info[Symbol.for('splat')];
+/**
+ * We use this formatter to get a console.log like logging system
+ * 
+ * @param {Object} logEntry - info object passed by winston 
+ */
+function splatTransform(logEntry) {
+    const args = logEntry[Symbol.for('splat')];
 
     if (args) {
-        info.message = util.format(info.message, ...args);
+        logEntry.message = util.format(logEntry.message, ...args);
     }
-    return info;
+    return logEntry;
 }
 
+/**
+ * Formatter that adds additional metadata to the log line.
+ * @param {Object} logEntry 
+ */
 function metaTransform(logEntry) {
     const customMeta = {
         timestamp: logEntry.timestamp,
@@ -37,6 +52,9 @@ function metaTransform(logEntry) {
     return logEntry;
 }
 
+// Combine the various custom formatters along with the winston's json to obtain a json like log line.
+// This formatter will be used only for file logging as it's json thus more parser friendly in 
+// case we externalize this somewhere.
 const fileLogger = format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
     format(splatTransform)(),
@@ -44,6 +62,7 @@ const fileLogger = format.combine(
     json()
 );
 
+// Winston rolling file common configuration used for both error and and normal logs file transports.
 const logFileCommonCfg = {
     format: fileLogger,
     auditFile: 'logs/app-log-audit.json',
@@ -53,31 +72,46 @@ const logFileCommonCfg = {
     maxFiles: '90d',
 };
 
+// Error logs along with uncaught exceptions will have their own individual files.
+// Normal log rolling file transport configuration based on common cfg.
 const appLogTransport = new transports.DailyRotateFile({
     ...logFileCommonCfg,
     level: config.get('server').logLevel,
     filename: 'logs/app-%DATE%.log',
 });
 
+// Error log rolling file transport configuration based on common cfg.
 const appErrorLogTransport = new transports.DailyRotateFile({
     ...logFileCommonCfg,
     level: 'error',
     filename: 'logs/app-error-%DATE%.log',
 });
 
+// Uncaught exception log transport configuration, we remove the custom formatters as it interferes with
+// winston's way of logging exceptions.
+// Warning! this transports swallows uncaught exceptions, logs and the exits the process with an error,
+// uncaught exception handlers might not work.
 const appExceptionLogTransportCfg = { ...logFileCommonCfg };
 delete appExceptionLogTransportCfg.format;
 
+// Log uncaught exceptions in both error log and normal log in case we need to track some particular flow.
 const appExceptionLogTransport = new transports.DailyRotateFile({
     ...appExceptionLogTransportCfg,
     filename: 'logs/app-error-%DATE%.log',
 });
-
-const logger = createLogger({
-    transports: [appLogTransport, appErrorLogTransport],
-    exceptionHandlers: [appExceptionLogTransport],
+const appExceptionCommonLogTransport = new transports.DailyRotateFile({
+    ...appExceptionLogTransportCfg,
+    filename: 'logs/app-%DATE%.log',
 });
 
+// Create actual loggers with specific transports
+const logger = createLogger({
+    transports: [appLogTransport, appErrorLogTransport],
+    exceptionHandlers: [appExceptionLogTransport, appExceptionCommonLogTransport],
+});
+
+// Only add a console log transport if we're not in production (i.e. NODE_ENV != production) in order to avoid
+// unnecessary operations.
 if (!isProduction()) {
 
     const consoleLogger = format.combine(
@@ -90,7 +124,7 @@ if (!isProduction()) {
                 `${timestamp} ${PID} ${TID} ${host} ${level}: ${message}`
         )
     );
-    // If we're not in production then also log to the `console`
+    
     logger.add(
         new transports.Console({
             format: consoleLogger,
