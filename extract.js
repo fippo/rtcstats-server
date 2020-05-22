@@ -268,8 +268,9 @@ function processDump(clientId) {
         } catch (error) {
             parentPort.postMessage({
                 type: ResponseType.ERROR,
-                body: { clientId, error } },
+                body: { clientId, error },
             });
+            
         }
     });
 }
