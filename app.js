@@ -229,10 +229,6 @@ function setupWebSocketsServer(server) {
 
                 numberOfEvents++;
 
-                if (data[0].endsWith('OnError')) {
-                    // monkey-patch java/swift sdk bugs.
-                    data[0] = data[0].replace(/OnError$/, 'OnFailure');
-                }
                 switch (data[0]) {
                     case 'getUserMedia':
                     case 'getUserMediaOnSuccess':
@@ -240,17 +236,6 @@ function setupWebSocketsServer(server) {
                     case 'navigator.mediaDevices.getUserMedia':
                     case 'navigator.mediaDevices.getUserMediaOnSuccess':
                     case 'navigator.mediaDevices.getUserMediaOnFailure':
-                        tempStream.write(JSON.stringify(data) + '\n');
-                        break;
-                    case 'constraints':
-                        if (data[2].constraintsOptional) { // workaround for RtcStats.java bug.
-                            data[2].optional = [];
-                            Object.keys(data[2].constraintsOptional).forEach(key => {
-                                const pair = {};
-                                pair[key] = data[2].constraintsOptional[key]
-                            });
-                            delete data[2].constraintsOptional;
-                        }
                         tempStream.write(JSON.stringify(data) + '\n');
                         break;
                     default:
