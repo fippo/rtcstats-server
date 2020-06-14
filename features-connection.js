@@ -145,6 +145,17 @@ module.exports = {
         }
     },
 
+    sfuP2P: function(client, peerConnectionLog) {
+        let constraints = getPeerConnectionConstraints(peerConnectionLog) || [];
+        if (!constraints.optional) return;
+        constraints = constraints.optional;
+        for (let i = 0; i < constraints.length; i++) {
+            if (constraints[i].rtcStatsSFUP2P) {
+                return constraints[i].rtcStatsSFUP2P;
+            }
+        }
+    },
+
     // when did the session start
     startTime: function(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
