@@ -21,7 +21,6 @@ gcp:
     bucket:
     dataset:
     table:
-    fields:
     maxFlushTime:
     bufferSize:
 

@@ -61,7 +61,7 @@ module.exports = function (config) {
         bigquery
             .dataset(config.dataset)
             .table(config.table)
-            .load(filename, { format: 'JSON' })
+            .load(filename, { format: 'JSON', ignoreUnknownValues: true })
             .then(() => {
                 if (isProduction) {
                     fs.unlink(filename, () => { });
@@ -81,13 +81,6 @@ module.exports = function (config) {
             };
 
             Object.assign(item, clientFeatures, connectionFeatures, streamFeatures);
-            if (config.fields && config.fields.length) {
-                Object.keys(item).forEach(key => {
-                    if (!config.fields.includes(key.toLowerCase())) {
-                        delete item[key]
-                    }
-                }); // ideally we'd use .entries and .fromEntries but that is unavailable in node.
-            }
             recordBuffer.put(item);
         },
     };
