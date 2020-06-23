@@ -6,13 +6,19 @@ const AWS = require('aws-sdk');
 const logger = require('../logging');
 
 module.exports = function (config) {
-  AWS.config = config;
+
+  AWS.config.update({region: config.region});
+
+  if (!config.useIAMAuth) {
+    AWS.config = config;
+  }
 
   const s3bucket = new AWS.S3({
     params: {
       Bucket: config.bucket
     }
   });
+
   const configured = !!config.bucket;
 
   return {
