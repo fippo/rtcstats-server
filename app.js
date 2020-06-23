@@ -22,8 +22,13 @@ let database;
 if (config.gcp && config.gcp.dataset && config.gcp.table) {
     database = require('./database/bigquery.js')(config.gcp);
 }
+
 if (!database) {
     database = require('./database/redshift-firehose.js')(config.firehose);
+}
+
+if(!database) {
+    logger.warn('No database configured!');
 }
 
 // Configure store, fall back to S3
@@ -31,18 +36,25 @@ let store;
 if (config.gcp && config.gcp.bucket) {
     store = require('./store/gcp.js')(config.gcp);
 }
+
 if (!store) {
     store = require('./store/s3.js')(config.s3);
 }
 
+
+// Configure Amplitude backend
 let amplitude;
 if (config.amplitude && config.amplitude.key) {
     amplitude = new AmplitudeConnector(config.amplitude.key);
+} else {
+    logger.warn('Amplitude is not configured!');
 }
 
 let server;
 const tempPath = 'temp';
 
+
+// Initialize prometheus metrics.
 const prom = require('prom-client');
 
 const connected = new prom.Gauge({
@@ -50,15 +62,15 @@ const connected = new prom.Gauge({
     help: 'number of open websocket connections',
 });
 
-// const processed = new prom.Counter({
-//     name: 'rtcstats_files_processed',
-//     help: 'number of files processed',
-// });
+const processed = new prom.Counter({
+    name: 'rtcstats_files_processed',
+    help: 'number of files processed',
+});
 
-// const errored = new prom.Counter({
-//     name: 'rtcstats_files_errored',
-//     help: 'number of files with errors during processing',
-// });
+const errored = new prom.Counter({
+    name: 'rtcstats_files_errored',
+    help: 'number of files with errors during processing',
+});
 
 function storeDump(clientId) {
     const path = tempPath + '/' + clientId;
@@ -83,24 +95,46 @@ const workerPool = new WorkerPool(workerScriptPath, getIdealWorkerCount());
 workerPool.on(ResponseType.PROCESSING, (body) => {
     logger.debug('Handling PROCESSING event with body %j', body);
 
-    amplitude && amplitude.track(body);
-    // const { url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures } = body;
+    // Amplitude has constraints and limits of what information one sends, so it has a designated backend which
+    // only sends specific features.
+    if (amplitude) {
+        amplitude.track(body);
+    }
 
-    // if (database) {
-    //     database.put(url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures);
-    // } else {
-    //     logger.warn('No database configured!');
-    // }
+    // Current supported databases are big data type so we can send bulk data without having to worry about
+    // volume.
+    if (database) {
+        const { url, clientId, connid, clientFeatures, connectionFeatures } = body;
+
+        if(!connectionFeatures) {
+            database.put(url, clientId, connid, clientFeatures);
+        } else {
+
+            // When using a database backend the streams features are stored separately, so we don't need them
+            // in the connectionFeatures object.
+            const streams = connectionFeatures.streams;
+            delete connectionFeatures.streams;
+
+            for(const streamFeatures of streams) {
+                database.put(url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures);
+           }
+        }
+    }
 });
 workerPool.on(ResponseType.DONE, (body) => {
     logger.debug('Handling DONE event with body %j', body);
-    storeDump(body.clientId);
+
+    processed.inc();
+
+    //storeDump(body.clientId);
 });
 workerPool.on(ResponseType.ERROR, (body) => {
     // TODO handle requeue of the request, this also requires logic in extract.js
     // i.e. we need to catch all potential errors and send back a request with
     // the client id.
     logger.error('Handling ERROR event with body %o', body);
+
+    errored.inc();
 
     // If feature extraction failed at least attempt to store the dump in s3.
     if (body.clientId) {
@@ -140,35 +174,48 @@ function setupWorkDirectory() {
     }
 }
 
-function setupHttpServer(port) {
+function serverHandler(request, response) {
+    switch (request.url) {
+        case '/healthcheck':
+            response.writeHead(200);
+            response.end();
+            break;
+        default:
+            response.writeHead(404);
+            response.end();
+    }
+}
+
+/**
+ * In case one wants to run the server locally, https is required, as browsers normally won't allow non
+ * secure web sockets on a https domain, so something like the bellow config is required along with a https
+ * server instead of http.
+ *
+ * @param {number} port
+ */
+function setupHttpsServer(port) {
     const options = {
-        key: fs.readFileSync('key.pem'),
-        cert: fs.readFileSync('cert.pem'),
+        key: fs.readFileSync(config.get('server').keyPath),
+        cert: fs.readFileSync(config.get('server').certPath),
     };
 
-    const server = https
-        .Server(options, () => {})
-        .on('request', (request, response) => {
-            switch (request.url) {
-                case '/healthcheck':
-                    response.writeHead(200);
-                    response.end();
-                    break;
-                default:
-                    response.writeHead(404);
-                    response.end();
-            }
-        })
-        .listen(port);
+    const server = https.createServer(options, serverHandler).listen(port);
+
+    return server;
+}
+
+function setupHttpServer(port) {
+    const server = http.createServer(serverHandler).listen(port);
+
     return server;
 }
 
 function setupMetricsServer(port) {
     const metricsServer = http
-        .Server()
-        .on('request', (request, response) => {
+        .createServer((request, response) => {
             switch (request.url) {
                 case '/metrics':
+                    prom.collectDefaultMetrics();
                     response.writeHead(200, { 'Content-Type': prom.contentType });
                     response.end(prom.register.metrics());
                     break;
@@ -297,12 +344,16 @@ function setupWebSocketsServer(server) {
     });
 }
 
-function run(keys) {
+function run() {
     logger.info('Initializing <%s>, version <%s>, env <%s> ...', appName, appVersion, getEnvName());
 
     setupWorkDirectory();
 
-    server = setupHttpServer(config.get('server').port, keys);
+    if (config.get('server').useHTTPS) {
+        server = setupHttpsServer(config.get('server').port);
+    } else {
+        server = setupHttpServer(config.get('server').port);
+    }
 
     if (config.get('server').metrics) {
         setupMetricsServer(config.get('server').metrics);
@@ -313,6 +364,9 @@ function run(keys) {
     logger.info('Initialization complete.');
 }
 
+/**
+ * Currently used from test script.
+ */
 function stop() {
     if (server) {
         server.close();

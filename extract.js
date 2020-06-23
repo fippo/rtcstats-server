@@ -51,7 +51,14 @@ if (!isMainThread) {
         }
     });
 } else {
-    logger.error('Attempting to run worker thread in main process context!');
+    const clientid = process.argv[2];
+    if (!clientid) {
+        logger.error('Please provide a valid clientId!');
+        return -1;
+    }
+
+    logger.info(`Running feature extraction on ${clientid}...`);
+    processDump(clientid);
 }
 
 // dumps all peerconnections.
@@ -73,6 +80,8 @@ function generateFeatures(url, client, clientId) {
     // ignore connections that never send getUserMedia or peerconnection events.
     if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) return;
 
+
+    const identity = client.identity;
     // logger.info(JSON.stringify(client.identity));
     // clientFeatures are the same for all peerconnections but are saved together
     // with each peerconnection anyway to make correlation easier.
@@ -96,16 +105,16 @@ function generateFeatures(url, client, clientId) {
         }
     });
 
-    // if (Object.keys(client.peerConnections).length === 0) {
-    //     // we only have GUM and potentially GUM errors.
-    //     parentPort.postMessage({
-    //         type: ResponseType.PROCESSING,
-    //         body: { url, clientId, connid: '', clientFeatures },
-    //     });
-    // }
+    if (Object.keys(client.peerConnections).length === 0) {
+        // We only have GUM and potentially GUM errors.
+        parentPort.postMessage({
+            type: ResponseType.PROCESSING,
+            body: { url, clientId, connid: '', identity, clientFeatures },
+        });
+    }
 
-    logger.debug('Client features: ', clientFeatures);
-    
+    logger.debug('Client features: %j', clientFeatures);
+
     const streamList = [];
 
     Object.keys(client.peerConnections).forEach((connid) => {
@@ -130,7 +139,6 @@ function generateFeatures(url, client, clientId) {
                 }
             }
         });
-
 
         const tracks = extractTracks(conn);
         const streams = extractStreams(tracks);
@@ -172,20 +180,27 @@ function generateFeatures(url, client, clientId) {
 
         connectionFeatures.streams = streamList;
 
-        parentPort.postMessage({
-            type: ResponseType.PROCESSING,
-            body: { clientId, connid, identity: client.identity, connectionFeatures },
-        });
+        if (!isMainThread) {
+            parentPort.postMessage({
+                type: ResponseType.PROCESSING,
+                body: { url, clientId, connid, clientFeatures, identity, connectionFeatures },
+            });
+        }
 
         delete client.peerConnections[connid]; // save memory
     });
 
-
-    parentPort.postMessage({ type: ResponseType.DONE, body: {clientId} });
+    if (!isMainThread) {
+        parentPort.postMessage({ type: ResponseType.DONE, body: { clientId } });
+    }
 }
 
 function processDump(clientId) {
-    const path = 'temp/' + clientId;
+    let path = clientId;
+    if (!isMainThread) {
+        path = 'temp/' + clientId;
+    }
+
     fs.readFile(path, { encoding: 'utf-8' }, (err, data) => {
         try {
             if (err) {
@@ -266,11 +281,14 @@ function processDump(clientId) {
             dump(client.url, client);
             generateFeatures(client.url, client, clientId);
         } catch (error) {
-            parentPort.postMessage({
-                type: ResponseType.ERROR,
-                body: { clientId, error },
-            });
-            
+            if (isMainThread) {
+                logger.error(error);
+            } else {
+                parentPort.postMessage({
+                    type: ResponseType.ERROR,
+                    body: { clientId, error },
+                });
+            }
         }
     });
 }

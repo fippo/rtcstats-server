@@ -6,8 +6,8 @@
   "scripts": {
     "test": "eslint *.js database/*.js store/*.js && node test/client.js",
     "start": "NODE_ENV=production node app.js",
-    "watch:dev": "nodemon --exec 'NODE_ENV=debug LOG=debug node app.js'",
-    "debug": "NODE_ENV=debug LOG=debug node app.js"
+    "watch:dev": "nodemon --exec 'NODE_ENV=debug node app.js'",
+    "debug": "NODE_ENV=debug node app.js"
   },
   "repository": {
     "type": "git",
