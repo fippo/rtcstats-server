@@ -20,6 +20,7 @@ module.exports = function (config) {
     firehose = new AWS.Firehose();
   } else {
     logger.warn('No Firehose configuration present.  Skipping firehose storage.')
+    return;
   }
 
   return {

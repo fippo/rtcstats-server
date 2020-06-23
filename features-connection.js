@@ -122,7 +122,7 @@ module.exports = {
         }
     },
     peerIdentifier: function(client, peerConnectionLog) {
-        let constraints = getPeerConnectionConstraints(peerConnectionLog); 
+        let constraints = getPeerConnectionConstraints(peerConnectionLog);
         if (!constraints.optional) return;
         constraints = constraints.optional;
         for (let i = 0; i < constraints.length; i++) {
@@ -132,7 +132,7 @@ module.exports = {
         }
     },
     conferenceIdentifier: function(client, peerConnectionLog) {
-        let constraints = getPeerConnectionConstraints(peerConnectionLog); 
+        let constraints = getPeerConnectionConstraints(peerConnectionLog);
         if (!constraints.optional) return;
         constraints = constraints.optional;
         for (let i = 0; i < constraints.length; i++) {
@@ -177,6 +177,8 @@ module.exports = {
         return lifeTime > 0 ? lifeTime : undefined;
     },
 
+    // Time in which the connection was in a potential sending state. Calculated
+    // as the difference between the first setLocalDescription call and the last PC log.
     sendingDuration: function(client, peerConnectionLog) {
         let sendingDuration = 0;
         let prevTime = peerConnectionLog[0].timestamp;
@@ -347,7 +349,7 @@ module.exports = {
 
     // was the peerconnection created with non-spec SDES?
     configuredSDES: function(client, peerConnectionLog) {
-        const constraints = getPeerConnectionConstraints(peerConnectionLog); 
+        const constraints = getPeerConnectionConstraints(peerConnectionLog);
         return constraints && constraints.mandatory && constraints.mandatory.DtlsSrtpKeyAgreement === false;
     },
 
