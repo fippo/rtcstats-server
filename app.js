@@ -248,6 +248,7 @@ function setupWebSocketsServer(server) {
                             Object.keys(data[2].constraintsOptional).forEach(key => {
                                 const pair = {};
                                 pair[key] = data[2].constraintsOptional[key]
+                                data[2].optional.push(pair);
                             });
                             delete data[2].constraintsOptional;
                         }
