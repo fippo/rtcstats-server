@@ -143,7 +143,8 @@ const RequestType = Object.freeze({
 const ResponseType = Object.freeze({
     PROCESSING: 'PROCESSING',
     DONE: 'DONE',
-    ERROR: 'ERROR',
+    METRICS: 'METRICS',
+    ERROR: 'ERROR'
 });
 
 module.exports = {

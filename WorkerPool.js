@@ -130,6 +130,10 @@ class WorkerPool extends EventEmitter {
             logger.info(`There are no IDLE workers queueing, current queue size <${this.taskQueue.length}>`);
         }
     }
+
+    getTaskQueueSize() {
+        return this.taskQueue.length;
+    }
 }
 
 module.exports = WorkerPool;

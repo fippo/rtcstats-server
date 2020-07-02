@@ -40,7 +40,7 @@ if (!isMainThread) {
                 } catch (error) {
                     parentPort.postMessage({
                         type: ResponseType.ERROR,
-                        body: { clientId: request.body.clientId, error: { ...error } },
+                        body: { clientId: request.body.clientId, error: error.stack },
                     });
                 }
                 break;
@@ -201,6 +201,10 @@ function processDump(clientId) {
         path = 'temp/' + clientId;
     }
 
+    const extractStartTime = new Date().getTime();
+    const dumpFileStats = fs.statSync(path);
+    const dumpFileSizeMb = dumpFileStats.size / 1000000.0;
+
     fs.readFile(path, { encoding: 'utf-8' }, (err, data) => {
         try {
             if (err) {
@@ -280,13 +284,21 @@ function processDump(clientId) {
 
             dump(client.url, client);
             generateFeatures(client.url, client, clientId);
+            const extractDurationMs = new Date().getTime() - extractStartTime;
+
+            if (!isMainThread) {
+                parentPort.postMessage({
+                    type: ResponseType.METRICS,
+                    body: { clientId, extractDurationMs, dumpFileSizeMb },
+                });
+            }
         } catch (error) {
             if (isMainThread) {
-                logger.error(error);
+                logger.error('%s', error);
             } else {
                 parentPort.postMessage({
                     type: ResponseType.ERROR,
-                    body: { clientId, error },
+                    body: { clientId, error: error.stack },
                 });
             }
         }

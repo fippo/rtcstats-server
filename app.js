@@ -62,6 +62,17 @@ const connected = new prom.Gauge({
     help: 'number of open websocket connections',
 });
 
+const connection_error = new prom.Counter({
+    name: 'rtcstats_websocket_connection_error',
+    help: 'number of open websocket connections that failed with an error',
+});
+
+
+const queueSize = new prom.Gauge({
+    name: 'rtcstats_queue_size',
+    help: 'Number of dumps currently queued for processing',
+});
+
 const processed = new prom.Counter({
     name: 'rtcstats_files_processed',
     help: 'number of files processed',
@@ -70,6 +81,23 @@ const processed = new prom.Counter({
 const errored = new prom.Counter({
     name: 'rtcstats_files_errored',
     help: 'number of files with errors during processing',
+});
+
+const processTime = new prom.Summary({
+    name: 'rtcstats_processing_time',
+    help: 'Processing time for a request',
+    maxAgeSeconds: 600,
+    ageBuckets: 5,
+    percentiles: [0.1, 0.25, 0.5, 0.75, 0.9],
+
+});
+
+const dumpSize = new prom.Summary({
+    name: 'rtcstats_dump_size',
+    help: 'Size of processed rtcstats dumps',
+    maxAgeSeconds: 600,
+    ageBuckets: 5,
+    percentiles: [0.1, 0.25, 0.5, 0.75, 0.9],
 });
 
 function storeDump(clientId) {
@@ -86,7 +114,9 @@ function storeDump(clientId) {
 }
 
 function getIdealWorkerCount() {
-    return os.cpus().length;
+    // Using all the CPUs available might slow down the main node.js thread which is responsible for handling
+    // requests.
+    return os.cpus().length - 1;
 }
 
 const workerScriptPath = path.join(__dirname, './extract.js');
@@ -126,13 +156,19 @@ workerPool.on(ResponseType.DONE, (body) => {
 
     processed.inc();
 
-    //storeDump(body.clientId);
+    storeDump(body.clientId);
+});
+
+workerPool.on(ResponseType.METRICS, (body) => {
+    logger.info('Handling METRICS event with body %j', body);
+    processTime.observe(body.extractDurationMs);
+    dumpSize.observe(body.dumpFileSizeMb);
 });
 workerPool.on(ResponseType.ERROR, (body) => {
     // TODO handle requeue of the request, this also requires logic in extract.js
     // i.e. we need to catch all potential errors and send back a request with
     // the client id.
-    logger.error('Handling ERROR event with body %o', body);
+    logger.error('Handling ERROR event with body %j', body);
 
     errored.inc();
 
@@ -160,7 +196,7 @@ function setupWorkDirectory() {
                     logger.debug(`Removing file ${tempPath + '/' + fname}`);
                     fs.unlinkSync(tempPath + '/' + fname);
                 } catch (e) {
-                    logger.error(`Error while unlinking file ${fname} - ${e.message}`);
+                    logger.error(`Error while unlinking file ${fname} - ${e}`);
                 }
             });
         } else {
@@ -168,7 +204,7 @@ function setupWorkDirectory() {
             fs.mkdirSync(tempPath);
         }
     } catch (e) {
-        logger.error(`Error while accessing working dir ${tempPath} - ${e.message}`);
+        logger.error(`Error while accessing working dir ${tempPath} - ${e}`);
         // The app is probably in an inconsistent state at this point, throw and stop process.
         throw e;
     }
@@ -215,7 +251,8 @@ function setupMetricsServer(port) {
         .createServer((request, response) => {
             switch (request.url) {
                 case '/metrics':
-                    prom.collectDefaultMetrics();
+                    queueSize.set(workerPool.getTaskQueueSize());
+                    // prom.collectDefaultMetrics();
                     response.writeHead(200, { 'Content-Type': prom.contentType });
                     response.end(prom.register.metrics());
                     break;
@@ -327,12 +364,13 @@ function setupWebSocketsServer(server) {
                         break;
                 }
             } catch (e) {
-                logger.error('Error while processing: %s - %s', e, msg);
+                logger.error('Error while processing: %s - %s', e.message, msg);
             }
         });
 
         client.on('error', (e) => {
             logger.error('Websocket error: %s', e);
+            connection_error.inc();
         });
 
         client.on('close', () => {
@@ -376,7 +414,7 @@ function stop() {
 // For now just log unhandled promise rejections, as the initial code did not take them into account and by default
 // node just silently eats them.
 process.on('unhandledRejection', (reason) => {
-    logger.error('Unhandled rejection: ', reason);
+    logger.error('Unhandled rejection: %s', reason);
 });
 
 run();
