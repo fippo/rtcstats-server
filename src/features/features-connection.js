@@ -7,7 +7,7 @@
 // 3) features which are specific to a track.
 // The second type of feature is contained in this file.
 
-const {capitalize, standardizedMoment, timeBetween, isIceConnected} = require('./utils');
+const {capitalize, standardizedMoment, timeBetween, isIceConnected} = require('../utils/utils');
 const SDPUtils = require('sdp');
 
 function getPeerConnectionConfig(peerConnectionLog) {

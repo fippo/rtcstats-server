@@ -1,13 +1,13 @@
 const fs = require('fs');
 const { parentPort, workerData, isMainThread } = require('worker_threads');
 
-const logger = require('./logging');
+const logger = require('../logging');
 const connectionfeatures = require('./features-connection');
 const clientfeatures = require('./features-client');
 const streamfeatures = require('./features-stream');
-const statsDecompressor = require('./getstats-deltacompression').decompress;
-const statsMangler = require('./getstats-mangle');
-const { extractTracks, extractStreams, isProduction, ResponseType, RequestType } = require('./utils');
+const statsDecompressor = require('../utils//getstats-deltacompression').decompress;
+const statsMangler = require('../utils/getstats-mangle');
+const { extractTracks, extractStreams, isProduction, ResponseType, RequestType } = require('../utils/utils');
 
 // const canUseProcessSend = !!process.send;
 

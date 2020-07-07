@@ -5,17 +5,28 @@ const os = require('os');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const WebSocketServer = require('ws').Server;
 
+const WebSocketServer = require('ws').Server;
 const config = require('config');
 const uuid = require('uuid');
 
 const AmplitudeConnector = require('./database/AmplitudeConnector');
 const logger = require('./logging');
-const obfuscate = require('./obfuscator');
-const { name: appName, version: appVersion } = require('./package');
-const { getEnvName, RequestType, ResponseType } = require('./utils');
-const WorkerPool = require('./WorkerPool');
+const obfuscate = require('./utils/obfuscator');
+const { name: appName, version: appVersion } = require('../package');
+const {
+    connected,
+    connection_error,
+    //diskQueueSize,
+    dumpSize,
+    errored,
+    processed,
+    processTime,
+    prom,
+    queueSize
+} = require('./prom-collector');
+const { getEnvName, RequestType, ResponseType } = require('./utils/utils');
+const WorkerPool = require('./utils/WorkerPool');
 
 // Configure database, fall back to redshift-firehose.
 let database;
@@ -27,7 +38,7 @@ if (!database) {
     database = require('./database/redshift-firehose.js')(config.firehose);
 }
 
-if(!database) {
+if (!database) {
     logger.warn('No database configured!');
 }
 
@@ -41,7 +52,6 @@ if (!store) {
     store = require('./store/s3.js')(config.s3);
 }
 
-
 // Configure Amplitude backend
 let amplitude;
 if (config.amplitude && config.amplitude.key) {
@@ -52,53 +62,6 @@ if (config.amplitude && config.amplitude.key) {
 
 let server;
 const tempPath = 'temp';
-
-
-// Initialize prometheus metrics.
-const prom = require('prom-client');
-
-const connected = new prom.Gauge({
-    name: 'rtcstats_websocket_connections',
-    help: 'number of open websocket connections',
-});
-
-const connection_error = new prom.Counter({
-    name: 'rtcstats_websocket_connection_error',
-    help: 'number of open websocket connections that failed with an error',
-});
-
-
-const queueSize = new prom.Gauge({
-    name: 'rtcstats_queue_size',
-    help: 'Number of dumps currently queued for processing',
-});
-
-const processed = new prom.Counter({
-    name: 'rtcstats_files_processed',
-    help: 'number of files processed',
-});
-
-const errored = new prom.Counter({
-    name: 'rtcstats_files_errored',
-    help: 'number of files with errors during processing',
-});
-
-const processTime = new prom.Summary({
-    name: 'rtcstats_processing_time',
-    help: 'Processing time for a request',
-    maxAgeSeconds: 600,
-    ageBuckets: 5,
-    percentiles: [0.1, 0.25, 0.5, 0.75, 0.9],
-
-});
-
-const dumpSize = new prom.Summary({
-    name: 'rtcstats_dump_size',
-    help: 'Size of processed rtcstats dumps',
-    maxAgeSeconds: 600,
-    ageBuckets: 5,
-    percentiles: [0.1, 0.25, 0.5, 0.75, 0.9],
-});
 
 function storeDump(clientId) {
     const path = tempPath + '/' + clientId;
@@ -119,7 +82,7 @@ function getIdealWorkerCount() {
     return os.cpus().length - 1;
 }
 
-const workerScriptPath = path.join(__dirname, './extract.js');
+const workerScriptPath = path.join(__dirname, './features/extract.js');
 const workerPool = new WorkerPool(workerScriptPath, getIdealWorkerCount());
 
 workerPool.on(ResponseType.PROCESSING, (body) => {
@@ -136,18 +99,17 @@ workerPool.on(ResponseType.PROCESSING, (body) => {
     if (database) {
         const { url, clientId, connid, clientFeatures, connectionFeatures } = body;
 
-        if(!connectionFeatures) {
+        if (!connectionFeatures) {
             database.put(url, clientId, connid, clientFeatures);
         } else {
-
             // When using a database backend the streams features are stored separately, so we don't need them
             // in the connectionFeatures object.
             const streams = connectionFeatures.streams;
             delete connectionFeatures.streams;
 
-            for(const streamFeatures of streams) {
+            for (const streamFeatures of streams) {
                 database.put(url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures);
-           }
+            }
         }
     }
 });
@@ -406,9 +368,7 @@ function run() {
  * Currently used from test script.
  */
 function stop() {
-    if (server) {
-        server.close();
-    }
+    process.exit();
 }
 
 // For now just log unhandled promise rejections, as the initial code did not take them into account and by default
@@ -421,4 +381,6 @@ run();
 
 module.exports = {
     stop: stop,
+    // We expose the number of processed items for use in the test script
+    processed: processed
 };

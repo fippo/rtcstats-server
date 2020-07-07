@@ -1,5 +1,16 @@
 /* feature extraction utils */
-const logger = require('./logging');
+const logger = require('../logging');
+
+const exec = require('child_process').exec;
+
+function getDirSize(pathToDir, callback) {
+    const child = exec('du -sh /path/to/dir', function(error, stdout, stderr){
+        console.log('stderr: ' + stderr);
+        if (error !== null){
+            console.log('exec error: ' + error);
+        }
+    });
+}
 
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);

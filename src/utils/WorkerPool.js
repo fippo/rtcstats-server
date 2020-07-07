@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const { Worker } = require('worker_threads');
 const uuid = require('uuid');
 
-const logger = require('./logging');
+const logger = require('../logging');
 
 const WorkerStatus = Object.freeze({
     IDLE: 'IDLE',
@@ -111,7 +111,7 @@ class WorkerPool extends EventEmitter {
             } else {
                 logger.warn('Can not add additional worker, pool is already at max capacity!');
             }
-        }, 2000);
+        } , 2000);
     }
 
     _getIdleWorkers() {

@@ -4,10 +4,10 @@
   "description": "",
   "main": "websocket.js",
   "scripts": {
-    "test": "eslint *.js database/*.js store/*.js && node test/client.js",
-    "start": "NODE_ENV=production node app.js",
-    "watch:dev": "nodemon --exec 'NODE_ENV=debug node app.js'",
-    "debug": "NODE_ENV=debug node app.js"
+    "test": "eslint ./src/*.js ./src/database/*.js ./src/store/*.js && node ./src/test/client.js",
+    "start": "NODE_ENV=production node ./src/app.js",
+    "watch:dev": "nodemon --exec 'NODE_ENV=debug node ./src/app.js'",
+    "debug": "NODE_ENV=debug node ./src/app.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "aws-sdk": "^2.441.0",
     "bluebird": "^3.3.1",
     "config": "^1.17.1",
+    "get-folder-size": "^2.0.1",
     "js-yaml": "^3.13.1",
     "pem": "^1.14.2",
     "platform": "https://github.com/bestiejs/platform.js.git",

@@ -8,7 +8,6 @@ lib-cov
 *.pid
 *.gz
 *.tgz
-*.sh
 *.tap
 temp
 
@@ -18,7 +17,7 @@ results
 
 npm-debug.log
 
-node_modules 
+node_modules
 
 GeoLite2-City.*
 

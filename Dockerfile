@@ -18,7 +18,7 @@ COPY --chown=$app:$app . /$app
 RUN npm install
 
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=10s \
+HEALTHCHECK --interval=10s --timeout=10s --start-period=10s \
   CMD curl --silent --fail http://localhost:3000/healthcheck \
   || exit 1
 
