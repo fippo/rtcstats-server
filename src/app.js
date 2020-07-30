@@ -214,7 +214,7 @@ function setupMetricsServer(port) {
             switch (request.url) {
                 case '/metrics':
                     queueSize.set(workerPool.getTaskQueueSize());
-                    // prom.collectDefaultMetrics();
+                    prom.collectDefaultMetrics();
                     response.writeHead(200, { 'Content-Type': prom.contentType });
                     response.end(prom.register.metrics());
                     break;
@@ -361,7 +361,7 @@ function run() {
 
     setupWebSocketsServer(server);
 
-    logger.info('Initialization complete.');
+    logger.info('Initialization complete.')
 }
 
 /**

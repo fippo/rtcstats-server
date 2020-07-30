@@ -1,3 +1,6 @@
+server:
+    logLevel: RTCSTATS_LOG_LEVEL
+
 amplitude:
     key: RTCSTATS_AMPLITUDE_KEY
 

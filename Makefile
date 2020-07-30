@@ -9,13 +9,23 @@ build:
 run:
 	@docker run \
 		-p 3000:3000 \
-		-p 8085:8085 \
+		-p 8095:8095 \
 		$(REPOSITORY):$(TAG)
+
+debug-restricted:
+	@docker run \
+		-p 3000:3000 \
+		-p 8095:8095 \
+		--env RTCSTATS_LOG_LEVEL=info \
+		--entrypoint npm \
+		--cpuset-cpus=0 \
+		$(REPOSITORY):$(TAG) \
+		run debug
 
 debug:
 	@docker run \
 		-p 3000:3000 \
-		-p 8085:8085 \
+		-p 8095:8095 \
 		-v $(PWD):/rtcstats-server \
 		--entrypoint npm \
 		$(REPOSITORY):$(TAG) \

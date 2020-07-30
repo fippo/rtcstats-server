@@ -55,7 +55,7 @@ const dumpSize = new prom.Summary({
 setInterval(() => {
     getFolderSize('temp', (err, size) => {
         if (err) {
-            logger.err('Could not get disk queue dir size %j', err);
+            logger.error('Could not get disk queue dir size %j', err);
             return;
         }
         diskQueueSize.set(size);

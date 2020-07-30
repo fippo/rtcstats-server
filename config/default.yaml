@@ -7,7 +7,7 @@ server:
     logLevel: info
     jsonConsoleLog: false
     # The provided certificates are intended for local testing usign a HTTPS server
-    useHTTPS: true
+    useHTTPS: false
     keyPath: './certs/key.pem'
     certPath: './certs/cert.pem'
 

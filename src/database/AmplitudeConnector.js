@@ -57,8 +57,9 @@ class AmplitudeConnector {
                 session_id: rtcstatsFeatures.identity.sessionId,
                 event_properties: {
                     rtcstatsIdentity: rtcstatsFeatures.clientId,
+                    displayName : rtcstatsFeatures.identity.displayName,
                     ...rtcstatsFeatures.identity.hosts,
-                    ...rtcstatsFeatures.identity.deployInfo,
+                    ...rtcstatsFeatures.identity.deploymentInfo,
                     ...this.extractRelevantStats(rtcstatsFeatures.connectionFeatures),
                 },
             };
