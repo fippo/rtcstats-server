@@ -8,7 +8,7 @@
 // The first type of feature is contained in this file.
 
 const platform = require('platform');
-const {timeBetween} = require('./utils');
+const {timeBetween} = require('../utils/utils');
 
 module.exports = {
     origin: function(client) {

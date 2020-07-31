@@ -4,20 +4,19 @@ server:
     # Set to true if you've a LB in front of RTCStats and you are obtaining
     # its IP address as part of the X-Forwarded-For header
     skipLoadBalancerIp: false
-    logLevel: info
-    jsonConsoleLog: true
-    # The provided certificates are intended for local testing usign a HTTPS server
-    useHTTPS: false
+    logLevel: debug
+    jsonConsoleLog: false
+    useHTTPS: true
 
 amplitude:
-    key:
+    key: ''
 
 s3:
     accessKeyId:
     secretAccessKey:
     region:
     bucket:
-    useIAMAuth: true
+    useIAMAuth: false
 
 firehose:
     accessKeyId:
@@ -29,6 +28,7 @@ gcp:
     bucket:
     dataset:
     table:
+    fields:
     maxFlushTime:
     bufferSize:
 

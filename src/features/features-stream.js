@@ -7,7 +7,7 @@
 // 3) features which are specific to a track.
 // The third type of feature is contained in this file.
 
-const {mode, standardizedMoment} = require('./utils');
+const {mode, standardizedMoment} = require('../utils/utils');
 // each feature expects {kind, direction, trackId, stats} as argument.
 module.exports = {
     numberOfStats: ({stats}) => stats.length,

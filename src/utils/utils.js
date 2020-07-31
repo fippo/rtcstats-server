@@ -1,4 +1,16 @@
 /* feature extraction utils */
+const logger = require('../logging');
+
+const exec = require('child_process').exec;
+
+function getDirSize(pathToDir, callback) {
+    const child = exec('du -sh /path/to/dir', function(error, stdout, stderr){
+        console.log('stderr: ' + stderr);
+        if (error !== null){
+            console.log('exec error: ' + error);
+        }
+    });
+}
 
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
@@ -86,7 +98,7 @@ function extractTracks(peerConnectionLog) {
                             tracks.get(key).stats.push(report);
                         }
                     } else if (trackIdentifier !== undefined) {
-                        console.log('NO ONTRACK FOR', trackIdentifier, report.ssrc);
+                        logger.debug('NO ONTRACK FOR', trackIdentifier, report.ssrc);
                     }
                 }
             });
@@ -127,12 +139,35 @@ function isIceConnected({type, value}) {
     return type === 'oniceconnectionstatechange' && ['connected', 'completed'].includes(value);
 }
 
+function getEnvName() {
+    return process.env.NODE_ENV || 'default';
+}
+
+function isProduction() {
+    return getEnvName() === 'production';
+}
+
+const RequestType = Object.freeze({
+    PROCESS: 'PROCESS',
+});
+
+const ResponseType = Object.freeze({
+    PROCESSING: 'PROCESSING',
+    DONE: 'DONE',
+    METRICS: 'METRICS',
+    ERROR: 'ERROR'
+});
+
 module.exports = {
     capitalize,
     extractTracks,
     extractStreams,
+    getEnvName,
     isIceConnected,
+    isProduction,
     mode,
     standardizedMoment,
     timeBetween,
+    RequestType,
+    ResponseType
 }

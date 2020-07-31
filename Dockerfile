@@ -1,4 +1,4 @@
-FROM node:10.15.3-alpine
+FROM node:12.16-alpine
 
 RUN apk add --no-cache git && \
   rm -rf /var/lib/apt/lists/* /var/cache/apk /usr/share/man /tmp/*
@@ -13,14 +13,17 @@ RUN chown -R $app:$app /$app
 
 USER $app
 
-COPY --chown=$app:$app . /$app
+# Use cached node_modules in case package.json doesn't change.
+COPY package.json package-lock.json /$app/
 
 RUN npm install
 
+COPY --chown=$app:$app . /$app
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=10s \
-  CMD curl --silent --fail http://localhost:3000/healthcheck \
-  || exit 1
+# This will run in k8s context so we use the heartbeat from there.
+# HEALTHCHECK --interval=10s --timeout=10s --start-period=10s \
+#   CMD curl --silent --fail http://localhost:3000/healthcheck \
+#   || exit 1
 
 EXPOSE 3000
 

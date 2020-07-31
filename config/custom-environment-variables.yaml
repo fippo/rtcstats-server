@@ -1,0 +1,9 @@
+server:
+    logLevel: RTCSTATS_LOG_LEVEL
+
+amplitude:
+    key: RTCSTATS_AMPLITUDE_KEY
+
+s3:
+    region: RTCSTATS_S3_AWS_REGION
+    bucket: RTCSTATS_S3_BUCKET
