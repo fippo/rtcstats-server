@@ -3,6 +3,8 @@ const { Worker } = require('worker_threads');
 const uuid = require('uuid');
 
 const logger = require('../logging');
+const { ResponseType } = require('../utils/utils');
+
 
 const WorkerStatus = Object.freeze({
     IDLE: 'IDLE',
@@ -38,24 +40,42 @@ class WorkerPool extends EventEmitter {
     }
 
     _createWorker(workerID) {
-        const workerInstance = new Worker(this.workerScriptPath, { workerData: { workerID } });
+        const workerInstance = new Worker(this.workerScriptPath, {
+            workerData: { workerID },
+            resourceLimits: { maxOldGenerationSizeMb: 4096, maxYoungGenerationSizeMb: 1024 },
+        });
         const workerMeta = { workerID, worker: workerInstance, status: WorkerStatus.IDLE };
 
-        logger.info('Created worker %j', workerMeta);
+        logger.info('[WorkerPool] Created worker %j', workerMeta);
 
         workerInstance.on('message', (message) => {
-            // logger.info(`Worker message: ${JSON.stringify(message)}`);
+
+            if (message.type === ResponseType.STATE_UPDATE) {
+                if (message.body) {
+                    workerMeta.currentTaskMeta = message.body;
+                }
+
+                return;
+            }
+
             this.emit(message.type, message.body);
-            this._processNextTask(workerMeta);
+
+            if (message.type === ResponseType.ERROR || message.type === ResponseType.DONE) {
+                this._processNextTask(workerMeta);
+            }
         });
 
         // Uncaught error thrown in the worker script, a exit event will follow so we just log the error.
         workerInstance.on('error', (error) => {
-            logger.error('Worker %j with error %o: ', workerMeta, error);
+            logger.error('[WorkerPool] Worker %j with error %o: ', workerMeta, error);
+            // Check if there was an ongoing operation during the worker crash and notify the client.
+            if (workerMeta.currentTaskMeta) {
+                this.emit(ResponseType.ERROR, {...workerMeta.currentTaskMeta, error});
+            }
         });
 
         workerInstance.on('exit', (exitCode) => {
-            logger.info('Worker %j exited with code %d.', workerMeta, exitCode);
+            logger.info('[WorkerPool] Worker %j exited with code %d.', workerMeta, exitCode);
             workerMeta.status = WorkerStatus.STOPPED;
 
             // Remove current worker from pool as it's no longer usable.
@@ -75,11 +95,11 @@ class WorkerPool extends EventEmitter {
             return { uuid: workerMeta.workerID, status: workerMeta.status };
         });
 
-        logger.info('Worker pool introspect: %j ', workerPoolInfo);
+        logger.info('[WorkerPool] Worker pool introspect: %j ', workerPoolInfo);
     }
 
     _removeWorkerFromPool(worker) {
-        logger.info('Removing worker from pool: %j', worker);
+        logger.info('[WorkerPool] Removing worker from pool: %j', worker);
         const workerIndex = this.workerPool.indexOf(worker);
         if (workerIndex > -1) {
             this.workerPool.splice(workerIndex, 1);
@@ -88,7 +108,7 @@ class WorkerPool extends EventEmitter {
     }
 
     _processTask(workerMeta, task) {
-        logger.info(`Processing task %j, current queue size %d`, task, this.taskQueue.length);
+        logger.info(`[WorkerPool] Processing task %j, current queue size %d`, task, this.taskQueue.length);
         workerMeta.worker.postMessage(task);
         workerMeta.status = WorkerStatus.RUNNING;
     }
@@ -109,9 +129,9 @@ class WorkerPool extends EventEmitter {
                 const workerMeta = this._addWorkerToPool();
                 this._processNextTask(workerMeta);
             } else {
-                logger.warn('Can not add additional worker, pool is already at max capacity!');
+                logger.warn('[WorkerPool] Can not add additional worker, pool is already at max capacity!');
             }
-        } , 2000);
+        }, 2000);
     }
 
     _getIdleWorkers() {
@@ -127,7 +147,7 @@ class WorkerPool extends EventEmitter {
             this._processTask(idleWorkers[0], task);
         } else {
             this.taskQueue.push(task);
-            logger.info(`There are no IDLE workers queueing, current queue size <${this.taskQueue.length}>`);
+            logger.info(`[WorkerPool] There are no IDLE workers queueing, current queue size <${this.taskQueue.length}>`);
         }
     }
 

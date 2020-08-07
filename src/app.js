@@ -17,7 +17,6 @@ const { name: appName, version: appVersion } = require('../package');
 const {
     connected,
     connection_error,
-    //diskQueueSize,
     dumpSize,
     errored,
     processed,
@@ -113,6 +112,7 @@ workerPool.on(ResponseType.PROCESSING, (body) => {
         }
     }
 });
+
 workerPool.on(ResponseType.DONE, (body) => {
     logger.debug('Handling DONE event with body %j', body);
 
@@ -122,15 +122,16 @@ workerPool.on(ResponseType.DONE, (body) => {
 });
 
 workerPool.on(ResponseType.METRICS, (body) => {
-    logger.info('Handling METRICS event with body %j', body);
+    logger.info('[App] Handling METRICS event with body %j', body);
     processTime.observe(body.extractDurationMs);
     dumpSize.observe(body.dumpFileSizeMb);
 });
+
 workerPool.on(ResponseType.ERROR, (body) => {
     // TODO handle requeue of the request, this also requires logic in extract.js
     // i.e. we need to catch all potential errors and send back a request with
     // the client id.
-    logger.error('Handling ERROR event with body %j', body);
+    logger.error('[App] Handling ERROR event with body %j', body);
 
     errored.inc();
 
@@ -138,7 +139,7 @@ workerPool.on(ResponseType.ERROR, (body) => {
     if (body.clientId) {
         storeDump(body.clientId);
     } else {
-        logger.error('Handling ERROR without a clientId field!');
+        logger.error('[App] Handling ERROR without a clientId field!');
     }
 
     // TODO At this point adding a retry mechanism can become detrimental, e.g.
@@ -158,7 +159,7 @@ function setupWorkDirectory() {
                     logger.debug(`Removing file ${tempPath + '/' + fname}`);
                     fs.unlinkSync(tempPath + '/' + fname);
                 } catch (e) {
-                    logger.error(`Error while unlinking file ${fname} - ${e}`);
+                    logger.error(`[App] Error while unlinking file ${fname} - ${e}`);
                 }
             });
         } else {
@@ -166,7 +167,7 @@ function setupWorkDirectory() {
             fs.mkdirSync(tempPath);
         }
     } catch (e) {
-        logger.error(`Error while accessing working dir ${tempPath} - ${e}`);
+        logger.error(`[App] Error while accessing working dir ${tempPath} - ${e}`);
         // The app is probably in an inconsistent state at this point, throw and stop process.
         throw e;
     }
@@ -281,7 +282,7 @@ function setupWebSocketsServer(server) {
             tempStream.write(JSON.stringify(['publicIP', null, [publicIP[2]], Date.now()]) + '\n');
         }
 
-        logger.info('New app connected: ua: <%s>, referer: <%s>, clientid: <%s>', ua, referer, clientId);
+        logger.info('[App] New app connected: ua: <%s>, referer: <%s>, clientid: <%s>', ua, referer, clientId);
 
         client.on('message', (msg) => {
             try {
@@ -326,12 +327,12 @@ function setupWebSocketsServer(server) {
                         break;
                 }
             } catch (e) {
-                logger.error('Error while processing: %s - %s', e.message, msg);
+                logger.error('[App] Error while processing: %s - %s', e.message, msg);
             }
         });
 
         client.on('error', (e) => {
-            logger.error('Websocket error: %s', e);
+            logger.error('[App] Websocket error: %s', e);
             connection_error.inc();
         });
 
@@ -345,7 +346,7 @@ function setupWebSocketsServer(server) {
 }
 
 function run() {
-    logger.info('Initializing <%s>, version <%s>, env <%s> ...', appName, appVersion, getEnvName());
+    logger.info('[App] Initializing <%s>, version <%s>, env <%s> ...', appName, appVersion, getEnvName());
 
     setupWorkDirectory();
 
@@ -361,7 +362,7 @@ function run() {
 
     setupWebSocketsServer(server);
 
-    logger.info('Initialization complete.')
+    logger.info('[App] Initialization complete.')
 }
 
 /**
@@ -374,7 +375,7 @@ function stop() {
 // For now just log unhandled promise rejections, as the initial code did not take them into account and by default
 // node just silently eats them.
 process.on('unhandledRejection', (reason) => {
-    logger.error('Unhandled rejection: %s', reason);
+    logger.error('[App] Unhandled rejection: %s', reason);
 });
 
 run();

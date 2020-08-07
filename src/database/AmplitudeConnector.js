@@ -45,10 +45,10 @@ class AmplitudeConnector {
     track(rtcstatsFeatures) {
         try {
             // TODO Add checks for identity info using object destructuring.
-
-            // if (!rtcstatsFeatures.identity.userId || !rtcstatsFeatures.identity.deviceId || !rtcstatsFeatures.identity.sessionId) {
-            //     throw new Error('[Amplitude] userId, deviceId and sessionId must be present, provided values userId: %s, deviceId: %s, sessionId: %s.');
-            // }
+            if (!rtcstatsFeatures.identity.userId && !rtcstatsFeatures.identity.deviceId) {
+                logger.warn('[Amplitude] userId or deviceId must be present');
+                return;
+            }
 
             const amplitudeEvent = {
                 event_type: 'rtcstats-publish',
@@ -57,7 +57,8 @@ class AmplitudeConnector {
                 session_id: rtcstatsFeatures.identity.sessionId,
                 event_properties: {
                     rtcstatsIdentity: rtcstatsFeatures.clientId,
-                    displayName : rtcstatsFeatures.identity.displayName,
+                    displayName: rtcstatsFeatures.identity.displayName,
+                    confID: rtcstatsFeatures.identity.confID,
                     ...rtcstatsFeatures.identity.hosts,
                     ...rtcstatsFeatures.identity.deploymentInfo,
                     ...this.extractRelevantStats(rtcstatsFeatures.connectionFeatures),

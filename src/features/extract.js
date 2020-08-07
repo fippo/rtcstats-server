@@ -28,14 +28,21 @@ function safeFeature(feature) {
 
 // check that the sorter was called as a worker thread
 if (!isMainThread) {
-    logger.info('Running feature extract worker thread: %j', workerData);
+    logger.info('[Extract] Running feature extract worker thread: %j', workerData);
     // throw new Error("Heavy");
     // Handle parent requests
     parentPort.on('message', (request) => {
         switch (request.type) {
             case RequestType.PROCESS: {
-                logger.info('Worker is processing request: %j', request);
+                logger.info('[Extract] Worker is processing request: %j', request);
                 try {
+                    // Update the worker state with the current operation metadata, in case the worker crashes
+                    // from something that is out of our control. Thus the client app can have some context
+                    // about what operation failed.
+                    parentPort.postMessage({
+                        type: ResponseType.STATE_UPDATE,
+                        body: { clientId: request.body.clientId }
+                    });
                     processDump(request.body.clientId);
                 } catch (error) {
                     parentPort.postMessage({
@@ -46,18 +53,18 @@ if (!isMainThread) {
                 break;
             }
             default: {
-                logger.warn('Unsupported request: %j', request);
+                logger.warn('[Extract] Unsupported request: %j', request);
             }
         }
     });
 } else {
     const clientid = process.argv[2];
     if (!clientid) {
-        logger.error('Please provide a valid clientId!');
+        logger.error('[Extract] Please provide a valid clientId!');
         return -1;
     }
 
-    logger.info(`Running feature extraction on ${clientid}...`);
+    logger.info(`[Extract] Running feature extraction on ${clientid}...`);
     processDump(clientid);
 }
 
@@ -70,7 +77,7 @@ function dump(url, client) {
         Object.keys(client.peerConnections).forEach((id) => {
             total += client.peerConnections[id].length;
         });
-        logger.info('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
+        logger.info('[Extract] DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
         return;
     }
 }

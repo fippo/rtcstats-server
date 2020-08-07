@@ -155,7 +155,8 @@ const ResponseType = Object.freeze({
     PROCESSING: 'PROCESSING',
     DONE: 'DONE',
     METRICS: 'METRICS',
-    ERROR: 'ERROR'
+    ERROR: 'ERROR',
+    STATE_UPDATE: 'STATE_UPDATE'
 });
 
 module.exports = {
