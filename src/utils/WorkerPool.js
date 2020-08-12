@@ -42,7 +42,7 @@ class WorkerPool extends EventEmitter {
     _createWorker(workerID) {
         const workerInstance = new Worker(this.workerScriptPath, {
             workerData: { workerID },
-            resourceLimits: { maxOldGenerationSizeMb: 4096, maxYoungGenerationSizeMb: 1024 },
+            resourceLimits: { maxOldGenerationSizeMb: 5120, maxYoungGenerationSizeMb: 1024 },
         });
         const workerMeta = { workerID, worker: workerInstance, status: WorkerStatus.IDLE };
 

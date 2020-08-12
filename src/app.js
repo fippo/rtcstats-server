@@ -78,7 +78,11 @@ function storeDump(clientId) {
 function getIdealWorkerCount() {
     // Using all the CPUs available might slow down the main node.js thread which is responsible for handling
     // requests.
-    return os.cpus().length - 1;
+    if (os.cpus().length <= 2) {
+        return 1;
+    } else {
+        return os.cpus().length - 2;
+    }
 }
 
 const workerScriptPath = path.join(__dirname, './features/extract.js');

@@ -50,8 +50,8 @@ function obfuscateSDP(sdp) {
 function obfuscateStats(stats) {
     Object.keys(stats).forEach(id => {
         const report = stats[id];
+        // TODO Safari and Firefox seem to be sending empty statistic files
         if (!report) {
-            console.warn('no report for', id, stats);
             return;
         }
         // obfuscate different variants of how the ip is contained in different stats / versions.
