@@ -290,6 +290,11 @@ function setupWebSocketsServer(server) {
 
         client.on('message', (msg) => {
             try {
+                if (!msg.localeCompare('__ping__')) {
+                    logger.debug('[App] Received ping for client: %s', clientId);
+                    return;
+                }
+
                 const data = JSON.parse(msg);
 
                 numberOfEvents++;
@@ -331,7 +336,7 @@ function setupWebSocketsServer(server) {
                         break;
                 }
             } catch (e) {
-                logger.error('[App] Error while processing: %s - %s', e.message, msg);
+                logger.error('[App] Error while processing clientId %s: %s - %s', clientId, e.message, msg);
             }
         });
 
