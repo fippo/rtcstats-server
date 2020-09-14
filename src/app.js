@@ -242,7 +242,16 @@ function setupWebSocketsServer(server) {
         // TODO: check against known/valid urls
 
         const ua = upgradeReq.headers['user-agent'];
-        const clientId = uuid.v4();
+
+        let clientId = undefined;
+        // In case this dump is send from the integration test suite, we need to maintain the ID used
+        // there, the user-agent will have the following format 'integration-test/<clientId>'
+        if (ua.startsWith('integration-test')) {
+            clientId = ua.split('/').pop();
+        } else {
+            clientId = uuid.v4();
+        }
+
         let tempStream = fs.createWriteStream(tempPath + '/' + clientId);
         tempStream.on('finish', () => {
             if (numberOfEvents > 0) {
@@ -392,5 +401,6 @@ run();
 module.exports = {
     stop: stop,
     // We expose the number of processed items for use in the test script
-    processed: processed
+    processed: processed,
+    workerPool: workerPool
 };

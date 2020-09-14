@@ -12,6 +12,17 @@ run:
 		-p 8095:8095 \
 		$(REPOSITORY):$(TAG)
 
+test:
+	@docker run \
+		-p 3000:3000 \
+		-p 8095:8095 \
+		-v $(PWD):/rtcstats-server \
+		--env RTCSTATS_LOG_LEVEL=debug \
+		--entrypoint npm \
+		--cpus=2 \
+		$(REPOSITORY):$(TAG) \
+		run test
+
 debug-restricted:
 	@docker run \
 		-p 3000:3000 \

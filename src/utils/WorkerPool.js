@@ -4,7 +4,7 @@ const uuid = require('uuid');
 
 const logger = require('../logging');
 const { ResponseType } = require('../utils/utils');
-
+const { queuedDumps } = require('../prom-collector');
 
 const WorkerStatus = Object.freeze({
     IDLE: 'IDLE',
@@ -146,6 +146,7 @@ class WorkerPool extends EventEmitter {
         if (idleWorkers.length > 0) {
             this._processTask(idleWorkers[0], task);
         } else {
+            queuedDumps.inc();
             this.taskQueue.push(task);
             logger.info(`[WorkerPool] There are no IDLE workers queueing, current queue size <${this.taskQueue.length}>`);
         }

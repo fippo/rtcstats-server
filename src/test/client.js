@@ -1,55 +1,142 @@
+const assert = require('assert').strict;
 var WebSocket = require('ws');
 var fs = require('fs');
 var config = require('config');
 
-var server = require('../app');
-var statsCompressor = require('../utils/getstats-deltacompression').compress;
+const LineByLine = require('line-by-line');
 
-var data = JSON.parse(fs.readFileSync('src/test/clienttest.json'));
-var url = data.url;
-var origin = url.split('/').splice(0, 3).join('/');
-var path = url.split('/').splice(3).join('/');
+var server = require('../app');
+const logger = require('../logging');
+const { ResponseType } = require('../utils/utils');
+class TestCheckRouter {
+    constructor(server) {
+        this.testCheckMap = {};
+
+        server.workerPool.on(ResponseType.PROCESSING, (body) => {
+            this.routeProcessingResponse(body);
+        });
+
+        server.workerPool.on(ResponseType.DONE, (body) => {
+            this.routeDoneResponse(body);
+        });
+
+        server.workerPool.on(ResponseType.METRICS, (body) => {
+            this.routeMetricsResponse(body);
+        });
+
+        server.workerPool.on(ResponseType.ERROR, (body) => {
+            this.routeErrorResponse(body);
+        });
+    }
+
+    checkResponseFormat(responseBody) {
+        assert('clientId' in responseBody);
+        assert(responseBody.clientId in this.testCheckMap);
+    }
+
+    routeProcessingResponse(body) {
+        this.checkResponseFormat(body);
+        this.testCheckMap[body.clientId].checkProcessingResponse(body);
+    }
+
+    routeDoneResponse(body) {
+        this.checkResponseFormat(body);
+        this.testCheckMap[body.clientId].checkDoneResponse(body);
+    }
+
+    routeErrorResponse(body) {
+        this.checkResponseFormat(body);
+        this.testCheckMap[body.clientId].checkErrorResponse(body);
+    }
+
+    routeMetricsResponse(body) {
+        this.checkResponseFormat(body);
+        this.testCheckMap[body.clientId].checkMetricsResponse(body);
+    }
+
+    attachTest(testCheck) {
+        // Make sure that the test object contains at least the clientId key so we can route results to their
+        // appropriate tests.
+        assert('clientId' in testCheck);
+
+        this.testCheckMap[testCheck.clientId] = testCheck;
+    }
+}
 
 function checkTestCompletion(server) {
-  if (server.processed.get().values[0].value === 1) {
-    server.stop();
-  } else {
-    setTimeout(checkTestCompletion, 1000, server);
-  }
+    if (server.processed.get().values[0].value === 2) {
+        server.stop();
+    } else {
+        setTimeout(checkTestCompletion, 4000, server);
+    }
 }
-// using setTimeout here is bad obviously. This should wait for the server to listen
-setTimeout(function() {
+
+function simulateConnection(dumpPath,resultPath) {
+    let resultString = fs.readFileSync(resultPath);
+    let resultObject = JSON.parse(resultString);
+    let dumpFile = dumpPath.split('/').filter(Boolean).pop();
+
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore self-signed cert
-    var ws = new WebSocket('ws://localhost:' + config.get('server').port + '/' + path, {
+
+    let ws = new WebSocket('ws://localhost:' + config.get('server').port + '/' + dumpFile, {
         headers: {
-            "User-Agent": data.userAgent,
+            'User-Agent': 'integration-test/' + dumpFile,
         },
-        origin: origin
+        origin: 'https://localhost',
     });
+
     ws.on('open', function open() {
-      var events = data.getUserMedia;
-      // TODO: handle multiple connections
-      Object.keys(data.peerConnections).forEach(function(id) {
-        events = events.concat(data.peerConnections[id]);
-      });
-      var prev = {}
-      var process = function() {
-        var evt = events.shift();
-        if (!evt) {
-          ws.close();
-          checkTestCompletion(server);
-          return;
-        }
-        if (evt.type === 'getStats') {
-          evt.type = 'getstats';
-          var base = JSON.parse(JSON.stringify(evt.value)); // our new prev
-          evt.value = statsCompressor(prev, evt.value);
-          //console.log(JSON.stringify(base).length, 'reduced to', JSON.stringify(evt.value).length);
-          prev = base;
-        }
-        ws.send(JSON.stringify([evt.type, 'testid', evt.value, new Date(evt.time).getTime()]));
-        setTimeout(process, 10);
-      };
-      process();
+        testCheckRouter.attachTest({
+            clientId: dumpFile,
+            checkDoneResponse: (body) => {
+                logger.info('[TEST] Handling DONE event with body %j', body);
+            },
+            checkProcessingResponse: (body) => {
+                logger.info('[TEST] Handling PROCESSING event with body %j', body);
+                body.clientId = dumpFile;
+                const parsedBody = JSON.parse(JSON.stringify(body));
+                //assert.deepStrictEqual(parsedBody, resultObject);
+            },
+            checkErrorResponse: (body) => {
+                logger.info('[TEST] Handling ERROR event with body %j', body);
+            },
+            checkMetricsResponse: (body) => {
+                logger.info('[TEST] Handling METRICS event with body %j', body);
+                //assert.fail(body.extractDurationMs < 400);
+            },
+        });
+
+        let lr = new LineByLine(dumpPath);
+
+        lr.on('error', function (err) {
+            logger.error('Error reading line: %j', err);
+        });
+
+        lr.on('line', function (line) {
+            ws.send(line);
+        });
+
+        lr.on('end', function () {
+            ws.close();
+        });
     });
-}, 2000);
+}
+
+var testCheckRouter = undefined;
+
+function runTest() {
+    testCheckRouter = new TestCheckRouter(server);
+
+    simulateConnection(
+        './src/test/dumps/3bc291e8-852e-46da-bf9d-403e98c6bf3c',
+        './src/test/results/3bc291e8-852e-46da-bf9d-403e98c6bf3c-result.json'
+    );
+    simulateConnection(
+        './src/test/dumps/24a93962-f981-43b4-8501-48e43f91a4e0',
+        './src/test/results/24a93962-f981-43b4-8501-48e43f91a4e0-result.json'
+    );
+}
+
+setTimeout(runTest, 2000);
+
+checkTestCompletion(server);

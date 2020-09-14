@@ -14,6 +14,10 @@ const connection_error = new prom.Counter({
     help: 'number of open websocket connections that failed with an error',
 });
 
+const queuedDumps = new prom.Counter({
+    name: 'rtcstats_queued_dumps',
+    help: 'Number of rtcstats dumps queued up for future processing',
+});
 
 const queueSize = new prom.Gauge({
     name: 'rtcstats_queue_size',
@@ -71,5 +75,6 @@ module.exports = {
     processed,
     processTime,
     prom,
+    queuedDumps,
     queueSize
 }
