@@ -16,21 +16,27 @@ class AmplitudeConnector {
      *
      * @param {Object} connectionFeatures
      */
-    extractRelevantStats(connectionFeatures) {
+    extractRelevantStats(connectionFeatures, clientFeatures) {
         const filteredFeature = {};
 
         // TODO Use object destructuring for a more clean approach.
+        filteredFeature.calledGetUserMediaRequestingScreen = clientFeatures.calledGetUserMediaRequestingScreen;
+        filteredFeature.calledGetUserMediaRequestingAudio = clientFeatures.calledGetUserMediaRequestingAudio;
+        filteredFeature.calledGetUserMediaRequestingVideo = clientFeatures.calledGetUserMediaRequestingVideo;
+        filteredFeature.firstAudioTrackLabel = clientFeatures.firstAudioTrackLabel;
+        filteredFeature.firstVideoTrackLabel = clientFeatures.firstVideoTrackLabel;
         filteredFeature.lifeTime = connectionFeatures.lifeTime;
         filteredFeature.ICEFailure = connectionFeatures.ICEFailure;
         filteredFeature.connectionTime = connectionFeatures.connectionTime;
         filteredFeature.numberOfRemoteStreams = connectionFeatures.numberOfRemoteStreams;
         filteredFeature.sessionDuration = connectionFeatures.sessionDuration;
-        filteredFeature.numberOfLocalSimulcastStreams = connectionFeatures.numberOfLocalSimulcastStreams;
         filteredFeature.bytesTotalSent = connectionFeatures.bytesTotalSent;
         filteredFeature.bytesTotalReceived = connectionFeatures.bytesTotalReceived;
         filteredFeature.statsMeanRoundTripTime = connectionFeatures.statsMeanRoundTripTime;
         filteredFeature.statsMeanReceivingBitrate = connectionFeatures.statsMeanReceivingBitrate;
         filteredFeature.statsMeanSendingBitrate = connectionFeatures.statsMeanSendingBitrate;
+        filteredFeature.statsMeanAudioPacketsLost = connectionFeatures.statsMeanAudioPacketsLost;
+        filteredFeature.statsMeanVideoPacketsLost = connectionFeatures.statsMeanVideoPacketsLost;
         filteredFeature.firstCandidatePairType = connectionFeatures.firstCandidatePairType;
         filteredFeature.bweGoogActualEncBitrateMean = connectionFeatures.bweGoogActualEncBitrateMean;
         filteredFeature.bweGoogRetransmitBitrateMean = connectionFeatures.bweGoogRetransmitBitrateMean;
@@ -61,7 +67,7 @@ class AmplitudeConnector {
                     confID: rtcstatsFeatures.identity.confID,
                     ...rtcstatsFeatures.identity.hosts,
                     ...rtcstatsFeatures.identity.deploymentInfo,
-                    ...this.extractRelevantStats(rtcstatsFeatures.connectionFeatures),
+                    ...this.extractRelevantStats(rtcstatsFeatures.connectionFeatures, rtcstatsFeatures.clientFeatures),
                 },
             };
 

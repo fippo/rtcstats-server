@@ -147,43 +147,43 @@ function generateFeatures(url, client, clientId) {
             }
         });
 
-        const tracks = extractTracks(conn);
-        const streams = extractStreams(tracks);
+        // const tracks = extractTracks(conn);
+        // const streams = extractStreams(tracks);
 
-        for (const [streamId, tracks] of streams.entries()) {
-            const streamFeatures = { streamId };
-            for (const { trackId, kind, direction, stats } of tracks) {
-                Object.keys(streamfeatures).forEach((fname) => {
-                    let feature = streamfeatures[fname].apply(null, [{ kind, direction, trackId, stats, peerConnectionLog: conn }]);
-                    if (feature !== undefined) {
-                        feature = safeFeature(feature);
-                        if (typeof feature === 'object') {
-                            Object.keys(feature).forEach((subname) => {
-                                feature[subname] = safeFeature(feature[subname]);
-                                streamFeatures[fname + capitalize(subname)] = feature[subname];
-                                logger.debug(
-                                    connid,
-                                    'STREAM',
-                                    streamId,
-                                    'TRACK',
-                                    trackId,
-                                    'FEATURE',
-                                    fname + capitalize(subname),
-                                    '=>',
-                                    safeFeature(feature[subname])
-                                );
-                            });
-                        } else {
-                            feature = safeFeature(feature);
-                            streamFeatures[fname] = feature;
-                            logger.debug(connid, 'STREAM', streamId, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
-                        }
-                    }
-                });
-            }
+        // for (const [streamId, tracks] of streams.entries()) {
+        //     const streamFeatures = { streamId };
+        //     for (const { trackId, kind, direction, stats } of tracks) {
+        //         Object.keys(streamfeatures).forEach((fname) => {
+        //             let feature = streamfeatures[fname].apply(null, [{ kind, direction, trackId, stats, peerConnectionLog: conn }]);
+        //             if (feature !== undefined) {
+        //                 feature = safeFeature(feature);
+        //                 if (typeof feature === 'object') {
+        //                     Object.keys(feature).forEach((subname) => {
+        //                         feature[subname] = safeFeature(feature[subname]);
+        //                         streamFeatures[fname + capitalize(subname)] = feature[subname];
+        //                         logger.debug(
+        //                             connid,
+        //                             'STREAM',
+        //                             streamId,
+        //                             'TRACK',
+        //                             trackId,
+        //                             'FEATURE',
+        //                             fname + capitalize(subname),
+        //                             '=>',
+        //                             safeFeature(feature[subname])
+        //                         );
+        //                     });
+        //                 } else {
+        //                     feature = safeFeature(feature);
+        //                     streamFeatures[fname] = feature;
+        //                     logger.debug(connid, 'STREAM', streamId, 'TRACK', trackId, 'FEATURE', fname, '=>', safeFeature(feature));
+        //                 }
+        //             }
+        //         });
+        //     }
 
-            streamList.push(streamFeatures);
-        }
+        //     streamList.push(streamFeatures);
+        // }
 
         connectionFeatures.streams = streamList;
 

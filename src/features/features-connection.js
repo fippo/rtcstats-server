@@ -237,6 +237,7 @@ module.exports = {
     },
 
     // was the peerconnection configured properly?
+    // basically check if RTCPeerConnection was created with config parameters
     configured: function(client, peerConnectionLog) {
         const peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         return peerConnectionConfig && peerConnectionConfig.nullConfig !== true;
@@ -353,6 +354,7 @@ module.exports = {
         return constraints && constraints.mandatory && constraints.mandatory.DtlsSrtpKeyAgreement === false;
     },
 
+    // SDP semantics used
     sdpSemantics: function(client, peerConnectionLog) {
         const peerConnectionConfig = getPeerConnectionConfig(peerConnectionLog);
         return peerConnectionConfig ? peerConnectionConfig.sdpSemantics : '';
@@ -398,7 +400,8 @@ module.exports = {
         return peerConnectionLog.filter(entry => isIceConnected(entry)).length > 0;
     },
 
-    // ICE connected but connectionState not indicates a DTLS failure
+    // ICE connected but connectionState indicates a DTLS failure, basically ICE process successfully completed
+    // but it did not connect
     dtlsFailure: function(client, peerConnectionLog) {
         let iceConnected = false;
         let connected = false;
@@ -417,22 +420,23 @@ module.exports = {
         }
     },
 
-    iceconnectionstateCheckingBeforeSRD: function(client, peerConnectionLog) {
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=959128#c65
-        // Sometimes, iceconnectionstatechange can fire before
-        // SRD/addIceCandidate. This happens when we are offering and
-        // the remote does a valid stun ping to the port before the answer
-        // arrives.
-        let hadSRD = false;
-        for (let i = 0; i < peerConnectionLog.length; i++) {
-            const {type, value} = peerConnectionLog[i];
-            if (type === 'setRemoteDescription') {
-                hadSRD = true;
-            } else if (type === 'oniceconnectionstatechange' && value === 'checking') {
-                return !hadSRD;
-            }
-        }
-    },
+    // The bug seems to have been fixed, remove for now.
+    // iceconnectionstateCheckingBeforeSRD: function(client, peerConnectionLog) {
+    //     // https://bugs.chromium.org/p/chromium/issues/detail?id=959128#c65
+    //     // Sometimes, iceconnectionstatechange can fire before
+    //     // SRD/addIceCandidate. This happens when we are offering and
+    //     // the remote does a valid stun ping to the port before the answer
+    //     // arrives.
+    //     let hadSRD = false;
+    //     for (let i = 0; i < peerConnectionLog.length; i++) {
+    //         const {type, value} = peerConnectionLog[i];
+    //         if (type === 'setRemoteDescription') {
+    //             hadSRD = true;
+    //         } else if (type === 'oniceconnectionstatechange' && value === 'checking') {
+    //             return !hadSRD;
+    //         }
+    //     }
+    // },
 
 
     // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
@@ -521,6 +525,7 @@ module.exports = {
         return usingBundle;
     },
 
+    // was iceRestart parameter provided during a createOffer call
     ICERestart: function(client, peerConnectionLog) {
         let iceRestart = false;
         peerConnectionLog.forEach(entry => {
@@ -533,6 +538,7 @@ module.exports = {
         return iceRestart;
     },
 
+    // was the initiated iceRestart successful
     ICERestartSuccess: function(client, peerConnectionLog) {
         let i = 0;
         let iceRestart = false;
@@ -615,6 +621,7 @@ module.exports = {
         return max;
     },
 
+    // number of remote distinct streams
     numberOfRemoteStreams: function(client, peerConnectionLog) {
         const remoteStreams = {};
         for (let i = 0; i < peerConnectionLog.length; i++) {
@@ -627,6 +634,7 @@ module.exports = {
         return Object.keys(remoteStreams).length;
     },
 
+    // check to see id the local SDP has simulcast related fields.
     usingSimulcast: function(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
             const {type, value} = peerConnectionLog[i];
@@ -639,6 +647,8 @@ module.exports = {
         }
         return false;
     },
+
+    // verify how many streams are part of the simulcast groups
     numberOfLocalSimulcastStreams: function(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
             const {type, value} = peerConnectionLog[i];
@@ -808,7 +818,7 @@ module.exports = {
         }
     },
 
-    // estimates the number of interfaces
+    // estimates the number of network interfaces, by analyzing gathered host ice candidates.
     numberOfInterfaces: function(client, peerConnectionLog) {
         const ips = {};
         for (let i = 0; i < peerConnectionLog.length; i++) {
@@ -825,7 +835,8 @@ module.exports = {
         return Object.keys(ips).length;
     },
 
-    // how long does it take to establish the connection?
+    // determines how long it took to establish the connection, by checking connection state
+    // changes.
     connectionTime: function(client, peerConnectionLog) {
         let first;
         let second;
@@ -987,8 +998,14 @@ module.exports = {
         const rtts = [];
         const recv = [];
         const send = [];
+
+        let packetsLostMap = {};
+
         let lastStatsReport;
         let lastTime;
+
+        // Iterate over the getStats entries for this specific PC and calculate the average roundTripTime
+        // data from the candidate-pair statistic.
         peerConnectionLog.forEach(entry => {
             if (entry.type !== 'getStats') return;
             const statsReport = entry.value;
@@ -997,6 +1014,20 @@ module.exports = {
                 const report = statsReport[id];
                 if (report.type === 'candidate-pair' && report.selected === true) {
                     rtts.push(report.roundTripTime);
+                }
+                // packetsLost is a cumulative stats thus we just overwrite the value so we don't have to find
+                // the last type of stats of a certain type.
+                if (report.type === 'ssrc' && id.endsWith('_send') === true) {
+                    if (report.mediaType === 'audio' || report.mediaType === 'video') {
+                        if (!packetsLostMap[report.ssrc]) {
+                            packetsLostMap[report.ssrc] = {}
+                            packetsLostMap[report.ssrc].mediaType = report.mediaType
+                            packetsLostMap[report.ssrc].samples = 0
+                            packetsLostMap[report.ssrc].packetsLost = 0;
+                        }
+                        packetsLostMap[report.ssrc].packetsLost = report.packetsLost || 0;
+                        ++packetsLostMap[report.ssrc].samples;
+                    }
                 }
             });
             if (lastStatsReport) {
@@ -1023,12 +1054,33 @@ module.exports = {
             lastTime = entry.time;
         });
 
+        // The reduced value will have the following format { audio: 0.133213, video: 2.3}
+        let averageMediaPacketsLost = Object.values(packetsLostMap).reduce((result, currentSsrc) => {
+            // the ssrcs were build in the same function so we assume at least a value of 1
+            // if this is to be refactored and control moved out of this function consider
+            // additional checks.
+            if (!result[currentSsrc.mediaType]) {
+                // If this is the first value there is no previous with which to divide, also reduce the
+                // float number to 2 decimals
+                result[currentSsrc.mediaType] = (currentSsrc.packetsLost / currentSsrc.samples).toFixed(2);
+            } else {
+                const ssrcPacketsLostMean = currentSsrc.packetsLost / currentSsrc.samples;
+                result[currentSsrc.mediaType] = ((result[currentSsrc.mediaType] + ssrcPacketsLostMean) / 2).toFixed(2);
+            }
+
+            return result;
+        }, {});
+
         feature['roundTripTime'] = Math.floor(rtts.reduce((a, b) => a + b, 0) / (rtts.length || 1));
         feature['receivingBitrate'] = Math.floor(recv.reduce((a, b) => a + b, 0) / (recv.length || 1));
         feature['sendingBitrate'] = Math.floor(send.reduce((a, b) => a + b, 0) / (send.length || 1));
+        feature['audioPacketsLost'] = averageMediaPacketsLost.audio;
+        feature['videoPacketsLost'] = averageMediaPacketsLost.video;
+
         return feature;
     },
 
+    // calculate mean RTT and max RTT for the first 30 seconds of the connection
     stunRTTInitial30s: function(client, peerConnectionLog) {
         let startTime;
         const rtts = [];
@@ -1078,6 +1130,7 @@ module.exports = {
         }
     },
 
+    // information regarding the active candidate pair
     firstCandidatePair: function(client, peerConnectionLog) {
         // search for first getStats after iceconnection->connected
         let i;
@@ -1152,6 +1205,7 @@ module.exports = {
         }
     },
 
+    // How many times did the active ice candidate-pair change over time.
     // how did the selected candidate pair change? Could happen e.g. because of an ice restart
     // so there should be a strong correlation.
     numberOfCandidatePairChanges: function(client, peerConnectionLog) {
@@ -1228,6 +1282,7 @@ module.exports = {
         return feature;
     },
 
+    // Was addStream called on the PC
     calledAddStream: function(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
             const type = peerConnectionLog[i].type;
@@ -1238,6 +1293,7 @@ module.exports = {
         return false;
     },
 
+    // Was addTrack called on the PC
     calledAddTrack: function(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
             const type = peerConnectionLog[i].type;
