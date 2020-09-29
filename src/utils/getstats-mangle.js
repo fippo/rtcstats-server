@@ -1,342 +1,360 @@
 // using shiftwidth=2 since reformating all the adapter code...
 module.exports = function(stats) {
-  // Mangle chrome stats to spec stats. Just chrome stats.
-  let needsMangling = false;
-  Object.keys(stats).forEach(id => {
-      if (!stats[id].id) {
-        stats[id].id = id; // backfill, might have been removed by client.
-      }
-      if (stats[id].type === 'googComponent') {
-          needsMangling = true;
-      }
-  });
-  if (!needsMangling) {
-      return stats;
-  }
-  // taken from https://github.com/fippo/adapter/tree/getstats-mangling
-  const standardReport = {};
-  Object.keys(stats).forEach(id => {
-    if (id === 'timestamp') {
-        return;
+    // Mangle chrome stats to spec stats. Just chrome stats.
+    let needsMangling = false;
+
+    Object.keys(stats).forEach(id => {
+        if (!stats[id].id) {
+            stats[id].id = id; // backfill, might have been removed by client.
+        }
+        if (stats[id].type === 'googComponent') {
+            needsMangling = true;
+        }
+    });
+    if (!needsMangling) {
+        return stats;
     }
-    const standardStats = stats[id];
 
-    // Step 1: translate to standard types and attribute names.
-    switch (standardStats.type) {
-      case 'ssrc':
-        standardStats.trackIdentifier = standardStats.googTrackId;
-        // FIXME: not defined in spec, probably whether the track is
-        //  remote?
-        standardStats.remoteSource =
-            standardStats.id.indexOf('recv') !== -1;
-        standardStats.ssrc = parseInt(standardStats.ssrc, 10);
+    // taken from https://github.com/fippo/adapter/tree/getstats-mangling
+    const standardReport = {};
 
-        // FIXME: 'only makes sense' <=> not set?
-        if (standardStats.googFrameWidthReceived ||
-            standardStats.googFrameWidthSent) {
-          standardStats.frameWidth = parseInt(
-              standardStats.googFrameWidthReceived ||
-              standardStats.googFrameWidthSent, 10);
+    Object.keys(stats).forEach(id => {
+        if (id === 'timestamp') {
+            return;
         }
-        if (standardStats.googFrameHeightReceived ||
-            standardStats.googFrameHeightSent) {
-          standardStats.frameHeight = parseInt(
-              standardStats.googFrameHeightReceived ||
-              standardStats.googFrameHeightSent, 10);
-        }
-        if (standardStats.googFrameRateInput ||
-            standardStats.googFrameRateReceived) {
-          // FIXME: might be something else not available currently
-          standardStats.framesPerSecond = parseInt(
-              standardStats.googFrameRateInput ||
-              standardStats.googFrameRateReceived, 10);
-        }
+        const standardStats = stats[id];
 
-        /* FIXME unfortunately the current stats (googFrameRateSent,
+        // Step 1: translate to standard types and attribute names.
+        switch (standardStats.type) {
+        case 'ssrc':
+            standardStats.trackIdentifier = standardStats.googTrackId;
+
+            // FIXME: not defined in spec, probably whether the track is
+            //  remote?
+            standardStats.remoteSource
+            = standardStats.id.indexOf('recv') !== -1;
+            standardStats.ssrc = parseInt(standardStats.ssrc, 10);
+
+            // FIXME: 'only makes sense' <=> not set?
+            if (standardStats.googFrameWidthReceived
+            || standardStats.googFrameWidthSent) {
+                standardStats.frameWidth = parseInt(
+              standardStats.googFrameWidthReceived
+              || standardStats.googFrameWidthSent, 10);
+            }
+            if (standardStats.googFrameHeightReceived
+            || standardStats.googFrameHeightSent) {
+                standardStats.frameHeight = parseInt(
+              standardStats.googFrameHeightReceived
+              || standardStats.googFrameHeightSent, 10);
+            }
+            if (standardStats.googFrameRateInput
+            || standardStats.googFrameRateReceived) {
+                // FIXME: might be something else not available currently
+                standardStats.framesPerSecond = parseInt(
+              standardStats.googFrameRateInput
+              || standardStats.googFrameRateReceived, 10);
+            }
+
+            /* FIXME unfortunately the current stats (googFrameRateSent,
          * googFrameRateReceived, googFrameRateDecoded) so we can not
          * calculate the cumulative amount.
          * FIXME (spec) Firefox has frameRateMean why is this
          * not part of the spec?
          */
-        if (standardStats.googFrameRateSent) {
-          standardStats.framesSent = 0;
-        }
-        if (standardStats.googFrameRateReceived) {
-          standardStats.framesReceived = 0;
-        }
-        // FIXME: both on sender and receiver?
-        if (standardStats.kind === 'video' || standardStats.mediaType === 'video') {
-          standardStats.framesDropped = 0;
-        }
-        if (standardStats.audioInputLevel ||
-            standardStats.audioOutputLevel) {
-          standardStats.audioLevel = parseInt(
-              standardStats.audioInputLevel ||
-              standardStats.audioOutputLevel, 10) / 32767.0;
-        }
+            if (standardStats.googFrameRateSent) {
+                standardStats.framesSent = 0;
+            }
+            if (standardStats.googFrameRateReceived) {
+                standardStats.framesReceived = 0;
+            }
 
-        if (standardStats.googJitterReceived) {
-          standardStats.jitter = 1.0 * parseInt(
+            // FIXME: both on sender and receiver?
+            if (standardStats.kind === 'video' || standardStats.mediaType === 'video') {
+                standardStats.framesDropped = 0;
+            }
+            if (standardStats.audioInputLevel
+            || standardStats.audioOutputLevel) {
+                standardStats.audioLevel = parseInt(
+              standardStats.audioInputLevel
+              || standardStats.audioOutputLevel, 10) / 32767.0;
+            }
+
+            if (standardStats.googJitterReceived) {
+                standardStats.jitter = 1.0 * parseInt(
               standardStats.googJitterReceived, 10);
-        }
-        // FIXME: fractionLost
+            }
 
-        if (standardStats.googFirsReceived || standardStats.googFirsSent) {
-          standardStats.firCount = parseInt(
-              standardStats.googFirsReceived ||
-              standardStats.googFirsSent, 10);
-        }
-        if (standardStats.googPlisReceived || standardStats.googPlisSent) {
-          standardStats.pliCount = parseInt(
-              standardStats.googPlisReceived ||
-              standardStats.googPlisSent, 10);
-        }
-        if (standardStats.googNacksReceived ||
-            standardStats.googNacksSent) {
-          standardStats.nackCount = parseInt(
-              standardStats.googNacksReceived ||
-              standardStats.googNacksSent, 10);
-        }
-        // FIXME: no SLI stats yet?
+            // FIXME: fractionLost
 
-        if (standardStats.bytesSent) {
-          standardStats.bytesSent = parseInt(standardStats.bytesSent, 10);
-        }
-        if (standardStats.bytesReceived) {
-          standardStats.bytesReceived = parseInt(
+            if (standardStats.googFirsReceived || standardStats.googFirsSent) {
+                standardStats.firCount = parseInt(
+              standardStats.googFirsReceived
+              || standardStats.googFirsSent, 10);
+            }
+            if (standardStats.googPlisReceived || standardStats.googPlisSent) {
+                standardStats.pliCount = parseInt(
+              standardStats.googPlisReceived
+              || standardStats.googPlisSent, 10);
+            }
+            if (standardStats.googNacksReceived
+            || standardStats.googNacksSent) {
+                standardStats.nackCount = parseInt(
+              standardStats.googNacksReceived
+              || standardStats.googNacksSent, 10);
+            }
+
+            // FIXME: no SLI stats yet?
+
+            if (standardStats.bytesSent) {
+                standardStats.bytesSent = parseInt(standardStats.bytesSent, 10);
+            }
+            if (standardStats.bytesReceived) {
+                standardStats.bytesReceived = parseInt(
               standardStats.bytesReceived, 10);
-        }
-        if (standardStats.packetsSent) {
-          standardStats.packetsSent = parseInt(
+            }
+            if (standardStats.packetsSent) {
+                standardStats.packetsSent = parseInt(
               standardStats.packetsSent, 10);
-        }
-        if (standardStats.packetsReceived) {
-          standardStats.packetsReceived = parseInt(
+            }
+            if (standardStats.packetsReceived) {
+                standardStats.packetsReceived = parseInt(
               standardStats.packetsReceived, 10);
-        }
-        if (standardStats.packetsLost) {
-          standardStats.packetsLost = parseInt(
+            }
+            if (standardStats.packetsLost) {
+                standardStats.packetsLost = parseInt(
               standardStats.packetsLost, 10);
-        }
-        if (standardStats.googEchoCancellationReturnLoss) {
-          standardStats.echoReturnLoss = 1.0 * parseInt(
+            }
+            if (standardStats.googEchoCancellationReturnLoss) {
+                standardStats.echoReturnLoss = 1.0 * parseInt(
               standardStats.googEchoCancellationReturnLoss, 10);
-          standardStats.echoReturnLossEnhancement = 1.0 * parseInt(
+                standardStats.echoReturnLossEnhancement = 1.0 * parseInt(
               standardStats.googEchoCancellationReturnLossEnhancement, 10);
-        }
-        if (standardStats.googRtt) {
-          // This is the RTCP RTT.
-          standardStats.roundTripTime = parseInt(standardStats.googRtt, 10);
-        }
-        break;
-      case 'localcandidate':
-      case 'remotecandidate':
+            }
+            if (standardStats.googRtt) {
+                // This is the RTCP RTT.
+                standardStats.roundTripTime = parseInt(standardStats.googRtt, 10);
+            }
+            break;
+        case 'localcandidate':
+        case 'remotecandidate':
         // https://w3c.github.io/webrtc-stats/#icecandidate-dict*
-        standardStats.portNumber = parseInt(standardStats.portNumber, 10);
-        standardStats.priority = parseInt(standardStats.priority, 10);
-        // FIXME: addressSourceUrl?
-        // FIXME: https://github.com/w3c/webrtc-stats/issues/12
-        break;
-      case 'googCandidatePair':
-        // https://w3c.github.io/webrtc-stats/#candidatepair-dict*
-        standardStats.transportId = standardStats.googChannelId;
-        // FIXME: maybe set depending on iceconnectionstate and read/write?
-        //standardStats.state = 'FIXME'; // enum
+            standardStats.portNumber = parseInt(standardStats.portNumber, 10);
+            standardStats.priority = parseInt(standardStats.priority, 10);
 
-        // FIXME: could be calculated from candidate priorities and role.
-        //standardStats.priority = 'FIXME'; // unsigned long long
-        standardStats.writable = standardStats.googWritable === 'true';
-        standardStats.readable = standardStats.googReadable === 'true';
-        // assumption: nominated is readable and writeable.
-        standardStats.nominated = standardStats.readable &&
-            standardStats.writable;
-        // FIXME: missing from spec
-        standardStats.selected =
-            standardStats.googActiveConnection === 'true';
-        standardStats.bytesSent = parseInt(standardStats.bytesSent, 10);
-        standardStats.bytesReceived = parseInt(
+            // FIXME: addressSourceUrl?
+            // FIXME: https://github.com/w3c/webrtc-stats/issues/12
+            break;
+        case 'googCandidatePair':
+        // https://w3c.github.io/webrtc-stats/#candidatepair-dict*
+            standardStats.transportId = standardStats.googChannelId;
+
+            // FIXME: maybe set depending on iceconnectionstate and read/write?
+            // standardStats.state = 'FIXME'; // enum
+
+            // FIXME: could be calculated from candidate priorities and role.
+            // standardStats.priority = 'FIXME'; // unsigned long long
+            standardStats.writable = standardStats.googWritable === 'true';
+            standardStats.readable = standardStats.googReadable === 'true';
+
+            // assumption: nominated is readable and writeable.
+            standardStats.nominated = standardStats.readable
+            && standardStats.writable;
+
+            // FIXME: missing from spec
+            standardStats.selected
+            = standardStats.googActiveConnection === 'true';
+            standardStats.bytesSent = parseInt(standardStats.bytesSent, 10);
+            standardStats.bytesReceived = parseInt(
             standardStats.bytesReceived, 10);
-        // FIXME: packetsSent is not in spec?
-        // FIXME: no packetsReceived?
-        standardStats.packetsSent = parseInt(
+
+            // FIXME: packetsSent is not in spec?
+            // FIXME: no packetsReceived?
+            standardStats.packetsSent = parseInt(
             standardStats.packetsSent, 10);
-        standardStats.packetsDiscardedOnSend = parseInt(
+            standardStats.packetsDiscardedOnSend = parseInt(
             standardStats.packetsDiscardedOnSend, 10);
 
-        // This is the STUN RTT.
-        standardStats.roundTripTime = parseInt(standardStats.googRtt, 10);
+            // This is the STUN RTT.
+            standardStats.roundTripTime = parseInt(standardStats.googRtt, 10);
 
-        // backfilled later from videoBWE.
-        standardStats.availableOutgoingBitrate = 0.0;
-        standardStats.availableIncomingBitrate = 0.0;
-        break;
-      case 'googComponent':
+            // backfilled later from videoBWE.
+            standardStats.availableOutgoingBitrate = 0.0;
+            standardStats.availableIncomingBitrate = 0.0;
+            break;
+        case 'googComponent':
         // additional RTCTransportStats created later since we
         // want the normalized fields and complete snowball.
-        break;
-      case 'googCertificate':
-        standardStats.type = 'certificate'; // FIXME spec: undefined in spec.
-        standardStats.fingerprint = standardStats.googFingerprint;
-        standardStats.fingerprintAlgorithm =
-            standardStats.googFingerprintAlgorithm;
-        standardStats.base64Certificate = standardStats.googDerBase64;
-        standardStats.issuerCertificateId = null; // FIXME spec: undefined what 'no issuer' is.
-        break;
-      case 'VideoBwe':
-        standardStats.availableOutgoingBitrate = 1.0 *
-            parseInt(standardStats.googAvailableSendBandwidth, 10);
-        standardStats.availableIncomingBitrate = 1.0 *
-            parseInt(standardStats.googAvailableReceiveBandwidth, 10);
-        break;
-      case 'rtcstats-device-report':
-        standardStats.batteryLevel = parseInt(standardStats.batteryLevel, 10);
-        break;
-      default:
-        break;
-    }
-    standardReport[standardStats.id] = standardStats;
-  });
-  // Step 2: fix things spanning multiple reports.
-  Object.keys(standardReport).forEach(id => {
-    const report = standardReport[id];
-    let other, newId;
-    switch (report.type) {
-      case 'googCandidatePair':
-        report.type = 'candidate-pair';
-        if (standardReport.bweforvideo) {
-          report.availableOutgoingBitrate =
-              standardReport.bweforvideo.availableOutgoingBitrate;
-          report.availableIncomingBitrate =
-              standardReport.bweforvideo.availableIncomingBitrate;
-          standardReport[report.id] = report;
+            break;
+        case 'googCertificate':
+            standardStats.type = 'certificate'; // FIXME spec: undefined in spec.
+            standardStats.fingerprint = standardStats.googFingerprint;
+            standardStats.fingerprintAlgorithm
+            = standardStats.googFingerprintAlgorithm;
+            standardStats.base64Certificate = standardStats.googDerBase64;
+            standardStats.issuerCertificateId = null; // FIXME spec: undefined what 'no issuer' is.
+            break;
+        case 'VideoBwe':
+            standardStats.availableOutgoingBitrate = 1.0
+            * parseInt(standardStats.googAvailableSendBandwidth, 10);
+            standardStats.availableIncomingBitrate = 1.0
+            * parseInt(standardStats.googAvailableReceiveBandwidth, 10);
+            break;
+        case 'rtcstats-device-report':
+            standardStats.batteryLevel = parseInt(standardStats.batteryLevel, 10);
+            break;
+        default:
+            break;
         }
-        break;
-      case 'googComponent':
+        standardReport[standardStats.id] = standardStats;
+    });
+
+    // Step 2: fix things spanning multiple reports.
+    Object.keys(standardReport).forEach(id => {
+        const report = standardReport[id];
+        let newId, other;
+
+        switch (report.type) {
+        case 'googCandidatePair':
+            report.type = 'candidate-pair';
+            if (standardReport.bweforvideo) {
+                report.availableOutgoingBitrate
+              = standardReport.bweforvideo.availableOutgoingBitrate;
+                report.availableIncomingBitrate
+              = standardReport.bweforvideo.availableIncomingBitrate;
+                standardReport[report.id] = report;
+            }
+            break;
+        case 'googComponent':
         // create a new report since we don't carry over all fields.
-        other = standardReport[report.selectedCandidatePairId];
-        newId = 'transport_' + report.id;
-        standardReport[newId] = {
-          type: 'transport',
-          timestamp: report.timestamp,
-          id: newId,
-          bytesSent: other && other.bytesSent || 0,
-          bytesReceived: other && other.bytesReceived || 0,
-          // FIXME (spec): rtpcpTransportStatsId: rtcp-mux is required so...
-          activeConnection: other && other.selected,
-          selectedCandidatePairId: report.selectedCandidatePairId,
-          localCertificateId: report.localCertificateId,
-          remoteCertificateId: report.remoteCertificateId
-        };
-        break;
-      case 'ssrc':
-        newId = 'rtpstream_' + report.id;
-        // Workaround for https://code.google.com/p/webrtc/issues/detail?id=4808 (fixed in M46)
-        /* it is not apparently. This can be set to the empty string.
+            other = standardReport[report.selectedCandidatePairId];
+            newId = `transport_${report.id}`;
+            standardReport[newId] = {
+                type: 'transport',
+                timestamp: report.timestamp,
+                id: newId,
+                bytesSent: (other && other.bytesSent) || 0,
+                bytesReceived: (other && other.bytesReceived) || 0,
+
+                // FIXME (spec): rtpcpTransportStatsId: rtcp-mux is required so...
+                activeConnection: other && other.selected,
+                selectedCandidatePairId: report.selectedCandidatePairId,
+                localCertificateId: report.localCertificateId,
+                remoteCertificateId: report.remoteCertificateId
+            };
+            break;
+        case 'ssrc':
+            newId = `rtpstream_${report.id}`;
+
+            // Workaround for https://code.google.com/p/webrtc/issues/detail?id=4808 (fixed in M46)
+            /* it is not apparently. This can be set to the empty string.
         if (!report.googCodecName) {
           report.googCodecName = 'VP8';
         }
         */
-        standardReport[newId] = {
-          //type: 'notastandalonething',
-          timestamp: report.timestamp,
-          id: newId,
-          ssrc: report.ssrc,
-          mediaType: report.kind || report.mediaType,
-          kind: report.kind || report.mediaType,
-          associateStatsId: 'rtcpstream_' + report.id,
-          isRemote: false,
-          mediaTrackId: 'mediatrack_' + report.id,
-          transportId: report.transportId,
-        };
-        if (report.googCodecName && report.googCodecName.length) {
-          standardReport.codecId = 'codec_' + report.googCodecName
-        }
-        if (report.kind === 'video' || report.mediaType === 'video') {
-          standardReport[newId].firCount = report.firCount;
-          standardReport[newId].pliCount = report.pliCount;
-          standardReport[newId].nackCount = report.nackCount;
-          standardReport[newId].sliCount = report.sliCount; // undefined yet
-        }
-        if (report.remoteSource) {
-          standardReport[newId].type = 'inbound-rtp';
-          standardReport[newId].packetsReceived = report.packetsReceived;
-          standardReport[newId].bytesReceived = report.bytesReceived;
-          standardReport[newId].packetsLost = report.packetsLost;
-        } else {
-          standardReport[newId].type = 'outbound-rtp';
-          standardReport[newId].packetsSent = report.packetsSent;
-          standardReport[newId].bytesSent = report.bytesSent;
-          standardReport[newId].roundTripTime = report.roundTripTime;
-          // TODO: targetBitrate
-        }
+            standardReport[newId] = {
+                // type: 'notastandalonething',
+                timestamp: report.timestamp,
+                id: newId,
+                ssrc: report.ssrc,
+                mediaType: report.kind || report.mediaType,
+                kind: report.kind || report.mediaType,
+                associateStatsId: `rtcpstream_${report.id}`,
+                isRemote: false,
+                mediaTrackId: `mediatrack_${report.id}`,
+                transportId: report.transportId
+            };
+            if (report.googCodecName && report.googCodecName.length) {
+                standardReport.codecId = `codec_${report.googCodecName}`;
+            }
+            if (report.kind === 'video' || report.mediaType === 'video') {
+                standardReport[newId].firCount = report.firCount;
+                standardReport[newId].pliCount = report.pliCount;
+                standardReport[newId].nackCount = report.nackCount;
+                standardReport[newId].sliCount = report.sliCount; // undefined yet
+            }
+            if (report.remoteSource) {
+                standardReport[newId].type = 'inbound-rtp';
+                standardReport[newId].packetsReceived = report.packetsReceived;
+                standardReport[newId].bytesReceived = report.bytesReceived;
+                standardReport[newId].packetsLost = report.packetsLost;
+            } else {
+                standardReport[newId].type = 'outbound-rtp';
+                standardReport[newId].packetsSent = report.packetsSent;
+                standardReport[newId].bytesSent = report.bytesSent;
+                standardReport[newId].roundTripTime = report.roundTripTime;
 
-        // FIXME: this is slightly more complicated. inboundrtp can have packetlost
-        // but so can outbound-rtp via rtcp (isRemote = true)
-        // need to unmux with opposite type and put loss into remote report.
-        newId = 'rtcpstream_' + report.id;
-        standardReport[newId] = {
-          //type: 'notastandalonething',
-          timestamp: report.timestamp,
-          id: newId,
-          ssrc: report.ssrc,
-          associateStatsId: 'rtpstream_' + report.id,
-          isRemote: true,
-          mediaTrackId: 'mediatrack_' + report.id,
-          transportId: report.transportId,
-          codecId: 'codec_' + report.googCodecName
-        };
-        if (report.remoteSource) {
-          standardReport[newId].type = 'outbound-rtp';
-          standardReport[newId].packetsSent = report.packetsSent;
-          standardReport[newId].bytesSent = report.bytesSent;
-          standardReport[newId].roundTripTime = report.roundTripTime;
-          standardReport[newId].packetsLost = report.packetsLost;
-        } else {
-          standardReport[newId].type = 'inbound-rtp';
-          standardReport[newId].packetsReceived = report.packetsReceived;
-          standardReport[newId].bytesReceived = report.bytesReceived;
-          standardReport[newId].packetsLost = report.packetsLost;
-        }
-        // FIXME: one of these is not set?
-        if (report.jitter) {
-          standardReport[newId].jitter = report.jitter;
-        }
+                // TODO: targetBitrate
+            }
 
-        newId = 'mediatrack_' + report.id;
-        standardReport[newId] = {
-          type: 'track',
-          timestamp: report.timestamp,
-          id: newId,
-          trackIdentifier: report.trackIdentifier,
-          remoteSource: report.remoteSource,
-          ssrcIds: ['rtpstream_' + report.id, 'rtcpstream_' + report.id]
-        };
-        if (report.kind === 'audio' || report.mediaType === 'audio') {
-          standardReport[newId].audioLevel = report.audioLevel;
-          if (report.id.indexOf('send') !== -1) {
-            standardReport[newId].echoReturnLoss = report.echoReturnLoss;
-            standardReport[newId].echoReturnLossEnhancement =
-                report.echoReturnLossEnhancement;
-          }
-        } else if (report.kind === 'video' || report.mediaType === 'video') {
-          standardReport[newId].frameWidth = report.frameWidth;
-          standardReport[newId].frameHeight = report.frameHeight;
-          standardReport[newId].framesPerSecond = report.framesPerSecond;
-          if (report.remoteSource) {
-            standardReport[newId].framesReceived = report.framesReceived;
-            standardReport[newId].framesDecoded = report.framesDecoded;
-            standardReport[newId].framesDropped = report.framesDropped;
-            standardReport[newId].framesCorrupted = report.framesCorrupted;
-          } else {
-            standardReport[newId].framesSent = report.framesSent;
-          }
-        }
+            // FIXME: this is slightly more complicated. inboundrtp can have packetlost
+            // but so can outbound-rtp via rtcp (isRemote = true)
+            // need to unmux with opposite type and put loss into remote report.
+            newId = `rtcpstream_${report.id}`;
+            standardReport[newId] = {
+                // type: 'notastandalonething',
+                timestamp: report.timestamp,
+                id: newId,
+                ssrc: report.ssrc,
+                associateStatsId: `rtpstream_${report.id}`,
+                isRemote: true,
+                mediaTrackId: `mediatrack_${report.id}`,
+                transportId: report.transportId,
+                codecId: `codec_${report.googCodecName}`
+            };
+            if (report.remoteSource) {
+                standardReport[newId].type = 'outbound-rtp';
+                standardReport[newId].packetsSent = report.packetsSent;
+                standardReport[newId].bytesSent = report.bytesSent;
+                standardReport[newId].roundTripTime = report.roundTripTime;
+                standardReport[newId].packetsLost = report.packetsLost;
+            } else {
+                standardReport[newId].type = 'inbound-rtp';
+                standardReport[newId].packetsReceived = report.packetsReceived;
+                standardReport[newId].bytesReceived = report.bytesReceived;
+                standardReport[newId].packetsLost = report.packetsLost;
+            }
 
-        // We have one codec item per codec name.
-        // This might be wrong (in theory) since with unified plan
-        // we can have multiple m-lines and codecs and different
-        // payload types/parameters but unified is not supported yet.
-        /*
+            // FIXME: one of these is not set?
+            if (report.jitter) {
+                standardReport[newId].jitter = report.jitter;
+            }
+
+            newId = `mediatrack_${report.id}`;
+            standardReport[newId] = {
+                type: 'track',
+                timestamp: report.timestamp,
+                id: newId,
+                trackIdentifier: report.trackIdentifier,
+                remoteSource: report.remoteSource,
+                ssrcIds: [ `rtpstream_${report.id}`, `rtcpstream_${report.id}` ]
+            };
+            if (report.kind === 'audio' || report.mediaType === 'audio') {
+                standardReport[newId].audioLevel = report.audioLevel;
+                if (report.id.indexOf('send') !== -1) {
+                    standardReport[newId].echoReturnLoss = report.echoReturnLoss;
+                    standardReport[newId].echoReturnLossEnhancement
+                = report.echoReturnLossEnhancement;
+                }
+            } else if (report.kind === 'video' || report.mediaType === 'video') {
+                standardReport[newId].frameWidth = report.frameWidth;
+                standardReport[newId].frameHeight = report.frameHeight;
+                standardReport[newId].framesPerSecond = report.framesPerSecond;
+                if (report.remoteSource) {
+                    standardReport[newId].framesReceived = report.framesReceived;
+                    standardReport[newId].framesDecoded = report.framesDecoded;
+                    standardReport[newId].framesDropped = report.framesDropped;
+                    standardReport[newId].framesCorrupted = report.framesCorrupted;
+                } else {
+                    standardReport[newId].framesSent = report.framesSent;
+                }
+            }
+
+            // We have one codec item per codec name.
+            // This might be wrong (in theory) since with unified plan
+            // we can have multiple m-lines and codecs and different
+            // payload types/parameters but unified is not supported yet.
+            /*
         if (!standardReport['codec_' + report.googCodecName]) {
           // determine payload type (from offer) and negotiated (?spec)
           // parameters (from answer). (parameters not negotiated yet)
@@ -367,31 +385,36 @@ module.exports = function(stats) {
           }
         }
         */
-        break;
-      default:
-        break;
-    }
-  });
-  // Step 3: fiddle the transport in between transport and rtp stream
-  Object.keys(standardReport).forEach(id => {
-    const report = standardReport[id];
-    if (report.type === 'transport') {
-      // RTCTransport has a pointer to the selectedCandidatePair...
-      let other = standardReport[report.selectedCandidatePairId];
-      if (other) {
-        other.transportId = report.id;
-      }
-      // but no pointers to the rtpstreams running over it?!
-      // instead, we rely on having added 'transport_'
-      Object.keys(standardReport).forEach(otherid => {
-        other = standardReport[otherid];
-        if ((other.type === 'inbound-rtp' ||
-            other.type === 'outbound-rtp') &&
-            report.id === 'transport_' + other.transportId) {
-          other.transportId = report.id;
+            break;
+        default:
+            break;
         }
-      });
-    }
-  });
-  return standardReport;
-}
+    });
+
+    // Step 3: fiddle the transport in between transport and rtp stream
+    Object.keys(standardReport).forEach(id => {
+        const report = standardReport[id];
+
+        if (report.type === 'transport') {
+            // RTCTransport has a pointer to the selectedCandidatePair...
+            let other = standardReport[report.selectedCandidatePairId];
+
+            if (other) {
+                other.transportId = report.id;
+            }
+
+            // but no pointers to the rtpstreams running over it?!
+            // instead, we rely on having added 'transport_'
+            Object.keys(standardReport).forEach(otherid => {
+                other = standardReport[otherid];
+                if ((other.type === 'inbound-rtp'
+            || other.type === 'outbound-rtp')
+            && report.id === `transport_${other.transportId}`) {
+                    other.transportId = report.id;
+                }
+            });
+        }
+    });
+
+    return standardReport;
+};

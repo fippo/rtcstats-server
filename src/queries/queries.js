@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 'use strict';
 /* typically used like this WHERE `ssh redshift` creates a tunnel to your redshift db
 ssh -f redshift sleep 10
@@ -1357,7 +1359,7 @@ function connectiontimeCountry() {
             "MEDIAN(connectiontime) OVER (PARTITION BY date, locationcountry) AS median, " +
             "STDDEV(connectiontime) OVER (PARTITION BY date, locationcountry) AS stddev " +
             "FROM features " +
-            "WHERE connectiontime > 0 and browsername = 'Chrome' " + //or browsername = 'Firefox' " + 
+            "WHERE connectiontime > 0 and browsername = 'Chrome' " + //or browsername = 'Firefox' " +
             "and (locationcountry = 'Norway' or locationcountry = 'Germany' or locationcountry = 'Pakistan' or locationcountry = 'United States' or locationcountry = 'India' or locationcountry = 'Japan' or locationcountry = 'France' or locationcountry = 'Brazil') " +
             "and browsermajorversion > 52 and browsermajorversion < 90" +
         ") t1 " +
@@ -1385,7 +1387,7 @@ function connectiontimeSFU() {
             "MEDIAN(connectiontime) OVER (PARTITION BY date, usingicelite) AS median, " +
             "STDDEV(connectiontime) OVER (PARTITION BY date, usingicelite) AS stddev " +
             "FROM features " +
-            "WHERE connectiontime > 0 and browsername = 'Chrome' " + //or browsername = 'Firefox' " + 
+            "WHERE connectiontime > 0 and browsername = 'Chrome' " + //or browsername = 'Firefox' " +
             "and browsermajorversion > 52 and browsermajorversion < 90" +
         ") t1 " +
         "GROUP BY day, usingicelite " +

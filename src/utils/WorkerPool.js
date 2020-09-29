@@ -1,15 +1,15 @@
 const EventEmitter = require('events');
-const { Worker } = require('worker_threads');
 const uuid = require('uuid');
+const { Worker } = require('worker_threads');
 
 const logger = require('../logging');
-const { ResponseType } = require('../utils/utils');
 const { queuedDumps } = require('../prom-collector');
+const { ResponseType } = require('../utils/utils');
 
 const WorkerStatus = Object.freeze({
     IDLE: 'IDLE',
     STOPPED: 'STOPPED',
-    RUNNING: 'RUNNING',
+    RUNNING: 'RUNNING'
 });
 
 /**
@@ -18,6 +18,11 @@ const WorkerStatus = Object.freeze({
  * However when the processes exits from the main thread or SIGKILL/SIGTERM it will shutdown as expected.
  */
 class WorkerPool extends EventEmitter {
+    /**
+     *
+     * @param {*} workerScriptPath
+     * @param {*} poolSize
+     */
     constructor(workerScriptPath, poolSize) {
         super();
 
@@ -31,24 +36,35 @@ class WorkerPool extends EventEmitter {
         }
     }
 
+    /**
+     *
+     */
     _addWorkerToPool() {
         const workerMeta = this._createWorker(uuid.v4());
+
         this.workerPool.push(workerMeta);
         this._workerPoolIntrospect();
 
         return workerMeta;
     }
 
+    /**
+     *
+     * @param {*} workerID
+     */
     _createWorker(workerID) {
         const workerInstance = new Worker(this.workerScriptPath, {
             workerData: { workerID },
-            resourceLimits: { maxOldGenerationSizeMb: 5120, maxYoungGenerationSizeMb: 1024 },
+            resourceLimits: { maxOldGenerationSizeMb: 5120,
+                maxYoungGenerationSizeMb: 1024 }
         });
-        const workerMeta = { workerID, worker: workerInstance, status: WorkerStatus.IDLE };
+        const workerMeta = { workerID,
+            worker: workerInstance,
+            status: WorkerStatus.IDLE };
 
         logger.info('[WorkerPool] Created worker %j', workerMeta);
 
-        workerInstance.on('message', (message) => {
+        workerInstance.on('message', message => {
 
             if (message.type === ResponseType.STATE_UPDATE) {
                 if (message.body) {
@@ -66,15 +82,17 @@ class WorkerPool extends EventEmitter {
         });
 
         // Uncaught error thrown in the worker script, a exit event will follow so we just log the error.
-        workerInstance.on('error', (error) => {
+        workerInstance.on('error', error => {
             logger.error('[WorkerPool] Worker %j with error %o: ', workerMeta, error);
+
             // Check if there was an ongoing operation during the worker crash and notify the client.
             if (workerMeta.currentTaskMeta) {
-                this.emit(ResponseType.ERROR, {...workerMeta.currentTaskMeta, error});
+                this.emit(ResponseType.ERROR, { ...workerMeta.currentTaskMeta,
+                    error });
             }
         });
 
-        workerInstance.on('exit', (exitCode) => {
+        workerInstance.on('exit', exitCode => {
             logger.info('[WorkerPool] Worker %j exited with code %d.', workerMeta, exitCode);
             workerMeta.status = WorkerStatus.STOPPED;
 
@@ -90,29 +108,47 @@ class WorkerPool extends EventEmitter {
         return workerMeta;
     }
 
+    /**
+     *
+     */
     _workerPoolIntrospect() {
-        const workerPoolInfo = this.workerPool.map((workerMeta) => {
-            return { uuid: workerMeta.workerID, status: workerMeta.status };
+        const workerPoolInfo = this.workerPool.map(workerMeta => {
+            return { uuid: workerMeta.workerID,
+                status: workerMeta.status };
         });
 
         logger.info('[WorkerPool] Worker pool introspect: %j ', workerPoolInfo);
     }
 
+    /**
+     *
+     * @param {*} worker
+     */
     _removeWorkerFromPool(worker) {
         logger.info('[WorkerPool] Removing worker from pool: %j', worker);
         const workerIndex = this.workerPool.indexOf(worker);
+
         if (workerIndex > -1) {
             this.workerPool.splice(workerIndex, 1);
         }
         this._workerPoolIntrospect();
     }
 
+    /**
+     *
+     * @param {*} workerMeta
+     * @param {*} task
+     */
     _processTask(workerMeta, task) {
-        logger.info(`[WorkerPool] Processing task %j, current queue size %d`, task, this.taskQueue.length);
+        logger.info('[WorkerPool] Processing task %j, current queue size %d', task, this.taskQueue.length);
         workerMeta.worker.postMessage(task);
         workerMeta.status = WorkerStatus.RUNNING;
     }
 
+    /**
+     *
+     * @param {*} workerMeta
+     */
     _processNextTask(workerMeta) {
         if (this.taskQueue.length === 0) {
             workerMeta.status = WorkerStatus.IDLE;
@@ -121,12 +157,16 @@ class WorkerPool extends EventEmitter {
         }
     }
 
+    /**
+     *
+     */
     _regenerateWorkerToPool() {
         // timeout is required here so the regeneration process doesn't enter an infinite loop
         // when node.js is attempting to shutdown.
         setTimeout(() => {
             if (this.workerPool.length < this.poolSize) {
                 const workerMeta = this._addWorkerToPool();
+
                 this._processNextTask(workerMeta);
             } else {
                 logger.warn('[WorkerPool] Can not add additional worker, pool is already at max capacity!');
@@ -134,12 +174,17 @@ class WorkerPool extends EventEmitter {
         }, 2000);
     }
 
+    /**
+     *
+     */
     _getIdleWorkers() {
-        return this.workerPool.filter((worker) => {
-            return worker.status === WorkerStatus.IDLE;
-        });
+        return this.workerPool.filter(worker => worker.status === WorkerStatus.IDLE);
     }
 
+    /**
+     *
+     * @param {*} task
+     */
     addTask(task) {
         const idleWorkers = this._getIdleWorkers();
 
@@ -148,10 +193,15 @@ class WorkerPool extends EventEmitter {
         } else {
             queuedDumps.inc();
             this.taskQueue.push(task);
-            logger.info(`[WorkerPool] There are no IDLE workers queueing, current queue size <${this.taskQueue.length}>`);
+            logger.info(
+                `[WorkerPool] There are no IDLE workers queueing, current queue size <${this.taskQueue.length}>`
+            );
         }
     }
 
+    /**
+     *
+     */
     getTaskQueueSize() {
         return this.taskQueue.length;
     }

@@ -1,59 +1,92 @@
 const assert = require('assert').strict;
-var WebSocket = require('ws');
-var fs = require('fs');
-var config = require('config');
-
+const config = require('config');
+const fs = require('fs');
 const LineByLine = require('line-by-line');
+const WebSocket = require('ws');
 
-var server = require('../app');
+const server = require('../app');
 const logger = require('../logging');
 const { ResponseType } = require('../utils/utils');
+
+let testCheckRouter;
+
+/**
+ *
+ */
 class TestCheckRouter {
-    constructor(server) {
+    /**
+     *
+     * @param {*} appServer
+     */
+    constructor(appServer) {
         this.testCheckMap = {};
 
-        server.workerPool.on(ResponseType.PROCESSING, (body) => {
+        appServer.workerPool.on(ResponseType.PROCESSING, body => {
             this.routeProcessingResponse(body);
         });
 
-        server.workerPool.on(ResponseType.DONE, (body) => {
+        appServer.workerPool.on(ResponseType.DONE, body => {
             this.routeDoneResponse(body);
         });
 
-        server.workerPool.on(ResponseType.METRICS, (body) => {
+        appServer.workerPool.on(ResponseType.METRICS, body => {
             this.routeMetricsResponse(body);
         });
 
-        server.workerPool.on(ResponseType.ERROR, (body) => {
+        appServer.workerPool.on(ResponseType.ERROR, body => {
             this.routeErrorResponse(body);
         });
     }
 
+    /**
+     *
+     * @param {*} responseBody
+     */
     checkResponseFormat(responseBody) {
         assert('clientId' in responseBody);
         assert(responseBody.clientId in this.testCheckMap);
     }
 
+    /**
+     *
+     * @param {*} body
+     */
     routeProcessingResponse(body) {
         this.checkResponseFormat(body);
         this.testCheckMap[body.clientId].checkProcessingResponse(body);
     }
 
+    /**
+     *
+     * @param {*} body
+     */
     routeDoneResponse(body) {
         this.checkResponseFormat(body);
         this.testCheckMap[body.clientId].checkDoneResponse(body);
     }
 
+    /**
+     *
+     * @param {*} body
+     */
     routeErrorResponse(body) {
         this.checkResponseFormat(body);
         this.testCheckMap[body.clientId].checkErrorResponse(body);
     }
 
+    /**
+     *
+     * @param {]} body
+     */
     routeMetricsResponse(body) {
         this.checkResponseFormat(body);
         this.testCheckMap[body.clientId].checkMetricsResponse(body);
     }
 
+    /**
+     *
+     * @param {*} testCheck
+     */
     attachTest(testCheck) {
         // Make sure that the test object contains at least the clientId key so we can route results to their
         // appropriate tests.
@@ -63,67 +96,80 @@ class TestCheckRouter {
     }
 }
 
-function checkTestCompletion(server) {
-    if (server.processed.get().values[0].value === 2) {
-        server.stop();
+/**
+ *
+ * @param {*} server
+ */
+function checkTestCompletion(appServer) {
+    if (appServer.processed.get().values[0].value === 2) {
+        appServer.stop();
     } else {
-        setTimeout(checkTestCompletion, 4000, server);
+        setTimeout(checkTestCompletion, 4000, appServer);
     }
 }
 
-function simulateConnection(dumpPath,resultPath) {
-    let resultString = fs.readFileSync(resultPath);
-    let resultObject = JSON.parse(resultString);
-    let dumpFile = dumpPath.split('/').filter(Boolean).pop();
+/**
+ *
+ * @param {*} dumpPath
+ * @param {*} resultPath
+ */
+function simulateConnection(dumpPath, resultPath) {
+    const resultString = fs.readFileSync(resultPath);
+    const resultObject = JSON.parse(resultString);
+    const dumpFile = dumpPath.split('/').filter(Boolean)
+                             .pop();
 
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore self-signed cert
 
-    let ws = new WebSocket('ws://localhost:' + config.get('server').port + '/' + dumpFile, {
+    const ws = new WebSocket(`ws://localhost:${config.get('server').port}/${dumpFile}`, {
         headers: {
-            'User-Agent': 'integration-test/' + dumpFile,
+            'User-Agent': `integration-test/${dumpFile}`
         },
-        origin: 'https://localhost',
+        origin: 'https://localhost'
     });
 
     ws.on('open', function open() {
         testCheckRouter.attachTest({
             clientId: dumpFile,
-            checkDoneResponse: (body) => {
+            checkDoneResponse: body => {
                 logger.info('[TEST] Handling DONE event with body %j', body);
             },
-            checkProcessingResponse: (body) => {
+            checkProcessingResponse: body => {
                 logger.info('[TEST] Handling PROCESSING event with body %j', body);
                 body.clientId = dumpFile;
                 const parsedBody = JSON.parse(JSON.stringify(body));
-                //assert.deepStrictEqual(parsedBody, resultObject);
+
+                assert.deepStrictEqual(parsedBody, resultObject);
             },
-            checkErrorResponse: (body) => {
+            checkErrorResponse: body => {
                 logger.info('[TEST] Handling ERROR event with body %j', body);
             },
-            checkMetricsResponse: (body) => {
+            checkMetricsResponse: body => {
                 logger.info('[TEST] Handling METRICS event with body %j', body);
-                //assert.fail(body.extractDurationMs < 400);
-            },
+
+                // assert.fail(body.extractDurationMs < 400);
+            }
         });
 
-        let lr = new LineByLine(dumpPath);
+        const lr = new LineByLine(dumpPath);
 
-        lr.on('error', function (err) {
+        lr.on('error', err => {
             logger.error('Error reading line: %j', err);
         });
 
-        lr.on('line', function (line) {
+        lr.on('line', line => {
             ws.send(line);
         });
 
-        lr.on('end', function () {
+        lr.on('end', () => {
             ws.close();
         });
     });
 }
 
-var testCheckRouter = undefined;
-
+/**
+ *
+ */
 function runTest() {
     testCheckRouter = new TestCheckRouter(server);
 

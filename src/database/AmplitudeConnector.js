@@ -1,8 +1,17 @@
+/* eslint-disable camelcase */
 const Amplitude = require('amplitude');
 
 const logger = require('../logging');
 
+/**
+ *
+ */
 class AmplitudeConnector {
+    /**
+     *
+     * @param {*} key
+     * @param {*} options
+     */
     constructor(key, options) {
         if (!key) {
             throw new Error('[Amplitude] Please provide an amplitude key!');
@@ -20,7 +29,8 @@ class AmplitudeConnector {
         const filteredFeature = {};
 
         // TODO Use object destructuring for a more clean approach.
-        filteredFeature.calledGetUserMediaRequestingScreen = clientFeatures.calledGetUserMediaRequestingScreen;
+        filteredFeature.calledGetUserMediaRequestingScreen
+            = clientFeatures.calledGetUserMediaRequestingScreen;
         filteredFeature.calledGetUserMediaRequestingAudio = clientFeatures.calledGetUserMediaRequestingAudio;
         filteredFeature.calledGetUserMediaRequestingVideo = clientFeatures.calledGetUserMediaRequestingVideo;
         filteredFeature.firstAudioTrackLabel = clientFeatures.firstAudioTrackLabel;
@@ -37,6 +47,8 @@ class AmplitudeConnector {
         filteredFeature.statsMeanSendingBitrate = connectionFeatures.statsMeanSendingBitrate;
         filteredFeature.statsMeanAudioPacketsLost = connectionFeatures.statsMeanAudioPacketsLost;
         filteredFeature.statsMeanVideoPacketsLost = connectionFeatures.statsMeanVideoPacketsLost;
+        filteredFeature.statsMeanAudioPacketsLostPct = connectionFeatures.statsMeanAudioPacketsLostPct;
+        filteredFeature.statsMeanVideoPacketsLostPct = connectionFeatures.statsMeanVideoPacketsLostPct;
         filteredFeature.firstCandidatePairType = connectionFeatures.firstCandidatePairType;
         filteredFeature.bweGoogActualEncBitrateMean = connectionFeatures.bweGoogActualEncBitrateMean;
         filteredFeature.bweGoogRetransmitBitrateMean = connectionFeatures.bweGoogRetransmitBitrateMean;
@@ -48,11 +60,16 @@ class AmplitudeConnector {
         return filteredFeature;
     }
 
+    /**
+     *
+     * @param {*} rtcstatsFeatures
+     */
     track(rtcstatsFeatures) {
         try {
             // TODO Add checks for identity info using object destructuring.
             if (!rtcstatsFeatures.identity.userId && !rtcstatsFeatures.identity.deviceId) {
                 logger.warn('[Amplitude] userId or deviceId must be present');
+
                 return;
             }
 
@@ -67,8 +84,11 @@ class AmplitudeConnector {
                     confID: rtcstatsFeatures.identity.confID,
                     ...rtcstatsFeatures.identity.hosts,
                     ...rtcstatsFeatures.identity.deploymentInfo,
-                    ...this.extractRelevantStats(rtcstatsFeatures.connectionFeatures, rtcstatsFeatures.clientFeatures),
-                },
+                    ...this.extractRelevantStats(
+                        rtcstatsFeatures.connectionFeatures,
+                        rtcstatsFeatures.clientFeatures
+                    )
+                }
             };
 
             this.amplitude
@@ -82,9 +102,19 @@ class AmplitudeConnector {
                         amplitudeEvent.session_id
                     )
                 )
-                .catch((error) => logger.error('[Amplitude] track promise failed for event %j error: %s', amplitudeEvent, error.message));
+                .catch(error =>
+                    logger.error(
+                        '[Amplitude] track promise failed for event %j error: %s',
+                        amplitudeEvent,
+                        error.message
+                    )
+                );
         } catch (error) {
-            logger.error('[Amplitude] Failed to send rtcstats features %j with error: %s', rtcstatsFeatures, error.message);
+            logger.error(
+                '[Amplitude] Failed to send rtcstats features %j with error: %s',
+                rtcstatsFeatures,
+                error.message
+            );
         }
     }
 }
