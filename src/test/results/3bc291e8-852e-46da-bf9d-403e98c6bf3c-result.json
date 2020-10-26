@@ -1,4 +1,4 @@
-{
+[{
   "url": "https://localhost/3bc291e8-852e-46da-bf9d-403e98c6bf3c",
   "clientId": "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
   "connid": "PC_0",
@@ -260,16 +260,24 @@
     "statsMeanRoundTripTime": 216,
     "statsMeanReceivingBitrate": 1322,
     "statsMeanSendingBitrate": 2959,
-    "statsMeanVideoPacketsLostTotal": 5567,
-    "statsMeanVideoPacketsSentTotal": 2090256,
-    "statsMeanVideoPacketsLostPct": 0.27,
+    "statsVideoPacketsLostTotal": 5567,
+    "statsVideoPacketsSentTotal": 2090256,
+    "statsVideoPacketsLostPct": 0.27,
     "statsMeanVideoPacketsLost": 0.93,
-    "statsMeanAudioPacketsLostTotal": 1067,
-    "statsMeanAudioPacketsSentTotal": 299314,
-    "statsMeanAudioPacketsLostPct": 0.36,
+    "statsAudioPacketsLostTotal": 1067,
+    "statsAudioPacketsSentTotal": 299314,
+    "statsAudioPacketsLostPct": 0.36,
     "statsMeanAudioPacketsLost": 0.18,
+    "statsHDVideoPct": 96.43,
+    "statsLDVideoPct": 0.2,
+    "statsMaxVideoRes": 720,
+    "statsMedianVideoRes": 540,
+    "statsMinVideoRes": 180,
+    "statsNoVideoPct": 0.03,
+    "statsSDVideoPct": 3.34,
     "stunRTTInitial30sMean": 205,
     "stunRTTInitial30sMax": 209,
+    "sfuP2P": true,
     "bytesTotalSent": 2211629987,
     "bytesTotalReceived": 987458064,
     "firstCandidatePairType": "peerreflexive;serverreflexive",
@@ -314,4 +322,4 @@
     "calledAddTrack": false,
     "streams": []
   }
-}
+}]

@@ -30,7 +30,7 @@
 ["setRemoteDescriptionOnSuccess",null,null,1593426941323]
 ["setRemoteDescriptionOnSuccess",null,null,1593426941323]
 ["create","PC_0",{"iceServers":[{"urls":"turns:all-turnrelay.jitsi.net:443?transport=tcp","username":"1593513339"}],"sdpSemantics":"plan-b","bundlePolicy":"max-bundle","browserType":"webkit"},1593426941751]
-["constraints","PC_0",{"optional":[{"googHighStartBitrate":0},{"googPayloadPadding":true},{"googScreencastMinBitrate":100},{"googCpuOveruseDetection":true},{"googCpuOveruseEncodeUsage":true},{"googCpuUnderuseThreshold":55},{"googCpuOveruseThreshold":85}]},1593426941753]
+["constraints","PC_0",{"optional":[{"googHighStartBitrate":0},{"rtcStatsSFUP2P":false},{"googPayloadPadding":true},{"googScreencastMinBitrate":100},{"googCpuOveruseDetection":true},{"googCpuOveruseEncodeUsage":true},{"googCpuUnderuseThreshold":55},{"googCpuOveruseThreshold":85}]},1593426941753]
 ["addStream","PC_0","27ad72e2-a7c0-4202-b132-f13bbabdfc77 audio:620af7f0-2b41-493e-8620-7cbafb1949a7",1593426941888]
 ["addStream","PC_0","27ad72e2-a7c0-4202-b132-f13bbabdfc77 audio:620af7f0-2b41-493e-8620-7cbafb1949a7",1593426941888]
 ["addStream","PC_0","06e5ef3c-1533-4ff1-a907-b1c3ddb8639a video:496cfd37-a4e1-49e5-b67e-54e139030b13",1593426941889]

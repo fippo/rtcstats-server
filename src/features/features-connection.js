@@ -157,6 +157,110 @@ function extractBWE(peerConnectionLog) {
     return reports;
 }
 
+/**
+ * Return the resolution as a valid number, guard against Object/Null/NaN/Undefined/Infinity values
+ *
+ * @param {Number} resolution
+ * @returns {Number} Valid resolution as a number.
+ */
+function extractValidResolution(resolution) {
+
+    if (Number.isFinite(resolution)) {
+        return resolution;
+    }
+
+    return 0;
+}
+
+/**
+ * Groups resolutions to High Definition, Standard Definition, Low Definition and No Video buckets.
+ * Count the total samples as well so we can establish a usage percentage for each of those.
+ * @param {ResStatsMap} resStatsMap
+ * @param {Number} resolution
+ */
+function fitResToDefinition(resStatsMap, resolution) {
+
+    ++resStatsMap.totalSamples;
+
+    // Not very elegant but we need it to be fast.
+    if (resolution >= 720) {
+        // HD
+        ++resStatsMap.resTimeShare.hdVideo;
+    } else if (resolution >= 360) {
+        // SD
+        ++resStatsMap.resTimeShare.sdVideo;
+    } else if (resolution > 0) {
+        // LD
+        ++resStatsMap.resTimeShare.ldVideo;
+    } else {
+        // NV
+        ++resStatsMap.resTimeShare.noVideo;
+    }
+}
+
+/**
+ * Compute how much time as a percentage of the total, this session spent send each standard definition.
+ *
+ * @param {ResStatsMap} resStatsMap
+ * @returns {ResTimeSharePct} - Computed time share as a percentage for each video definition
+ */
+function calculateResTimeSharePct(resStatsMap) {
+
+    const { totalSamples, resTimeShare } = resStatsMap;
+
+    const resTimeSharePct = {};
+
+    // resTimeSharePct values should amount
+    resTimeSharePct.hdVideo = percentOf(resTimeShare.hdVideo, totalSamples);
+    resTimeSharePct.sdVideo = percentOf(resTimeShare.sdVideo, totalSamples);
+    resTimeSharePct.ldVideo = percentOf(resTimeShare.ldVideo, totalSamples);
+    resTimeSharePct.noVideo = percentOf(resTimeShare.noVideo, totalSamples);
+
+    return resTimeSharePct;
+}
+
+/**
+ * Calculate aggregates of the provided resolution map.
+ *
+ * @param {Object} usedResolutions Contains a map of the used definitions throughout the session.
+ * @returns {{min: Number,max: Number, median: Number}}
+ */
+function calculateResAggregates(usedResolutions) {
+
+    const sortedRes = Object.values(usedResolutions).sort();
+
+    const aggregateValues = {
+        min: 0,
+        max: 0,
+        median: 0
+    };
+
+    if (!sortedRes.length) {
+        return aggregateValues;
+    }
+
+    aggregateValues.min = sortedRes[0];
+    aggregateValues.max = sortedRes[sortedRes.length - 1];
+    aggregateValues.median = sortedRes[Math.floor(sortedRes.length / 2)];
+
+    return aggregateValues;
+}
+
+/**
+ * Map resolution to object properties, so we have an aggregated view of what resolutions were used.
+ *
+ * @param {Object} usedResolutions
+ * @param {Number} resolution
+ */
+function fitResToAggregateMap(usedResolutions, resolution) {
+    if (!resolution) {
+        return;
+    }
+
+    usedResolutions[resolution] = resolution;
+}
+
+
 module.exports = {
     // client and conference identifiers, specified as optional peerconnection constraints
     // (which are not a thing any longer). See https://github.com/opentok/rtcstats/issues/28
@@ -214,7 +318,7 @@ module.exports = {
         }
         constraints = constraints.optional;
         for (let i = 0; i < constraints.length; i++) {
-            if (constraints[i].rtcStatsSFUP2P) {
+            if (constraints[i].hasOwnProperty('rtcStatsSFUP2P')) {
                 return constraints[i].rtcStatsSFUP2P;
             }
         }
@@ -1299,16 +1403,31 @@ module.exports = {
     },
 
     // mean RTT, send and recv bitrate of the active candidate pair
-    statsMean(client, peerConnectionLog) {
+    stats(client, peerConnectionLog) {
         const feature = {};
         const rtts = [];
         const recv = [];
         const send = [];
 
         const packetsLostMap = {};
+        const usedResolutions = {};
+
+        /**
+         * @type {ResStatsMap}
+         */
+        const resStatsMap = {
+            totalSamples: 0,
+            resTimeShare: {
+                noVideo: 0,
+                ldVideo: 0,
+                sdVideo: 0,
+                hdVideo: 0
+            }
+        };
 
         let lastStatsReport;
         let lastTime;
+
 
         // Iterate over the getStats entries for this specific PC and calculate the average roundTripTime
         // data from the candidate-pair statistic.
@@ -1317,7 +1436,6 @@ module.exports = {
                 return;
             }
             const statsReport = entry.value;
-
 
             // look for type track, remoteSource: false, audioLevel (0..1)
             Object.keys(statsReport).forEach(id => {
@@ -1337,9 +1455,26 @@ module.exports = {
                             packetsLostMap[report.ssrc].samples = 0;
                         }
 
-                        packetsLostMap[report.ssrc].packetsLost = report.packetsLost || 0;
-                        packetsLostMap[report.ssrc].packetsSent = report.packetsSent || 0;
+                        const packetsLost = report.packetsLost || 0;
+                        const packetsSent = report.packetsSent || 0;
+                        const prevPacketsLost = packetsLostMap[report.ssrc].packetsLost || 0;
+                        const prevPacketsSent = packetsLostMap[report.ssrc].packetsSent || 0;
+
+                        if (prevPacketsLost <= packetsLost) {
+                            packetsLostMap[report.ssrc].packetsLost = packetsLost;
+                        }
+
+                        if (prevPacketsSent <= packetsSent) {
+                            packetsLostMap[report.ssrc].packetsSent = packetsSent;
+                        }
+
                         ++packetsLostMap[report.ssrc].samples;
+                    }
+                    if (report.mediaType === 'video') {
+                        const resolution = extractValidResolution(report.frameHeight);
+
+                        fitResToDefinition(resStatsMap, resolution);
+                        fitResToAggregateMap(usedResolutions, resolution);
                     }
                 }
             });
@@ -1376,6 +1511,7 @@ module.exports = {
             lastTime = entry.time;
         });
 
+        // We could have multiple sent tracks both of type video and audio, create an average between them.
         // The reduced value will have the following format:
         // { audio: {packetsLostMean: 0.133213, packetsLostPct: 5}, video: {packetsLostMean:2.3, packetsLostPct: 3}}
         const sentMediaSummary = Object.values(packetsLostMap).reduce((result, currentSsrc) => {
@@ -1391,21 +1527,19 @@ module.exports = {
                 // Calculate average packets with other media tracks of the same kind.
                 const ssrcPacketsLostMean = currentSsrc.packetsLost / currentSsrc.samples;
 
-                trackResult.packetsLostMean = fixedDecMean(
-                    [ trackResult.packetsLostMean, ssrcPacketsLostMean ],
-                    2
-                );
+                trackResult.packetsLostMean = fixedDecMean([ trackResult.packetsLostMean, ssrcPacketsLostMean ], 2);
 
                 // Calculate packets lost as a percentage, if there are more tracks of the same kind average them
-                const ssrcPacketsLostPct = percentOf(currentSsrc.packetsLost, currentSsrc.packetsSent);
+                let ssrcPacketsLostPct = 0;
+
+                if (currentSsrc.packetsSent > 0) {
+                    ssrcPacketsLostPct = percentOf(currentSsrc.packetsLost, currentSsrc.packetsSent);
+                }
 
                 if (trackResult.packetsLostPct === undefined) {
                     trackResult.packetsLostPct = ssrcPacketsLostPct;
                 } else {
-                    trackResult.packetsLostPct = fixedDecMean(
-                        [ ssrcPacketsLostPct, trackResult.packetsLostPct ],
-                        2
-                    );
+                    trackResult.packetsLostPct = fixedDecMean([ ssrcPacketsLostPct, trackResult.packetsLostPct ], 2);
                 }
             } else {
                 // If this is the first value there is no previous with which to divide, also reduce the
@@ -1417,31 +1551,48 @@ module.exports = {
                     currentSsrc.packetsLost / currentSsrc.samples,
                     2
                 );
-                result[currentSsrc.mediaType].packetsLostPct = percentOf(
-                    currentSsrc.packetsLost,
-                    currentSsrc.packetsSent
-                );
+
+                if (currentSsrc.packetsSent > 0) {
+                    result[currentSsrc.mediaType].packetsLostPct = percentOf(
+                        currentSsrc.packetsLost,
+                        currentSsrc.packetsSent
+                    );
+                } else {
+                    result[currentSsrc.mediaType].packetsLostPct = 0;
+                }
+
             }
 
             return result;
         }, {});
 
-        feature.roundTripTime = Math.floor(rtts.reduce((a, b) => a + b, 0) / (rtts.length || 1));
-        feature.receivingBitrate = Math.floor(recv.reduce((a, b) => a + b, 0) / (recv.length || 1));
-        feature.sendingBitrate = Math.floor(send.reduce((a, b) => a + b, 0) / (send.length || 1));
+        const restTimeSharePct = calculateResTimeSharePct(resStatsMap);
+        const resAggregates = calculateResAggregates(usedResolutions);
+
+        feature.NoVideoPct = restTimeSharePct.noVideo;
+        feature.LDVideoPct = restTimeSharePct.ldVideo;
+        feature.SDVideoPct = restTimeSharePct.sdVideo;
+        feature.HDVideoPct = restTimeSharePct.hdVideo;
+        feature.minVideoRes = resAggregates.min;
+        feature.medianVideoRes = resAggregates.median;
+        feature.maxVideoRes = resAggregates.max;
+
+        feature.meanRoundTripTime = Math.floor(rtts.reduce((a, b) => a + b, 0) / (rtts.length || 1));
+        feature.meanReceivingBitrate = Math.floor(recv.reduce((a, b) => a + b, 0) / (recv.length || 1));
+        feature.meanSendingBitrate = Math.floor(send.reduce((a, b) => a + b, 0) / (send.length || 1));
 
         if (sentMediaSummary.video) {
             feature.videoPacketsLostTotal = sentMediaSummary.video.packetsLost;
             feature.videoPacketsSentTotal = sentMediaSummary.video.packetsSent;
             feature.videoPacketsLostPct = sentMediaSummary.video.packetsLostPct;
-            feature.videoPacketsLost = sentMediaSummary.video.packetsLostMean;
+            feature.meanVideoPacketsLost = sentMediaSummary.video.packetsLostMean;
         }
 
         if (sentMediaSummary.audio) {
             feature.audioPacketsLostTotal = sentMediaSummary.audio.packetsLost;
             feature.audioPacketsSentTotal = sentMediaSummary.audio.packetsSent;
             feature.audioPacketsLostPct = sentMediaSummary.audio.packetsLostPct;
-            feature.audioPacketsLost = sentMediaSummary.audio.packetsLostMean;
+            feature.meanAudioPacketsLost = sentMediaSummary.audio.packetsLostMean;
         }
 
         return feature;

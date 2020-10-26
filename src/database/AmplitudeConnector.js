@@ -47,8 +47,15 @@ class AmplitudeConnector {
         filteredFeature.statsMeanSendingBitrate = connectionFeatures.statsMeanSendingBitrate;
         filteredFeature.statsMeanAudioPacketsLost = connectionFeatures.statsMeanAudioPacketsLost;
         filteredFeature.statsMeanVideoPacketsLost = connectionFeatures.statsMeanVideoPacketsLost;
-        filteredFeature.statsMeanAudioPacketsLostPct = connectionFeatures.statsMeanAudioPacketsLostPct;
-        filteredFeature.statsMeanVideoPacketsLostPct = connectionFeatures.statsMeanVideoPacketsLostPct;
+        filteredFeature.statsAudioPacketsLostPct = connectionFeatures.statsAudioPacketsLostPct;
+        filteredFeature.statsVideoPacketsLostPct = connectionFeatures.statsVideoPacketsLostPct;
+        filteredFeature.statsHDVideoPct = connectionFeatures.statsHDVideoPct;
+        filteredFeature.statsSDVideoPct = connectionFeatures.statsSDVideoPct;
+        filteredFeature.statsLDVideoPct = connectionFeatures.statsLDVideoPct;
+        filteredFeature.statsNoVideoPct = connectionFeatures.statsNoVideoPct;
+        filteredFeature.statsMaxVideoRes = connectionFeatures.statsMaxVideoRes;
+        filteredFeature.statsMedianVideoRes = connectionFeatures.statsMedianVideoRes;
+        filteredFeature.statsMinVideoRes = connectionFeatures.statsMinVideoRes;
         filteredFeature.firstCandidatePairType = connectionFeatures.firstCandidatePairType;
         filteredFeature.bweGoogActualEncBitrateMean = connectionFeatures.bweGoogActualEncBitrateMean;
         filteredFeature.bweGoogRetransmitBitrateMean = connectionFeatures.bweGoogRetransmitBitrateMean;
@@ -56,6 +63,7 @@ class AmplitudeConnector {
         filteredFeature.bweGoogTransmitBitrateMean = connectionFeatures.bweGoogTransmitBitrateMean;
         filteredFeature.bweAvailableOutgoingBitrateMean = connectionFeatures.bweAvailableOutgoingBitrateMean;
         filteredFeature.bweAvailableIncomingBitrateMean = connectionFeatures.bweAvailableIncomingBitrateMean;
+        filteredFeature.sfuP2P = connectionFeatures.sfuP2P;
 
         return filteredFeature;
     }
