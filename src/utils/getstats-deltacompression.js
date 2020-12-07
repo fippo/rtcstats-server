@@ -1,8 +1,19 @@
 module.exports = {
-    decompress(baseStats, newStats) {
+    decompress(baseStats, newStats, clientMeta) {
+        const { clientProtocol = 0 } = clientMeta;
         const timestamp = newStats.timestamp;
 
         delete newStats.timestamp;
+
+        // Temporary for backwards compatibility, until client version is synched with server.
+        if (clientProtocol >= 3) {
+            Object.keys(baseStats).forEach(id => {
+                if (!newStats[id]) {
+                    delete baseStats[id];
+                }
+            });
+        }
+
         Object.keys(newStats).forEach(id => {
             if (baseStats[id]) {
                 const report = newStats[id];

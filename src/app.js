@@ -275,15 +275,16 @@ function setupWebSocketsServer(wsServer) {
         const referer = upgradeReq.headers.origin + upgradeReq.url;
 
         // TODO: check against known/valid urls
-
         const ua = upgradeReq.headers['user-agent'];
+        const warning = upgradeReq.headers.warning;
+
 
         let clientId;
 
         // In case this dump is send from the integration test suite, we need to maintain the ID used
         // there, the user-agent will have the following format 'integration-test/<clientId>'
-        if (ua.startsWith('integration-test')) {
-            clientId = ua.split('/').pop();
+        if (warning && warning.startsWith('integration-test')) {
+            clientId = warning.split('/').pop();
         } else {
             clientId = uuid.v4();
         }
@@ -308,7 +309,8 @@ function setupWebSocketsServer(wsServer) {
             url: referer,
             userAgent: ua,
             time: Date.now(),
-            fileFormat: 2
+            fileFormat: 2,
+            clientProtocol: Number(client.protocol)
         };
 
         tempStream.write(`${JSON.stringify(meta)}\n`);
@@ -341,8 +343,9 @@ function setupWebSocketsServer(wsServer) {
         }
 
         logger.info(
-            '[App] New app connected: ua: <%s>, referer: <%s>, clientid: <%s>',
+            '[App] New app connected: ua: <%s>, protocolV: <%s>, referer: <%s>, clientid: <%s>',
             ua,
+            client.protocol,
             referer,
             clientId
         );

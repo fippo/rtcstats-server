@@ -301,10 +301,19 @@ module.exports = {
     // can be a list of proxies from the x-forwarded-for header,
     // take the last one.
     publicIPAddress(client) {
+        if (!client.publicIP) {
+            return;
+        }
+
         return client.publicIP[client.publicIP.length - 1];
+
     },
 
     usesHTTPProxy(client) {
+        if (!client.publicIP) {
+            return;
+        }
+
         return client.publicIP.length > 1;
     }
 };

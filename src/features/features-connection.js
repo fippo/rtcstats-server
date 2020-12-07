@@ -13,14 +13,15 @@
 const SDPUtils = require('sdp');
 
 const {
-    capitalize,
-    fixedDecMean,
-    standardizedMoment,
+    isStatisticEntry,
+    getTransportInfoFn
+} = require('../utils/stats-detection');
+const {
     timeBetween,
-    isIceConnected,
-    percentOf,
-    round
+    isIceConnected
 } = require('../utils/utils');
+
+const { stats } = require('./connection-stats/features');
 
 /**
  *
@@ -131,135 +132,6 @@ function gatheringTimeTURN(protocol, client, peerConnectionLog) {
         }
     }
 }
-
-
-/**
- *
- * @param {*} peerConnectionLog
- */
-function extractBWE(peerConnectionLog) {
-    const reports = [];
-
-    for (let i = 0; i < peerConnectionLog.length; i++) {
-        if (peerConnectionLog[i].type === 'getStats') {
-            const statsReport = peerConnectionLog[i].value;
-
-            Object.keys(statsReport).forEach(id => {
-                const report = statsReport[id];
-
-                if (report.type === 'VideoBwe') {
-                    reports.push(report);
-                }
-            });
-        }
-    }
-
-    return reports;
-}
-
-/**
- * Return the resolution as a valid number, guard against Object/Null/NaN/Undefined/Infinity values
- *
- * @param {Number} resolution
- * @returns {Number} Valid resolution as a number.
- */
-function extractValidResolution(resolution) {
-
-    if (Number.isFinite(resolution)) {
-        return resolution;
-    }
-
-    return 0;
-}
-
-/**
- * Groups resolutions to High Definition, Standard Definition, Low Definition and No Video buckets.
- * Count the total samples as well so we can establish a usage percentage for each of those.
- * @param {ResStatsMap} resStatsMap
- * @param {Number} resolution
- */
-function fitResToDefinition(resStatsMap, resolution) {
-
-    ++resStatsMap.totalSamples;
-
-    // Not very elegant but we need it to be fast.
-    if (resolution >= 720) {
-        // HD
-        ++resStatsMap.resTimeShare.hdVideo;
-    } else if (resolution >= 360) {
-        // SD
-        ++resStatsMap.resTimeShare.sdVideo;
-    } else if (resolution > 0) {
-        // LD
-        ++resStatsMap.resTimeShare.ldVideo;
-    } else {
-        // NV
-        ++resStatsMap.resTimeShare.noVideo;
-    }
-}
-
-/**
- * Compute how much time as a percentage of the total, this session spent send each standard definition.
- *
- * @param {ResStatsMap} resStatsMap
- * @returns {ResTimeSharePct} - Computed time share as a percentage for each video definition
- */
-function calculateResTimeSharePct(resStatsMap) {
-
-    const { totalSamples, resTimeShare } = resStatsMap;
-
-    const resTimeSharePct = {};
-
-    // resTimeSharePct values should amount
-    resTimeSharePct.hdVideo = percentOf(resTimeShare.hdVideo, totalSamples);
-    resTimeSharePct.sdVideo = percentOf(resTimeShare.sdVideo, totalSamples);
-    resTimeSharePct.ldVideo = percentOf(resTimeShare.ldVideo, totalSamples);
-    resTimeSharePct.noVideo = percentOf(resTimeShare.noVideo, totalSamples);
-
-    return resTimeSharePct;
-}
-
-/**
- * Calculate aggregates of the provided resolution map.
- *
- * @param {Object} usedResolutions Contains a map of the used definitions throughout the session.
- * @returns {{min: Number,max: Number, median: Number}}
- */
-function calculateResAggregates(usedResolutions) {
-
-    const sortedRes = Object.values(usedResolutions).sort();
-
-    const aggregateValues = {
-        min: 0,
-        max: 0,
-        median: 0
-    };
-
-    if (!sortedRes.length) {
-        return aggregateValues;
-    }
-
-    aggregateValues.min = sortedRes[0];
-    aggregateValues.max = sortedRes[sortedRes.length - 1];
-    aggregateValues.median = sortedRes[Math.floor(sortedRes.length / 2)];
-
-    return aggregateValues;
-}
-
-/**
- * Map resolution to object properties, so we have an aggregated view of what resolutions were used.
- *
- * @param {Object} usedResolutions
- * @param {Number} resolution
- */
-function fitResToAggregateMap(usedResolutions, resolution) {
-    if (!resolution) {
-        return;
-    }
-
-    usedResolutions[resolution] = resolution;
-}
-
 
 module.exports = {
     // client and conference identifiers, specified as optional peerconnection constraints
@@ -651,24 +523,6 @@ module.exports = {
             return false;
         }
     },
-
-    // The bug seems to have been fixed, remove for now.
-    // iceconnectionstateCheckingBeforeSRD: function(client, peerConnectionLog) {
-    //     // https://bugs.chromium.org/p/chromium/issues/detail?id=959128#c65
-    //     // Sometimes, iceconnectionstatechange can fire before
-    //     // SRD/addIceCandidate. This happens when we are offering and
-    //     // the remote does a valid stun ping to the port before the answer
-    //     // arrives.
-    //     let hadSRD = false;
-    //     for (let i = 0; i < peerConnectionLog.length; i++) {
-    //         const {type, value} = peerConnectionLog[i];
-    //         if (type === 'setRemoteDescription') {
-    //             hadSRD = true;
-    //         } else if (type === 'oniceconnectionstatechange' && value === 'checking') {
-    //             return !hadSRD;
-    //         }
-    //     }
-    // },
 
     // Firefox has a timeout of ~5 seconds where addIceCandidate needs to happen after SRD.
     // This calculates the delay between SRD and addIceCandidate which should allow
@@ -1353,302 +1207,32 @@ module.exports = {
         return 'unknown';
     },
 
-    // dlts cipher suite used
-    // TODO: what is the standard thing for that?
-    dtlsCipherSuite(client, peerConnectionLog) {
-        let dtlsCipher;
-
-        for (let i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') {
-                continue;
-            }
-            const statsReport = peerConnectionLog[i].value;
-
-            // eslint-disable-next-line no-loop-func
-            Object.keys(statsReport).forEach(id => {
-                const report = statsReport[id];
-
-                if (report.type === 'googComponent' && report.dtlsCipher) {
-                    dtlsCipher = report.dtlsCipher;
-                }
-            });
-            if (dtlsCipher) {
-                return dtlsCipher;
-            }
-        }
-    },
-
-    // srtp cipher suite used
-    srtpCipherSuite(client, peerConnectionLog) {
-        let srtpCipher;
-
-        for (let i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') {
-                continue;
-            }
-            const statsReport = peerConnectionLog[i].value;
-
-            // eslint-disable-next-line no-loop-func
-            Object.keys(statsReport).forEach(id => {
-                const report = statsReport[id];
-
-                if (report.type === 'googComponent' && report.srtpCipher) {
-                    srtpCipher = report.srtpCipher;
-                }
-            });
-            if (srtpCipher) {
-                return srtpCipher;
-            }
-        }
-    },
-
-    // mean RTT, send and recv bitrate of the active candidate pair
-    stats(client, peerConnectionLog) {
-        const feature = {};
-        const rtts = [];
-        const recv = [];
-        const send = [];
-
-        const packetsLostMap = {};
-        const usedResolutions = {};
-
-        /**
-         * @type {ResStatsMap}
-         */
-        const resStatsMap = {
-            totalSamples: 0,
-            resTimeShare: {
-                noVideo: 0,
-                ldVideo: 0,
-                sdVideo: 0,
-                hdVideo: 0
-            }
-        };
-
-        let lastStatsReport;
-        let lastTime;
-
-
-        // Iterate over the getStats entries for this specific PC and calculate the average roundTripTime
-        // data from the candidate-pair statistic.
-        peerConnectionLog.forEach(entry => {
-            if (entry.type !== 'getStats') {
-                return;
-            }
-            const statsReport = entry.value;
-
-            // look for type track, remoteSource: false, audioLevel (0..1)
-            Object.keys(statsReport).forEach(id => {
-                const report = statsReport[id];
-
-                if (report.type === 'candidate-pair' && report.selected === true) {
-                    rtts.push(report.roundTripTime);
-                }
-
-                // packetsLost is a cumulative stats thus we just overwrite the value so we don't have to find
-                // the last type of stats of a certain type.
-                if (report.type === 'ssrc' && id.endsWith('_send') === true) {
-                    if (report.mediaType === 'audio' || report.mediaType === 'video') {
-                        if (!packetsLostMap[report.ssrc]) {
-                            packetsLostMap[report.ssrc] = {};
-                            packetsLostMap[report.ssrc].mediaType = report.mediaType;
-                            packetsLostMap[report.ssrc].samples = 0;
-                        }
-
-                        const packetsLost = report.packetsLost || 0;
-                        const packetsSent = report.packetsSent || 0;
-                        const prevPacketsLost = packetsLostMap[report.ssrc].packetsLost || 0;
-                        const prevPacketsSent = packetsLostMap[report.ssrc].packetsSent || 0;
-
-                        if (prevPacketsLost <= packetsLost) {
-                            packetsLostMap[report.ssrc].packetsLost = packetsLost;
-                        }
-
-                        if (prevPacketsSent <= packetsSent) {
-                            packetsLostMap[report.ssrc].packetsSent = packetsSent;
-                        }
-
-                        ++packetsLostMap[report.ssrc].samples;
-                    }
-                    if (report.mediaType === 'video') {
-                        const resolution = extractValidResolution(report.frameHeight);
-
-                        fitResToDefinition(resStatsMap, resolution);
-                        fitResToAggregateMap(usedResolutions, resolution);
-                    }
-                }
-            });
-            if (lastStatsReport) {
-                Object.keys(statsReport).forEach(id => {
-                    const report = statsReport[id];
-                    let bitrate;
-
-                    if (report.type === 'candidate-pair' && report.selected === true && lastStatsReport[id]) {
-                        bitrate
-                            = (8 * (report.bytesReceived - lastStatsReport[id].bytesReceived))
-                            / (entry.time - lastTime);
-
-                        // needs to work around resetting counters -
-                        // - https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                        if (bitrate > 0) {
-                            recv.push(bitrate);
-                        }
-                    }
-                    if (report.type === 'candidate-pair' && report.selected === true && lastStatsReport[id]) {
-                        bitrate
-                            = (8 * (report.bytesSent - lastStatsReport[id].bytesSent))
-                            / (entry.time - lastTime);
-
-                        // needs to work around resetting counters
-                        // -- https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
-                        if (bitrate > 0) {
-                            send.push(bitrate);
-                        }
-                    }
-                });
-            }
-            lastStatsReport = statsReport;
-            lastTime = entry.time;
-        });
-
-        // We could have multiple sent tracks both of type video and audio, create an average between them.
-        // The reduced value will have the following format:
-        // { audio: {packetsLostMean: 0.133213, packetsLostPct: 5}, video: {packetsLostMean:2.3, packetsLostPct: 3}}
-        const sentMediaSummary = Object.values(packetsLostMap).reduce((result, currentSsrc) => {
-            // the ssrcs were build in the same function so we assume at least a value of 1
-            // if this is to be refactored and control moved out of this function consider
-            // additional checks.
-            if (result[currentSsrc.mediaType]) {
-                const trackResult = result[currentSsrc.mediaType];
-
-                trackResult.packetsLost += currentSsrc.packetsLost;
-                trackResult.packetsSent += currentSsrc.packetsSent;
-
-                // Calculate average packets with other media tracks of the same kind.
-                const ssrcPacketsLostMean = currentSsrc.packetsLost / currentSsrc.samples;
-
-                trackResult.packetsLostMean = fixedDecMean([ trackResult.packetsLostMean, ssrcPacketsLostMean ], 2);
-
-                // Calculate packets lost as a percentage, if there are more tracks of the same kind average them
-                let ssrcPacketsLostPct = 0;
-
-                if (currentSsrc.packetsSent > 0) {
-                    ssrcPacketsLostPct = percentOf(currentSsrc.packetsLost, currentSsrc.packetsSent);
-                }
-
-                if (trackResult.packetsLostPct === undefined) {
-                    trackResult.packetsLostPct = ssrcPacketsLostPct;
-                } else {
-                    trackResult.packetsLostPct = fixedDecMean([ ssrcPacketsLostPct, trackResult.packetsLostPct ], 2);
-                }
-            } else {
-                // If this is the first value there is no previous with which to divide, also reduce the
-                // float number to 2 decimals
-                result[currentSsrc.mediaType] = {};
-                result[currentSsrc.mediaType].packetsLost = currentSsrc.packetsLost;
-                result[currentSsrc.mediaType].packetsSent = currentSsrc.packetsSent;
-                result[currentSsrc.mediaType].packetsLostMean = round(
-                    currentSsrc.packetsLost / currentSsrc.samples,
-                    2
-                );
-
-                if (currentSsrc.packetsSent > 0) {
-                    result[currentSsrc.mediaType].packetsLostPct = percentOf(
-                        currentSsrc.packetsLost,
-                        currentSsrc.packetsSent
-                    );
-                } else {
-                    result[currentSsrc.mediaType].packetsLostPct = 0;
-                }
-
-            }
-
-            return result;
-        }, {});
-
-        const restTimeSharePct = calculateResTimeSharePct(resStatsMap);
-        const resAggregates = calculateResAggregates(usedResolutions);
-
-        feature.NoVideoPct = restTimeSharePct.noVideo;
-        feature.LDVideoPct = restTimeSharePct.ldVideo;
-        feature.SDVideoPct = restTimeSharePct.sdVideo;
-        feature.HDVideoPct = restTimeSharePct.hdVideo;
-        feature.minVideoRes = resAggregates.min;
-        feature.medianVideoRes = resAggregates.median;
-        feature.maxVideoRes = resAggregates.max;
-
-        feature.meanRoundTripTime = Math.floor(rtts.reduce((a, b) => a + b, 0) / (rtts.length || 1));
-        feature.meanReceivingBitrate = Math.floor(recv.reduce((a, b) => a + b, 0) / (recv.length || 1));
-        feature.meanSendingBitrate = Math.floor(send.reduce((a, b) => a + b, 0) / (send.length || 1));
-
-        if (sentMediaSummary.video) {
-            feature.videoPacketsLostTotal = sentMediaSummary.video.packetsLost;
-            feature.videoPacketsSentTotal = sentMediaSummary.video.packetsSent;
-            feature.videoPacketsLostPct = sentMediaSummary.video.packetsLostPct;
-            feature.meanVideoPacketsLost = sentMediaSummary.video.packetsLostMean;
-        }
-
-        if (sentMediaSummary.audio) {
-            feature.audioPacketsLostTotal = sentMediaSummary.audio.packetsLost;
-            feature.audioPacketsSentTotal = sentMediaSummary.audio.packetsSent;
-            feature.audioPacketsLostPct = sentMediaSummary.audio.packetsLostPct;
-            feature.meanAudioPacketsLost = sentMediaSummary.audio.packetsLostMean;
-        }
-
-        return feature;
-    },
-
-    // calculate mean RTT and max RTT for the first 30 seconds of the connection
-    stunRTTInitial30s(client, peerConnectionLog) {
-        let startTime;
-        const rtts = [];
-
-        for (let i = 0; i < peerConnectionLog.length; i++) {
-            const { type, value, timestamp } = peerConnectionLog[i];
-
-            if (type !== 'getStats') {
-                continue;
-            }
-            if (!startTime) {
-                startTime = timestamp;
-            }
-            Object.keys(value).forEach(id => {
-                const report = value[id];
-
-                if (report.type === 'candidate-pair' && report.selected === true) {
-                    rtts.push(report.roundTripTime);
-                }
-            });
-            if (timestamp - startTime > 30 * 1000) {
-                break;
-            }
-        }
-        if (rtts.length > 2) {
-            return {
-                mean: Math.floor(rtts.reduce((a, b) => a + b, 0) / rtts.length),
-                max: Math.max.apply(null, rtts)
-            };
-        }
-    },
-
+    /**
+     * Get the total bytes send and received according to transport stats.
+     *
+     * @param {*} client
+     * @param {*} peerConnectionLog
+     */
     bytesTotal(client, peerConnectionLog) {
         // TODO: does this reset during a restart? See
         // https://bugs.chromium.org/p/webrtc/issues/detail?id=5361
         let lastReport;
+        const isTransportReportFn = getTransportInfoFn(client);
 
         for (let i = 0; i < peerConnectionLog.length; i++) {
             const { type, value } = peerConnectionLog[i];
 
-            if (type !== 'getStats') {
+            if (!isStatisticEntry(type)) {
                 continue;
             }
             // eslint-disable-next-line no-loop-func
             Object.keys(value).forEach(id => {
                 const report = value[id];
 
-                if (report.type === 'candidate-pair' && report.selected === true) {
+                if (isTransportReportFn(report)) {
                     lastReport = report;
                 }
+
             });
         }
         if (lastReport) {
@@ -1670,9 +1254,10 @@ module.exports = {
             }
         }
         for (; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') {
+            if (!isStatisticEntry(peerConnectionLog[i].type)) {
                 continue;
             }
+
             const statsReport = peerConnectionLog[i].value;
             let pair = null;
 
@@ -1784,86 +1369,6 @@ module.exports = {
         return selectedCandidatePairList.length - 1;
     },
 
-    // how did the selected interface type change? e.g. a wifi->mobile transition
-    // eslint-disable-next-line max-len
-    // see https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/app/webrtc/statscollector.cc&q=statscollector&sq=package:chromium&l=53
-    // TODO: check if this really allows detecting such transitions
-    candidatePairChangeInterfaceTypes(client, peerConnectionLog) {
-        const interfaceTypesList = [ null ];
-
-        for (let i = 0; i < peerConnectionLog.length; i++) {
-            if (peerConnectionLog[i].type !== 'getStats') {
-                continue;
-            }
-            const statsReport = peerConnectionLog[i].value;
-
-            Object.keys(statsReport).forEach(id => {
-                const report = statsReport[id];
-
-                if (
-                    report.type === 'candidate-pair'
-                    && report.selected === true
-                    && statsReport[report.localCandidateId]
-                ) {
-                    const type = statsReport[report.localCandidateId].networkType;
-
-                    if (type && type !== interfaceTypesList[interfaceTypesList.length - 1]) {
-                        interfaceTypesList.push(type);
-                    }
-                }
-            });
-        }
-        interfaceTypesList.shift();
-
-        return interfaceTypesList.join(';') || 'unknown';
-    },
-
-    bwe(client, peerConnectionLog) {
-        let bwe = extractBWE(peerConnectionLog);
-
-        if (!bwe.length) {
-            return;
-        }
-        const stats = [
-            'googActualEncBitrate',
-            'googRetransmitBitrate',
-            'googTargetEncBitrate',
-            'googBucketDelay',
-            'googTransmitBitrate'
-        ];
-
-        bwe = bwe.map(item => {
-            stats.forEach(stat => {
-                item[stat] = parseInt(item[stat], 10);
-            });
-            delete item.googAvailableSendBandwidth;
-            delete item.googAvailableReceiveBandwidth;
-
-            return item;
-        });
-        stats.push('availableOutgoingBitrate');
-        stats.push('availableIncomingBitrate');
-
-        const feature = {};
-
-        stats.forEach(stat => {
-            const series = bwe.map(item => item[stat]);
-
-            feature[`${capitalize(stat)}Mean`] = series.reduce((a, b) => a + b, 0) / series.length;
-            feature[`${capitalize(stat)}Max`] = Math.max.apply(null, series);
-            feature[`${capitalize(stat)}Min`] = Math.min.apply(null, series);
-
-            feature[`${capitalize(stat)}Variance`] = standardizedMoment(series, 2);
-
-            /*
-            feature[capitalize(stat) + 'Skewness'] = standardizedMoment(series, 3);
-            feature[capitalize(stat) + 'Kurtosis'] = standardizedMoment(series, 4);
-            */
-        });
-
-        return feature;
-    },
-
     // Was addStream called on the PC
     calledAddStream(client, peerConnectionLog) {
         for (let i = 0; i < peerConnectionLog.length; i++) {
@@ -1942,5 +1447,6 @@ module.exports = {
                 end: last.batteryLevel
             };
         }
-    }
+    },
+    stats
 };

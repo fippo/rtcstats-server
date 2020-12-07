@@ -29,8 +29,7 @@ class AmplitudeConnector {
         const filteredFeature = {};
 
         // TODO Use object destructuring for a more clean approach.
-        filteredFeature.calledGetUserMediaRequestingScreen
-            = clientFeatures.calledGetUserMediaRequestingScreen;
+        filteredFeature.calledGetUserMediaRequestingScreen = clientFeatures.calledGetUserMediaRequestingScreen;
         filteredFeature.calledGetUserMediaRequestingAudio = clientFeatures.calledGetUserMediaRequestingAudio;
         filteredFeature.calledGetUserMediaRequestingVideo = clientFeatures.calledGetUserMediaRequestingVideo;
         filteredFeature.firstAudioTrackLabel = clientFeatures.firstAudioTrackLabel;
@@ -57,12 +56,6 @@ class AmplitudeConnector {
         filteredFeature.statsMedianVideoRes = connectionFeatures.statsMedianVideoRes;
         filteredFeature.statsMinVideoRes = connectionFeatures.statsMinVideoRes;
         filteredFeature.firstCandidatePairType = connectionFeatures.firstCandidatePairType;
-        filteredFeature.bweGoogActualEncBitrateMean = connectionFeatures.bweGoogActualEncBitrateMean;
-        filteredFeature.bweGoogRetransmitBitrateMean = connectionFeatures.bweGoogRetransmitBitrateMean;
-        filteredFeature.bweGoogTargetEncBitrateMean = connectionFeatures.bweGoogTargetEncBitrateMean;
-        filteredFeature.bweGoogTransmitBitrateMean = connectionFeatures.bweGoogTransmitBitrateMean;
-        filteredFeature.bweAvailableOutgoingBitrateMean = connectionFeatures.bweAvailableOutgoingBitrateMean;
-        filteredFeature.bweAvailableIncomingBitrateMean = connectionFeatures.bweAvailableIncomingBitrateMean;
         filteredFeature.sfuP2P = connectionFeatures.sfuP2P;
 
         return filteredFeature;
