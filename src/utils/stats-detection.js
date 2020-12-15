@@ -29,6 +29,25 @@ function isTransportReport(report) {
 }
 
 /**
+ * Determine if the report is of type google legacy stats ssrc
+ *
+ * @param {*} report
+ * @returns {Boolean}
+ */
+function isLegacySsrcReport(report) {
+    return report.type === 'ssrc' && report.id.endsWith('_send') === true;
+}
+
+/**
+ * Determine if the report is of type google legacy stats video ssrc
+ *
+ * @param {*} report
+ */
+function isLegacyVideoSsrcReport(report) {
+    return isLegacySsrcReport(report) && report.mediaType === 'video';
+}
+
+/**
  * Get transport report check function.
  * At the time of writing there were only two options either 'candidate-pair' report for firefox and chrome legacy
  * stats, or the standard compliant 'transport' report used by safari and chrome-standard report types.
@@ -153,7 +172,7 @@ function getStatsFormat(clientMeta) {
  * @returns {PacketsSummary}
  */
 function getTotalPacketsLegacy(report) {
-    if (report.type === 'ssrc' && report.id.endsWith('_send') === true) {
+    if (isLegacySsrcReport(report)) {
         return {
             packetsLost: report.packetsLost,
             packetsSent: report.packetsSent,
@@ -266,10 +285,8 @@ function getUsedResolutionStandard(report, statsEntry) {
 function getUsedResolutionLegacy(report) {
     // packetsLost is a cumulative stats thus we just overwrite the value so we don't have to find
     // the last type of stats of a certain type.
-    if (report.type === 'ssrc' && report.id.endsWith('_send') === true) {
-        if (report.mediaType === 'video') {
-            return extractValidResolution(report.frameHeight);
-        }
+    if (isLegacyVideoSsrcReport(report)) {
+        return extractValidResolution(report.frameHeight);
     }
 }
 
@@ -359,10 +376,72 @@ function getBitRateFn(client) {
     return getBitRateStandard;
 }
 
+/**
+ * Not supported.
+ *
+ * @param {*} report
+ */
+function getScreenShareDataStandard() {
+    return;
+}
+
+/**
+ * Not supported.
+ *
+ * @param {*} report
+ */
+function getScreenShareDataFirefox() {
+    return;
+}
+
+/**
+ * Extract screen-share resolution stats from legacy chrome video report.
+ *
+ * @param {*} report
+ * @returns {Object}
+ */
+function getScreenShareDataLegacy(report) {
+    // googContentType can be either screen for screen-sharing or realtime for video
+    if (isLegacyVideoSsrcReport(report) && report.googContentType === 'screen') {
+        const {
+            googCpuLimitedResolution: cpuLimited,
+            googBandwidthLimitedResolution: bandwidthLimited,
+            googFrameHeightInput: frameHeightInput,
+            googFrameHeightSent: frameHeightSent
+        } = report;
+
+        // Boolean values come in as strings for legacy reports.
+        return {
+            cpuLimited: cpuLimited === 'true',
+            bandwidthLimited: bandwidthLimited === 'true',
+            frameHeightInput,
+            frameHeightSent
+        };
+    }
+}
+
+/**
+ *  Obtain a function that extracts screen-sharing statistics regarding resolution quality.
+ *
+ * @param {*} client
+ */
+function getScreenShareDataFn(client) {
+
+    if (client.statsFormat === StatsFormat.CHROME_LEGACY) {
+        return getScreenShareDataLegacy;
+    } else if (client.statsFormat === StatsFormat.FIREFOX) {
+        return getScreenShareDataFirefox;
+    }
+
+    return getScreenShareDataStandard;
+}
+
+
 module.exports = {
     isStatisticEntry,
     getBitRateFn,
     getRTTFn,
+    getScreenShareDataFn,
     getStatsFormat,
     getTotalPacketsFn,
     getTransportInfoFn,

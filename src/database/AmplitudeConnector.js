@@ -56,6 +56,12 @@ class AmplitudeConnector {
         filteredFeature.statsMedianVideoRes = connectionFeatures.statsMedianVideoRes;
         filteredFeature.statsMinVideoRes = connectionFeatures.statsMinVideoRes;
         filteredFeature.firstCandidatePairType = connectionFeatures.firstCandidatePairType;
+        filteredFeature.statsScreenShareLimCPUPct = connectionFeatures.statsScreenShareLimCPUPct;
+        filteredFeature.statsScreenShareLimBwPct = connectionFeatures.statsScreenShareLimBwPct;
+        filteredFeature.statsScreenShareDiffResPct = connectionFeatures.statsScreenShareDiffResPct;
+        filteredFeature.statsScreenShareMaxDiffRes = connectionFeatures.statsScreenShareMaxDiffRes;
+        filteredFeature.statsScreenShareMinDiffRes = connectionFeatures.statsScreenShareMinDiffRes;
+        filteredFeature.statsScreenShareMedianDiffRes = connectionFeatures.statsScreenShareMedianDiffRes;
         filteredFeature.sfuP2P = connectionFeatures.sfuP2P;
 
         return filteredFeature;

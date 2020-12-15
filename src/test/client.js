@@ -118,7 +118,7 @@ class TestCheckRouter {
  * @param {*} server
  */
 function checkTestCompletion(appServer) {
-    if (appServer.processed.get().values[0].value === 7) {
+    if (appServer.processed.get().values[0].value === 9) {
         appServer.stop();
     } else {
         setTimeout(checkTestCompletion, 4000, appServer);
@@ -193,6 +193,20 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
  */
 function runTest() {
     testCheckRouter = new TestCheckRouter(server);
+
+    simulateConnection(
+        './src/test/dumps/google-legacy-screenshare-p2p',
+        './src/test/results/google-legacy-screenshare-p2p-result.json',
+        BrowserUASamples.CHROME,
+        ProtocolV.LEGACY
+    );
+
+    simulateConnection(
+        './src/test/dumps/google-legacy-screenshare-msessions',
+        './src/test/results/google-legacy-screenshare-msessions-result.json',
+        BrowserUASamples.CHROME,
+        ProtocolV.LEGACY
+    );
 
     simulateConnection(
         './src/test/dumps/google-legacy-stats-sfu',

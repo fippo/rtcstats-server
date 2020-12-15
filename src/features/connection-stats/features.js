@@ -3,10 +3,10 @@ const {
     getBitRateFn,
     getRTTFn,
     getTotalPacketsFn,
-    getUsedResolutionFn
+    getUsedResolutionFn,
+    getScreenShareDataFn
 } = require('../../utils/stats-detection');
 const {
-    fixedDecMean,
     percentOf,
     round
 } = require('../../utils/utils');
@@ -173,6 +173,69 @@ function calculatePacketStats(packetsLostMap) {
 }
 
 /**
+ * Add scree-sharing data sample to aggregation container and count specific event occurrences.
+ *
+ * @param {*} screenShareStats
+ * @param {*} screenShareSample
+ */
+function processScreenSharingSample(screenShareStats, screenShareSample) {
+
+    if (!screenShareSample) {
+        return;
+    }
+
+    ++screenShareStats.totalSamples;
+
+    const { cpuLimited, bandwidthLimited, frameHeightInput, frameHeightSent } = screenShareSample;
+
+    // Count the number of times resolution was limited due to CPU or BW.
+    cpuLimited && screenShareStats.limCPUSamples++;
+    bandwidthLimited && screenShareStats.limBwSamples++;
+
+    // Verify if there was a difference between the captured frame resolution and the resolution actually sent to the
+    // remote peer.
+    // CPU and BW flags might not be active when this occurs so count it as a separate event so we can observe it.
+    const frameDiff = frameHeightInput - frameHeightSent;
+
+    // Ignore the stats where frameHeightSent is 0, screen sharing might be paused or stopped at that point and it will
+    // pollute the aggregates.
+    if (frameDiff > 0 && frameHeightSent > 0) {
+        screenShareStats.resDiffMap[frameDiff] = frameDiff;
+        screenShareStats.resDiffSamples++;
+    }
+}
+
+/**
+ * Calculate aggregates.
+ *
+ * @param {*} screenShareStats
+ */
+function calculateScreenShareAggregates(screenShareStats) {
+    const { limCPUSamples, limBwSamples, resDiffSamples, totalSamples } = screenShareStats;
+
+    // If no scree-sharing reports were present just ignore.
+    if (!totalSamples) {
+        return;
+    }
+
+    // Sort the differences in frame input - frame sent in order to obtain the min/median/max values that occurred.
+    const sortedRes = Object.values(screenShareStats.resDiffMap).sort((a, b) => a - b) || [];
+
+    if (!sortedRes.length) {
+        sortedRes.push(0);
+    }
+
+    return {
+        limCPUPct: percentOf(limCPUSamples, totalSamples),
+        limBwPct: percentOf(limBwSamples, totalSamples),
+        diffResPct: percentOf(resDiffSamples, totalSamples),
+        minDiffRes: sortedRes[0],
+        maxDiffRes: sortedRes[sortedRes.length - 1],
+        medianDiffRes: sortedRes[Math.floor(sortedRes.length / 2)]
+    };
+}
+
+/**
  * Mean RTT, send and recv bitrate of the active candidate pair
  *
  * @param {*} client
@@ -199,13 +262,21 @@ function stats(client, peerConnectionLog) {
         }
     };
 
+    const screenShareStats = {
+        totalSamples: 0,
+        limBwSamples: 0,
+        limCPUSamples: 0,
+        resDiffSamples: 0,
+        resDiffMap: {}
+    };
+
     let lastStatsReport;
 
     const getBitRate = getBitRateFn(client);
     const getRTT = getRTTFn(client);
     const getTotalPackets = getTotalPacketsFn(client);
     const getUsedResolution = getUsedResolutionFn(client);
-
+    const getScreenShareData = getScreenShareDataFn(client);
 
     // Iterate over the getStats entries for this specific PC and calculate the average roundTripTime
     // data from the candidate-pair statistic.
@@ -229,7 +300,9 @@ function stats(client, peerConnectionLog) {
 
             aggregateTotalPackets(packetsLostMap, getTotalPackets(report, statsReport));
             const resolution = getUsedResolution(report, statsReport);
+            const screenShareDataSample = getScreenShareData(report, statsReport);
 
+            processScreenSharingSample(screenShareStats, screenShareDataSample);
             fitResToDefinition(resStatsMap, resolution);
             fitResToAggregateMap(usedResolutions, resolution);
             const { sendBitRate, recvBitRate } = getBitRate(report, lastStatsReport, statsReport) || {};
@@ -244,6 +317,7 @@ function stats(client, peerConnectionLog) {
     const packetAggregates = calculatePacketStats(packetsLostMap);
     const restTimeSharePct = calculateResTimeSharePct(resStatsMap);
     const resAggregates = calculateResAggregates(usedResolutions);
+    const screenShareAggregates = calculateScreenShareAggregates(screenShareStats);
 
     feature.NoVideoPct = restTimeSharePct.noVideo;
     feature.LDVideoPct = restTimeSharePct.ldVideo;
@@ -256,6 +330,15 @@ function stats(client, peerConnectionLog) {
     feature.meanRoundTripTime = round(rtts.reduce((a, b) => a + b, 0) / (rtts.length || 1), 2);
     feature.meanReceivingBitrate = Math.floor(recv.reduce((a, b) => a + b, 0) / (recv.length || 1));
     feature.meanSendingBitrate = Math.floor(send.reduce((a, b) => a + b, 0) / (send.length || 1));
+
+    if (screenShareAggregates) {
+        feature.screenShareLimCPUPct = screenShareAggregates.limCPUPct;
+        feature.screenShareLimBwPct = screenShareAggregates.limBwPct;
+        feature.screenShareDiffResPct = screenShareAggregates.diffResPct;
+        feature.screenShareMinDiffRes = screenShareAggregates.minDiffRes;
+        feature.screenShareMaxDiffRes = screenShareAggregates.maxDiffRes;
+        feature.screenShareMedianDiffRes = screenShareAggregates.medianDiffRes;
+    }
 
     if (packetAggregates.video) {
         feature.videoPacketsLostTotal = packetAggregates.video.packetsLost;
