@@ -14,7 +14,7 @@ amplitude:
 s3:
     accessKeyId:
     secretAccessKey:
-    region:
+    region: us-west-2
     bucket:
     useIAMAuth: false
 
@@ -36,3 +36,8 @@ github:
     client_id: GITHUB_CLIENT_ID
     client_secret: GITHUB_SECRET
     callback_url: GITHUB_CALLBACK_URL
+
+dynamo:
+  tableName: rtcstats-meta-table-local
+  endpoint: http://localhost:8000
+

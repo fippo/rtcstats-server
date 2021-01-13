@@ -7,3 +7,6 @@ amplitude:
 s3:
     region: RTCSTATS_S3_AWS_REGION
     bucket: RTCSTATS_S3_BUCKET
+
+dynamo:
+    tableName: RTCSTATS_METADATA_TABLE

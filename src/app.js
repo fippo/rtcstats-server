@@ -21,6 +21,7 @@ const {
     prom,
     queueSize
 } = require('./prom-collector');
+const saveMetadata = require('./store/dynamo').saveEntry;
 const WorkerPool = require('./utils/WorkerPool');
 const obfuscate = require('./utils/obfuscator');
 const { getEnvName, RequestType, ResponseType } = require('./utils/utils');
@@ -289,6 +290,11 @@ function setupWebSocketsServer(wsServer) {
             clientId = uuid.v4();
         }
 
+        const fileMetadata = {
+            startDate: Date.now(),
+            clientId
+        };
+
         let tempStream = fs.createWriteStream(`${tempPath}/${clientId}`);
 
         tempStream.on('finish', () => {
@@ -296,6 +302,10 @@ function setupWebSocketsServer(wsServer) {
                 // q.enqueue(clientid);
                 workerPool.addTask({ type: RequestType.PROCESS,
                     body: { clientId } });
+                fileMetadata.endDate = Date.now();
+
+                saveMetadata(fileMetadata);
+
             } else {
                 fs.unlink(`${tempPath}/${clientId}`, () => {
                     // we're good...
@@ -388,6 +398,17 @@ function setupWebSocketsServer(wsServer) {
                     }
                     tempStream.write(`${JSON.stringify(data)}\n`);
                     break;
+
+                case 'identity': {
+                    const info = data[2];
+
+                    fileMetadata.userId = info.displayName;
+                    fileMetadata.conferenceId = info.confID;
+                    fileMetadata.app = info.applicationName;
+
+                    tempStream.write(`${JSON.stringify(data)}\n`);
+                    break;
+                }
                 default:
                     if (data[0] === 'getstats' && data[2].values) {
                         // workaround for RtcStats.java bug.

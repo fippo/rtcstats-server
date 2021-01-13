@@ -5,6 +5,7 @@
   "main": "websocket.js",
   "scripts": {
     "lint": "eslint ./src/",
+    "lint:fix": "eslint --fix ./src/",
     "integration": "node ./src/test/client.js",
     "test": "npm run lint && npm run integration",
     "start": "NODE_ENV=production node ./src/app.js",
@@ -28,6 +29,7 @@
     "aws-sdk": "^2.441.0",
     "bluebird": "^3.3.1",
     "config": "^1.17.1",
+    "dynamoose": "^2.5.0",
     "get-folder-size": "^2.0.1",
     "js-yaml": "^3.13.1",
     "pem": "^1.14.2",
