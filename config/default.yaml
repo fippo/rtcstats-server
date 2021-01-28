@@ -43,3 +43,8 @@ github:
     client_id: GITHUB_CLIENT_ID
     client_secret: GITHUB_SECRET
     callback_url: GITHUB_CALLBACK_URL
+
+dynamo:
+  tableName:
+  endpoint:
+

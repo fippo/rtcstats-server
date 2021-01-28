@@ -79,7 +79,7 @@ function storeDump(clientId) {
             });
         })
         .catch(err => {
-            logger.error('Error storing: %s - %s', path, err);
+            logger.error('Error storing: %s - %s', clientId, err);
             fs.unlink(dumpPath, () => {
                 // do nothing.
             });
@@ -207,6 +207,11 @@ function serverHandler(request, response) {
         response.writeHead(200);
         response.end();
         break;
+    case '/bindcheck':
+        logger.info('Accessing bind check!');
+        response.writeHead(200);
+        response.end();
+        break;
     default:
         response.writeHead(404);
         response.end();
@@ -304,7 +309,7 @@ function setupWebSocketsServer(wsServer) {
                     body: { clientId } });
                 fileMetadata.endDate = Date.now();
 
-                saveMetadata(fileMetadata);
+                saveMetadata && saveMetadata(fileMetadata);
 
             } else {
                 fs.unlink(`${tempPath}/${clientId}`, () => {
@@ -385,20 +390,6 @@ function setupWebSocketsServer(wsServer) {
                 case 'navigator.mediaDevices.getUserMediaOnFailure':
                     tempStream.write(`${JSON.stringify(data)}\n`);
                     break;
-                case 'constraints':
-                    if (data[2].constraintsOptional) {
-                        // workaround for RtcStats.java bug.
-                        data[2].optional = [];
-                        Object.keys(data[2].constraintsOptional).forEach(key => {
-                            const pair = {};
-
-                            pair[key] = data[2].constraintsOptional[key];
-                        });
-                        delete data[2].constraintsOptional;
-                    }
-                    tempStream.write(`${JSON.stringify(data)}\n`);
-                    break;
-
                 case 'identity': {
                     const info = data[2];
 
@@ -410,13 +401,6 @@ function setupWebSocketsServer(wsServer) {
                     break;
                 }
                 default:
-                    if (data[0] === 'getstats' && data[2].values) {
-                        // workaround for RtcStats.java bug.
-                        const { timestamp, values } = data[2];
-
-                        data[2] = values;
-                        data[2].timestamp = timestamp;
-                    }
                     obfuscate(data);
                     tempStream.write(`${JSON.stringify(data)}\n`);
                     break;
