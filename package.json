@@ -1,6 +1,6 @@
 {
   "name": "rtcstats-server",
-  "version": "1.8.3",
+  "version": "1.9.0",
   "description": "",
   "main": "websocket.js",
   "scripts": {

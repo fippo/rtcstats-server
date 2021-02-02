@@ -396,6 +396,7 @@ function setupWebSocketsServer(wsServer) {
                     fileMetadata.userId = info.displayName;
                     fileMetadata.conferenceId = info.confID;
                     fileMetadata.app = info.applicationName;
+                    fileMetadata.sessionId = String(info.meetingUniqueId);
 
                     tempStream.write(`${JSON.stringify(data)}\n`);
                     break;
