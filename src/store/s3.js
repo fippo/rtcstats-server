@@ -50,22 +50,3 @@ module.exports = function(config) {
         }
     };
 };
-
-if (require.main === module) {
-    // For manual testing of the upload
-    if (process.argv.length !== 4) {
-        console.log(`usage: node ${process.argv[1]} <s3-bucket-name> <file-to-upload>`);
-    }
-    const bucket = process.argv[2];
-    const filename = process.argv[3];
-    const instance = module.exports({ bucket });
-
-    instance
-        .put(filename, filename)
-        .then(() => {
-            console.log(`uploaded ${filename} to ${bucket}`);
-        })
-        .catch(e => {
-            console.error(e);
-        });
-}

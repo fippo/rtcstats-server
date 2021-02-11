@@ -10,6 +10,8 @@ server:
     useHTTPS: false
     keyPath: './certs/key.pem'
     certPath: './certs/cert.pem'
+    tempPath : 'temp'
+
 
 features:
     # White list of client related features to be extracted possible values can be found in featured-client.js
@@ -47,4 +49,3 @@ github:
 dynamo:
   tableName:
   endpoint:
-

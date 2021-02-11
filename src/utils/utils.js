@@ -1,4 +1,7 @@
 /* feature extraction utils */
+const fs = require('fs');
+const os = require('os');
+
 const logger = require('../logging');
 
 /**
@@ -250,6 +253,28 @@ function isProduction() {
     return getEnvName() === 'production';
 }
 
+/**
+ *
+ * @param {*} filePath
+ */
+async function asyncDeleteFile(filePath) {
+    await fs.promises.unlink(filePath);
+}
+
+/**
+ *  Using all the CPUs available might slow down the main node.js thread which is responsible for handling
+ *  requests.
+ */
+function getIdealWorkerCount() {
+
+    if (os.cpus().length <= 2) {
+        return 1;
+    }
+
+    return os.cpus().length - 2;
+}
+
+
 const RequestType = Object.freeze({
     PROCESS: 'PROCESS'
 });
@@ -264,10 +289,12 @@ const ResponseType = Object.freeze({
 
 module.exports = {
     capitalize,
+    asyncDeleteFile,
     extractTracks,
     extractStreams,
     fixedDecMean,
     getEnvName,
+    getIdealWorkerCount,
     isIceConnected,
     isProduction,
     mode,

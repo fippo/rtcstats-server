@@ -8,6 +8,7 @@ server:
     jsonConsoleLog: true
     # The provided certificates are intended for local testing usign a HTTPS server
     useHTTPS: false
+    tempPath : 'temp'
 
 features:
     # White list of client related features to be extracted possible values can be found in featured-client.js

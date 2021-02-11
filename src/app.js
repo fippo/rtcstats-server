@@ -1,15 +1,16 @@
+const JSONStream = require('JSONStream');
 const config = require('config');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const os = require('os');
 const path = require('path');
-const uuid = require('uuid');
-const WebSocketServer = require('ws').Server;
+const { pipeline } = require('stream');
+const WebSocket = require('ws');
 
 const { name: appName, version: appVersion } = require('../package');
 
 const AmplitudeConnector = require('./database/AmplitudeConnector');
+const DemuxSink = require('./demux');
 const logger = require('./logging');
 const {
     connected,
@@ -21,32 +22,12 @@ const {
     prom,
     queueSize
 } = require('./prom-collector');
-const saveMetadata = require('./store/dynamo').saveEntry;
+const saveEntryAssureUnique = require('./store/dynamo').saveEntryAssureUnique;
 const WorkerPool = require('./utils/WorkerPool');
-const obfuscate = require('./utils/obfuscator');
-const { getEnvName, RequestType, ResponseType } = require('./utils/utils');
-
-// Configure database, fall back to redshift-firehose.
-let database;
-
-if (config.gcp && config.gcp.dataset && config.gcp.table) {
-    database = require('./database/bigquery.js')(config.gcp);
-}
-
-if (!database) {
-    database = require('./database/redshift-firehose.js')(config.firehose);
-}
-
-if (!database) {
-    logger.warn('No database configured!');
-}
+const { asyncDeleteFile, getEnvName, getIdealWorkerCount, RequestType, ResponseType } = require('./utils/utils');
 
 // Configure store, fall back to S3
 let store;
-
-if (config.gcp && config.gcp.bucket) {
-    store = require('./store/gcp.js')(config.gcp);
-}
 
 if (!store) {
     store = require('./store/s3.js')(config.s3);
@@ -61,42 +42,48 @@ if (config.amplitude && config.amplitude.key) {
     logger.warn('Amplitude is not configured!');
 }
 
-let server;
-const tempPath = 'temp';
+const tempPath = config.server.tempPath;
 
 /**
+ * Store the dump to the configured store. The dump file might be stored under a different
+ * name, this is to account for the reconnect mechanism currently in place.
  *
- * @param {*} clientId
+ * @param {string} clientId - name that the dump file will actually have on disk.
+ * @param {string} uniqueClientId - name that the dump will have on the store.
  */
-function storeDump(clientId) {
+async function storeDump(clientId, uniqueClientId) {
     const dumpPath = `${tempPath}/${clientId}`;
 
-    store
-        .put(clientId, dumpPath)
-        .then(() => {
-            fs.unlink(dumpPath, () => {
-                // do nothing.
-            });
-        })
-        .catch(err => {
-            logger.error('Error storing: %s - %s', clientId, err);
-            fs.unlink(dumpPath, () => {
-                // do nothing.
-            });
-        });
+    try {
+        await store.put(uniqueClientId, dumpPath);
+    } catch (err) {
+        logger.error('Error storing: %s - %s', dumpPath, err);
+    } finally {
+        await asyncDeleteFile(dumpPath);
+    }
 }
 
 /**
+ * Persist the dump file to the configured store and save the  associated metadata. At the time of writing the
+ * only supported store for metadata is dynamo.
  *
+ * @param {Object} sinkMeta - metadata associated with the dump file.
  */
-function getIdealWorkerCount() {
-    // Using all the CPUs available might slow down the main node.js thread which is responsible for handling
-    // requests.
-    if (os.cpus().length <= 2) {
-        return 1;
+async function persistDumpData(sinkMeta) {
+
+    // Metadata associated with a dump can get large so just select the necessary fields.
+    const { clientId } = sinkMeta;
+    let uniqueClientId = clientId;
+
+    if (saveEntryAssureUnique) {
+        // Because of the current reconnect mechanism some files might have the same clientId, in which case the
+        // underlying call will add an associated uniqueId to the clientId and return it.
+        uniqueClientId = await saveEntryAssureUnique(sinkMeta);
     }
 
-    return os.cpus().length - 2;
+    // Store the dump file associated with the clientId using uniqueClientId as the key value. In the majority of
+    // casses the input parameter will have the same values.
+    storeDump(clientId, uniqueClientId);
 }
 
 const workerScriptPath = path.join(__dirname, './features/extract.js');
@@ -110,26 +97,6 @@ workerPool.on(ResponseType.PROCESSING, body => {
     if (amplitude) {
         amplitude.track(body);
     }
-
-    // Current supported databases are big data type so we can send bulk data without having to worry about
-    // volume.
-    if (database) {
-        const { url, clientId, connid, clientFeatures, connectionFeatures } = body;
-
-        if (connectionFeatures) {
-            // When using a database backend the streams features are stored separately, so we don't need them
-            // in the connectionFeatures object.
-            const streams = connectionFeatures.streams;
-
-            delete connectionFeatures.streams;
-
-            for (const streamFeatures of streams) {
-                database.put(url, clientId, connid, clientFeatures, connectionFeatures, streamFeatures);
-            }
-        } else {
-            database.put(url, clientId, connid, clientFeatures);
-        }
-    }
 });
 
 workerPool.on(ResponseType.DONE, body => {
@@ -137,7 +104,8 @@ workerPool.on(ResponseType.DONE, body => {
 
     processed.inc();
 
-    storeDump(body.clientId);
+    persistDumpData(body);
+
 });
 
 workerPool.on(ResponseType.METRICS, body => {
@@ -147,27 +115,16 @@ workerPool.on(ResponseType.METRICS, body => {
 });
 
 workerPool.on(ResponseType.ERROR, body => {
-    // TODO handle requeue of the request, this also requires logic in extract.js
-    // i.e. we need to catch all potential errors and send back a request with
-    // the client id.
     logger.error('[App] Handling ERROR event with body %j', body);
 
     errored.inc();
 
     // If feature extraction failed at least attempt to store the dump in s3.
     if (body.clientId) {
-        storeDump(body.clientId);
+        persistDumpData(body);
     } else {
         logger.error('[App] Handling ERROR without a clientId field!');
     }
-
-    // TODO At this point adding a retry mechanism can become detrimental, e.g.
-    // If there is a error with the dump file structure the error would just requeue ad infinitum,
-    // a smarter mechanism is required here, with some sort of maximum retry per request and so on.
-    // if (body.clientId) {
-    //     logger.info('Requeued clientId %s', body.clientId);
-    //     workerPool.addTask({ type: RequestType.PROCESS, body: { clientId: body.clientId } });
-    // }
 });
 
 /**
@@ -178,14 +135,14 @@ function setupWorkDirectory() {
         if (fs.existsSync(tempPath)) {
             fs.readdirSync(tempPath).forEach(fname => {
                 try {
-                    logger.debug(`Removing file ${`${tempPath}/${fname}`}`);
+                    logger.debug(`[App] Removing file ${`${tempPath}/${fname}`}`);
                     fs.unlinkSync(`${tempPath}/${fname}`);
                 } catch (e) {
                     logger.error(`[App] Error while unlinking file ${fname} - ${e}`);
                 }
             });
         } else {
-            logger.debug(`Creating working dir ${tempPath}`);
+            logger.debug(`[App] Creating working dir ${tempPath}`);
             fs.mkdirSync(tempPath);
         }
     } catch (e) {
@@ -220,7 +177,7 @@ function serverHandler(request, response) {
 
 /**
  * In case one wants to run the server locally, https is required, as browsers normally won't allow non
- * secure web sockets on a https domain, so something like the bellow config is required along with a https
+ * secure web sockets on a https domain, so something like the bello
  * server instead of http.
  *
  * @param {number} port
@@ -271,145 +228,85 @@ function setupMetricsServer(port) {
  * @param {*} wsServer
  */
 function setupWebSocketsServer(wsServer) {
-    const wss = new WebSocketServer({ server: wsServer });
+    const wss = new WebSocket.Server({ server: wsServer });
 
     wss.on('connection', (client, upgradeReq) => {
         connected.inc();
-        let numberOfEvents = 0;
 
         // the url the client is coming from
         const referer = upgradeReq.headers.origin + upgradeReq.url;
 
         // TODO: check against known/valid urls
         const ua = upgradeReq.headers['user-agent'];
-        const warning = upgradeReq.headers.warning;
 
+        // const warning = upgradeReq.headers.warning;
+        // let clientId;
 
-        let clientId;
+        // // In case this dump is send from the integration test suite, we need to maintain the ID used
+        // // there, the user-agent will have the following format 'integration-test/<clientId>'
+        // if (warning && warning.startsWith('integration-test')) {
+        //     clientId = warning.split('/').pop();
+        // } else {
+        //     clientId = uuid.v4();
+        // }
 
-        // In case this dump is send from the integration test suite, we need to maintain the ID used
-        // there, the user-agent will have the following format 'integration-test/<clientId>'
-        if (warning && warning.startsWith('integration-test')) {
-            clientId = warning.split('/').pop();
-        } else {
-            clientId = uuid.v4();
-        }
+        // During feature extraction we need information about the browser in order to decide which algorithms use.
+        const connMeta = {
 
-        const fileMetadata = {
-            startDate: Date.now(),
-            clientId
-        };
-
-        let tempStream = fs.createWriteStream(`${tempPath}/${clientId}`);
-
-        tempStream.on('finish', () => {
-            if (numberOfEvents > 0) {
-                // q.enqueue(clientid);
-                workerPool.addTask({ type: RequestType.PROCESS,
-                    body: { clientId } });
-                fileMetadata.endDate = Date.now();
-
-                saveMetadata && saveMetadata(fileMetadata);
-
-            } else {
-                fs.unlink(`${tempPath}/${clientId}`, () => {
-                    // we're good...
-                });
-            }
-        });
-
-        const meta = {
             path: upgradeReq.url,
             origin: upgradeReq.headers.origin,
             url: referer,
             userAgent: ua,
             time: Date.now(),
-            fileFormat: 2,
-            clientProtocol: Number(client.protocol)
+            clientProtocol: client.protocol
         };
 
-        tempStream.write(`${JSON.stringify(meta)}\n`);
+        logger.info('[App] Meta: %s', connMeta);
 
-        const forwardedFor = upgradeReq.headers['x-forwarded-for'];
+        const demuxSinkOptions = {
+            connMeta,
+            dumpFolder: './temp',
+            log: logger
+        };
 
-        if (forwardedFor) {
-            const forwardedIPs = forwardedFor.split(',');
+        const demuxSink = new DemuxSink(demuxSinkOptions);
 
-            if (config.server.skipLoadBalancerIp) {
-                forwardedIPs.pop();
-            }
-            const obfuscatedIPs = forwardedIPs.map(ip => {
-                const publicIP = [ 'publicIP', null, ip.trim() ];
+        demuxSink.on('close-sink', ({ id, meta }) => {
+            logger.info('[App] Queue for processing id %s', id);
 
-                obfuscate(publicIP);
+            // Metadata associated with a dump can get large so just select the necessary fields.
+            const sinkMetadata = {
+                clientId: id,
+                startDate: meta.startDate,
+                endDate: Date.now(),
+                userId: meta.displayName,
+                conferenceId: meta.confID,
+                app: meta.applicationName,
+                sessionId: String(meta.meetingUniqueId)
+            };
 
-                return publicIP[2];
-            });
+            // Add the clientId in the worker pool so it can process the associated dump file.
+            workerPool.addTask({ type: RequestType.PROCESS,
+                body: sinkMetadata });
+        });
 
-            const publicIP = [ 'publicIP', null, obfuscatedIPs, Date.now() ];
+        const connectionPipeline = pipeline(
+            WebSocket.createWebSocketStream(client),
+            JSONStream.parse(),
+            demuxSink,
+            err => err && logger.error('[App] Pipeline error: ', err)
+        );
 
-            tempStream.write(`${JSON.stringify(publicIP)}\n`);
-        } else {
-            const { remoteAddress } = upgradeReq.connection;
-            const publicIP = [ 'publicIP', null, remoteAddress ];
-
-            obfuscate(publicIP);
-            tempStream.write(`${JSON.stringify([ 'publicIP', null, [ publicIP[2] ], Date.now() ])}\n`);
-        }
+        connectionPipeline.on('finish', () => {
+            logger.info('[App] Pipeline successfully finished');
+        });
 
         logger.info(
-            '[App] New app connected: ua: <%s>, protocolV: <%s>, referer: <%s>, clientid: <%s>',
+            '[App] New app connected: ua: <%s>, protocolV: <%s>, referer: <%s>',
             ua,
             client.protocol,
             referer,
-            clientId
         );
-
-        client.on('message', msg => {
-            try {
-                if (!msg.localeCompare('__ping__')) {
-                    logger.debug('[App] Received ping for client: %s', clientId);
-
-                    return;
-                }
-
-                const data = JSON.parse(msg);
-
-                numberOfEvents++;
-
-                if (data[0].endsWith('OnError')) {
-                    // monkey-patch java/swift sdk bugs.
-                    data[0] = data[0].replace(/OnError$/, 'OnFailure');
-                }
-                switch (data[0]) {
-                case 'getUserMedia':
-                case 'getUserMediaOnSuccess':
-                case 'getUserMediaOnFailure':
-                case 'navigator.mediaDevices.getUserMedia':
-                case 'navigator.mediaDevices.getUserMediaOnSuccess':
-                case 'navigator.mediaDevices.getUserMediaOnFailure':
-                    tempStream.write(`${JSON.stringify(data)}\n`);
-                    break;
-                case 'identity': {
-                    const info = data[2];
-
-                    fileMetadata.userId = info.displayName;
-                    fileMetadata.conferenceId = info.confID;
-                    fileMetadata.app = info.applicationName;
-                    fileMetadata.sessionId = String(info.meetingUniqueId);
-
-                    tempStream.write(`${JSON.stringify(data)}\n`);
-                    break;
-                }
-                default:
-                    obfuscate(data);
-                    tempStream.write(`${JSON.stringify(data)}\n`);
-                    break;
-                }
-            } catch (e) {
-                logger.error('[App] Error while processing clientId %s: %s - %s', clientId, e.message, msg);
-            }
-        });
 
         client.on('error', e => {
             logger.error('[App] Websocket error: %s', e);
@@ -418,9 +315,6 @@ function setupWebSocketsServer(wsServer) {
 
         client.on('close', () => {
             connected.dec();
-            tempStream.write(JSON.stringify([ 'close', null, null, Date.now() ]));
-            tempStream.end();
-            tempStream = null;
         });
     });
 }
@@ -430,6 +324,7 @@ function setupWebSocketsServer(wsServer) {
  */
 function run() {
     logger.info('[App] Initializing <%s>, version <%s>, env <%s> ...', appName, appVersion, getEnvName());
+    let server;
 
     setupWorkDirectory();
 

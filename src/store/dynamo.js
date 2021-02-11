@@ -24,6 +24,7 @@ const Document = dynamoose.model(
     {
         conferenceId: String,
         dumpId: String,
+        baseDumpId: String,
         userId: String,
         app: String,
         sessionId: String,
@@ -44,8 +45,11 @@ const formatConferenceId = ({ conferenceId }) => {
 
 const getDumpId = ({ clientId }) => `${clientId}.gz`;
 
-
-const saveEntry = async data => {
+/**
+ *
+ * @param {*} data
+ */
+async function saveEntry({ ...data }) {
     try {
         const entry = Object.assign(data, {
             conferenceId: formatConferenceId(data),
@@ -54,14 +58,54 @@ const saveEntry = async data => {
 
         const document = new Document(entry);
 
-
-        await document.save();
+        // overwrite: false will returns an exception in case the entry already exists
+        await document.save({ overwrite: false });
         logger.info('[Dynamo] Saved metadata %j', entry);
+
+        return true;
     } catch (error) {
+        // Dynamo returns this error code in case there is a duplicate entry
+        if (error.code === 'ConditionalCheckFailedException') {
+            logger.warn('[Dynamo] duplicate entry %j, %j', data, error);
+
+            return false;
+        }
+
         logger.error('[Dynamo] Error saving metadata %j, %j', data, error);
+
+
+        // we don't want any exception leaving the boundaries of the dynamo client. At this point
+        // just logging them will suffice, although it would be healthyier for whoever is using this client
+        // to make that decision.
+        return true;
     }
-};
+}
+
+/**
+ *
+ * @param {*} data
+ */
+async function saveEntryAssureUnique({ ...data }) {
+    const { clientId } = data;
+    const [ baseClientId, order ] = clientId.split('_');
+
+    data.baseDumpId = baseClientId;
+
+    let saveSuccessful = false;
+    let clientIdIncrement = Number(order) || 0;
+
+    while (!saveSuccessful) {
+        saveSuccessful = await saveEntry(data);
+
+        if (!saveSuccessful) {
+            logger.warn('[Dynamo] duplicate cliendId %s, incrementing reconnect count', data.clientId);
+            data.clientId = `${baseClientId}_${++clientIdIncrement}`;
+        }
+    }
+
+    return data.clientId;
+}
 
 module.exports = {
-    saveEntry
+    saveEntryAssureUnique
 };
