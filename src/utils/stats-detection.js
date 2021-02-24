@@ -142,15 +142,19 @@ function isStatisticEntry(entryType) {
 function getStatsFormat(clientMeta) {
 
     const { browser: { name: browserName = 'Unsupported' } } = uaParser(clientMeta.userAgent);
-    const { clientProtocol = 0 } = clientMeta;
+    const { clientProtocol } = clientMeta;
 
     let statsFormat = StatsFormat.UNSUPPORTED;
+
+    // We expect stats type to be of two types, LEGACY or STANDARD, this will only be used when determining which type
+    // of chrome statistic to use, firefox and sfarai ua will ignore it.
+    const [ , statsType ] = clientProtocol.split('_');
 
     // Take into account Chromium as well, possible match values Chrome / Headless / Chrome WebView / Chromium
     // In case it's chromium based we need to check if the stats format is legacy or according to the spec
     if (browserName.startsWith('Chrom')) {
         // Starting with protocol 3 the client switched to standard stats.
-        if (clientProtocol >= 3) {
+        if (statsType === 'STANDARD') {
             statsFormat = StatsFormat.CHROME_STANDARD;
         } else {
             statsFormat = StatsFormat.CHROME_LEGACY;

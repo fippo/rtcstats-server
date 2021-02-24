@@ -22,7 +22,6 @@ const clientFeaturesFns = require('./features-client');
 const connectionFeaturesFns = require('./features-connection');
 const streamFeaturesFns = require('./features-stream');
 
-
 /**
  *
  * @param {*} str
@@ -293,12 +292,6 @@ function extractTrackFeatures(client, connId) {
 function extractFeatures(url, client, sinkMeta) {
 
     const { clientId } = sinkMeta;
-
-
-    // ignore connections that never send getUserMedia or peerconnection events.
-    if (client.getUserMedia.length === 0 && Object.keys(client.peerConnections).length === 0) {
-        return;
-    }
 
     const { identity = {} } = client;
     const clientFeatures = extractClientFeatures(client);

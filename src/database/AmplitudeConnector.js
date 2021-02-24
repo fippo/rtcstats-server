@@ -25,7 +25,7 @@ class AmplitudeConnector {
      *
      * @param {Object} connectionFeatures
      */
-    extractRelevantStats(connectionFeatures, clientFeatures) {
+    extractRelevantStats(connectionFeatures = {}, clientFeatures = {}) {
         const filteredFeature = {};
 
         // TODO Use object destructuring for a more clean approach.

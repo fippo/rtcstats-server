@@ -1,15 +1,20 @@
+/* eslint-disable no-invalid-this */
 /* eslint-disable no-multi-str */
 const assert = require('assert').strict;
 const config = require('config');
+const { EventEmitter } = require('events');
 const fs = require('fs');
 const LineByLine = require('line-by-line');
 const WebSocket = require('ws');
 
+
 const server = require('../app');
 const logger = require('../logging');
-const { ResponseType } = require('../utils/utils');
+const { uuidV4, ResponseType } = require('../utils/utils');
 
 let testCheckRouter;
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore self-signed cert
 
 const BrowserUASamples = Object.freeze({
     CHROME:
@@ -22,9 +27,151 @@ const BrowserUASamples = Object.freeze({
 });
 
 const ProtocolV = Object.freeze({
-    LEGACY: '2',
-    STANDARD: '3'
+    LEGACY: '3_LEGACY',
+    STANDARD: '3_STANDARD'
 });
+
+/**
+ *
+ */
+class RtcstatsConnection extends EventEmitter {
+    /**
+     *
+     * @param {*} param0
+     */
+    constructor({ id, serverUrl, dumpPath, readDelay = 1000, wsOptions, protocolV }) {
+        super();
+        this.id = id;
+        this.dumpPath = dumpPath;
+        this.serverUrl = serverUrl;
+        this.wsOptions = wsOptions;
+        this.readDelay = readDelay;
+        this.protocolV = protocolV;
+        this.clientId = uuidV4();
+
+        this._createIdentityData();
+    }
+
+    /**
+     *
+     */
+    getClientId() {
+        return this.clientId;
+    }
+
+    /**
+     *
+     */
+    getIdentityData() {
+        return this.identityData;
+    }
+
+    /**
+     *
+     */
+    connect() {
+        this.startWSOpen = new Date();
+        this.ws = new WebSocket(this.serverUrl, this.protocolV, this.wsOptions);
+        this.ws.on('open', this._open);
+        this.ws.on('close', this._close);
+        this.ws.on('error', this._error);
+    }
+
+    /**
+     *
+     */
+    _createIdentityData() {
+        this.identityData = {
+            sessionId: new Date().getTime(),
+            deviceId: uuidV4(),
+            applicationName: 'Integration Test',
+            confID: `192.168.1.1/conf-${this.clientId}`,
+            displayName: `test-${this.clientId}`,
+            meetingUniqueId: uuidV4()
+        };
+    }
+
+    /**
+     *
+     */
+    _sendIdentity() {
+        const identity = [
+            'identity',
+            null,
+            this.identityData,
+            new Date()
+        ];
+
+        const identityRequest = {
+            clientId: this.clientId,
+            type: 'identity',
+            data: identity
+        };
+
+        this._sendRequest(identityRequest);
+    }
+
+    /**
+     *
+     * @param {*} data
+     */
+    _sendStats(data) {
+        const statsRequest = {
+            clientId: this.clientId,
+            type: 'stats-entry',
+            data
+        };
+
+        this._sendRequest(statsRequest);
+    }
+
+    /**
+     *
+     * @param {*} request
+     */
+    _sendRequest(request) {
+        this.ws.send(JSON.stringify(request));
+    }
+
+    /**
+     *
+     */
+    _open = () => {
+        const endWSOpen = new Date() - this.startWSOpen;
+
+        logger.info(`Connected ws ${this.id} setup time ${endWSOpen}`);
+
+        this._sendIdentity();
+
+        this.lineReader = new LineByLine(this.dumpPath);
+
+        this.lineReader.on('line', line => {
+            this._sendStats(line);
+        });
+
+        this.lineReader.on('end', () => {
+            this.ws.close();
+        });
+        this.lineReader.on('error', err => {
+
+            logger.error('LineReader error:', err);
+        });
+    };
+
+    _close = () => {
+        const closedAfter = new Date() - this.startWSOpen;
+
+        logger.info(`Closed ws ${this.id} in ${closedAfter}`);
+        this.emit('finished', { id: this.id });
+    };
+
+    _error = e => {
+        const errorAfter = new Date() - this.startWSOpen;
+
+        logger.info(`Failed ws ${this.id}, error %o in ${errorAfter}`, e);
+        this.emit('finished', { id: this.id });
+    };
+}
 
 
 /**
@@ -132,60 +279,62 @@ function checkTestCompletion(appServer) {
  */
 function simulateConnection(dumpPath, resultPath, ua, protocolV) {
     const resultString = fs.readFileSync(resultPath);
-    const resultObject = JSON.parse(resultString);
-    const dumpFile = dumpPath.split('/').filter(Boolean)
-                             .pop();
+    const resultList = JSON.parse(resultString);
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore self-signed cert
+    const wsOptions = {
+        headers: {
+            'User-Agent': ua
+        },
+        origin: 'localhost'
+    };
 
-    const ws = new WebSocket(`ws://localhost:${config.get('server').port}/${dumpFile}`,
-        protocolV,
-        {
-            headers: {
-                'User-Agent': ua,
-                'warning': `integration-test/${dumpFile}`
-            },
-            origin: 'https://localhost'
-        });
+    const rtcstatsWsOptions = {
+        id: dumpPath,
+        serverUrl: 'ws://localhost:3000/',
+        dumpPath,
+        readDelay: 1,
+        wsOptions,
+        protocolV
+    };
 
-    ws.on('open', function open() {
-        testCheckRouter.attachTest({
-            clientId: dumpFile,
-            checkDoneResponse: body => {
-                logger.info('[TEST] Handling DONE event with body %j', body);
-            },
-            checkProcessingResponse: body => {
-                logger.debug('[TEST] Handling PROCESSING event with clientId %j, features %j', body.clientId, body);
-                body.clientId = dumpFile;
+    const connection = new RtcstatsConnection(rtcstatsWsOptions);
+    const clientId = connection.getClientId();
+    const identityData = connection.getIdentityData();
 
-                const parsedBody = JSON.parse(JSON.stringify(body));
 
-                assert.deepStrictEqual(parsedBody, resultObject.shift());
-            },
-            checkErrorResponse: body => {
-                logger.info('[TEST] Handling ERROR event with body %j', body);
-            },
-            checkMetricsResponse: body => {
-                logger.info('[TEST] Handling METRICS event with body %j', body);
+    testCheckRouter.attachTest({
+        clientId,
+        checkDoneResponse: body => {
+            logger.info('[TEST] Handling DONE event with body %j', body);
+        },
+        checkProcessingResponse: body => {
+            logger.info('[TEST] Handling PROCESSING event with clientId %j, features %j', body.clientId, body);
 
-                // assert.fail(body.extractDurationMs < 400);
-            }
-        });
+            const parsedBody = JSON.parse(JSON.stringify(body));
+            const resultTemplate = resultList.shift();
 
-        const lr = new LineByLine(dumpPath);
+            resultTemplate.clientId = clientId;
+            resultTemplate.url = 'localhost/';
+            resultTemplate.userId = identityData.displayName;
+            resultTemplate.app = identityData.applicationName;
+            resultTemplate.conferenceId = identityData.confID;
+            resultTemplate.sessionId = identityData.meetingUniqueId;
+            resultTemplate.startDate = body.startDate;
+            resultTemplate.endDate = body.endDate;
 
-        lr.on('error', err => {
-            logger.error('Error reading line: %j', err);
-        });
+            assert.deepStrictEqual(parsedBody, resultTemplate);
+        },
+        checkErrorResponse: body => {
+            logger.info('[TEST] Handling ERROR event with body %j', body);
+        },
+        checkMetricsResponse: body => {
+            logger.info('[TEST] Handling METRICS event with body %j', body);
 
-        lr.on('line', line => {
-            ws.send(line);
-        });
-
-        lr.on('end', () => {
-            ws.close();
-        });
+            // assert.fail(body.extractDurationMs < 400);
+        }
     });
+
+    connection.connect();
 }
 
 /**

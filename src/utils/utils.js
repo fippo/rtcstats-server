@@ -1,6 +1,7 @@
 /* feature extraction utils */
 const fs = require('fs');
 const os = require('os');
+const uuid = require('uuid');
 
 const logger = require('../logging');
 
@@ -262,6 +263,15 @@ async function asyncDeleteFile(filePath) {
 }
 
 /**
+ * Generate uuid v4
+ *
+ * @returns {string}
+ */
+function uuidV4() {
+    return uuid.v4();
+}
+
+/**
  *  Using all the CPUs available might slow down the main node.js thread which is responsible for handling
  *  requests.
  */
@@ -303,5 +313,6 @@ module.exports = {
     RequestType,
     ResponseType,
     standardizedMoment,
-    timeBetween
+    timeBetween,
+    uuidV4
 };

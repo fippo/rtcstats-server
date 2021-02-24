@@ -239,20 +239,8 @@ function setupWebSocketsServer(wsServer) {
         // TODO: check against known/valid urls
         const ua = upgradeReq.headers['user-agent'];
 
-        // const warning = upgradeReq.headers.warning;
-        // let clientId;
-
-        // // In case this dump is send from the integration test suite, we need to maintain the ID used
-        // // there, the user-agent will have the following format 'integration-test/<clientId>'
-        // if (warning && warning.startsWith('integration-test')) {
-        //     clientId = warning.split('/').pop();
-        // } else {
-        //     clientId = uuid.v4();
-        // }
-
         // During feature extraction we need information about the browser in order to decide which algorithms use.
         const connMeta = {
-
             path: upgradeReq.url,
             origin: upgradeReq.headers.origin,
             url: referer,
@@ -260,8 +248,6 @@ function setupWebSocketsServer(wsServer) {
             time: Date.now(),
             clientProtocol: client.protocol
         };
-
-        logger.info('[App] Meta: %s', connMeta);
 
         const demuxSinkOptions = {
             connMeta,
@@ -299,6 +285,11 @@ function setupWebSocketsServer(wsServer) {
 
         connectionPipeline.on('finish', () => {
             logger.info('[App] Pipeline successfully finished');
+
+            // We need to explicity close the ws, you might notice that we don't do the same in case of an error
+            // that's because in that case the error will propagate up the pipeline chain and the ws stream will also
+            // close the ws.
+            client.close();
         });
 
         logger.info(

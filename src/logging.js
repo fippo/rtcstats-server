@@ -2,7 +2,7 @@ const config = require('config');
 const os = require('os');
 const util = require('util');
 const { createLogger, format, transports } = require('winston');
-const { threadId } = require('worker_threads');
+const { threadId, isMainThread } = require('worker_threads');
 
 require('winston-daily-rotate-file');
 
@@ -71,6 +71,8 @@ const appLogTransport = new transports.DailyRotateFile({
     ...logFileCommonCfg,
     level: config.get('server').logLevel,
     filename: 'logs/app-%DATE%.log'
+
+    // handleExceptions: false
 });
 
 // Error log rolling file transport configuration based on common cfg.
@@ -78,6 +80,8 @@ const appErrorLogTransport = new transports.DailyRotateFile({
     ...logFileCommonCfg,
     level: 'error',
     filename: 'logs/app-error-%DATE%.log'
+
+    // handleExceptions: false
 });
 
 // Uncaught exception log transport configuration, we remove the custom formatters as it interferes with
@@ -98,43 +102,50 @@ const appExceptionCommonLogTransport = new transports.DailyRotateFile({
     filename: 'logs/app-%DATE%.log'
 });
 
+// We don't want winston to swallow uncaught exceptions in worker threads, as this will prevent the error event
+// from being emitted to the service that manages them.
+const handleUncaughtExceptions = isMainThread;
+const exceptionHandlers = handleUncaughtExceptions
+    ? [ appExceptionLogTransport, appExceptionCommonLogTransport ] : undefined;
+
 // Create actual loggers with specific transports
 const logger = createLogger({
     transports: [ appLogTransport, appErrorLogTransport ],
-    exceptionHandlers: [ appExceptionLogTransport, appExceptionCommonLogTransport ]
+    exceptionHandlers
 });
 
 // The JSON format is more suitable for production deployments that use the console.
 // The alternative is a single line log format that is easier to read, useful for local development.
 if (config.get('server').jsonConsoleLog) {
     logger.add(
-        new transports.Console({
-            format: fileLogger,
-            level: config.get('server').logLevel,
-            handleExceptions: true
-        })
+            new transports.Console({
+                format: fileLogger,
+                level: config.get('server').logLevel,
+                handleExceptions: handleUncaughtExceptions
+            })
     );
 } else {
     const consoleLogger = format.combine(
-        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-        colorize(),
-        format(splatTransform)(),
-        format(metaTransform)(),
-        format.printf(
-            ({ level, message, timestamp, PID, TID, host }) =>
-                `${timestamp} ${PID} ${TID} ${host} ${level}: ${message}`
-        )
+            format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+            colorize(),
+            format(splatTransform)(),
+            format(metaTransform)(),
+            format.printf(
+                ({ level, message, timestamp, PID, TID, host }) =>
+                    `${timestamp} ${PID} ${TID} ${host} ${level}: ${message}`
+            )
     );
 
     logger.add(
-        new transports.Console({
-            format: consoleLogger,
-            level: config.get('server').logLevel,
-            handleExceptions: true
-        })
+            new transports.Console({
+                format: consoleLogger,
+                level: config.get('server').logLevel,
+                handleExceptions: handleUncaughtExceptions
+            })
     );
 }
 
 logger.info('Logger successfully initialized.');
+
 
 module.exports = logger;

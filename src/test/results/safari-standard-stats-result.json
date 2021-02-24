@@ -216,7 +216,7 @@
         "firstCandidatePairType": "prflx;srflx",
         "firstCandidatePairLocalType": "prflx",
         "firstCandidatePairRemoteType": "srflx",
-        "firstCandidatePairRemoteIPAddress": "3.249.64.x",
+        "firstCandidatePairRemoteIPAddress": "3.249.64.62",
         "firstCandidatePairLocalTypePreference": 110,
         "firstCandidatePairRemoteTypePreference": 100,
         "numberOfCandidatePairChanges": 0,
