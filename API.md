@@ -15,13 +15,13 @@ The protocol version is provided so we can have backwards compatibility between 
 Default request message format, JSON:
 ```javascript
 {
-	clientId: String, // mandatory
+	statsSessionId: String, // mandatory
 	data: Object/String, // optional depending on request
 	type: String // mandatory
 }
 ```
 - `data` can have different meanings depending on the message type as described in a subsequent section.
-- `clientId` associates a request with a statistics dump, the value is a client side generated uuid v4. This allows for sending stats associated with different entities on the same websocket.
+- `statsSessionId` associates a request with a statistics dump, the value is a client side generated uuid v4. This allows for sending stats associated with different entities on the same websocket.
 - `type` determines the request type being sent.
 
 ### identity request
@@ -31,10 +31,10 @@ In this case data will have the following format:
 ```javascript
 {
 	type: "identity",
-	clientId: String,
+	statsSessionId: String,
 	data:  {
 	    applicationName: String, // mandatoy
-        confID: String, // mandatory
+        confName: String, // mandatory
         displayName: String, // optional
         meetingUniqueId: String, // optional
         ... // additional metadata we want associated with a dump
@@ -44,9 +44,10 @@ In this case data will have the following format:
 The specified fields will be persisted to dynamodb under the following schema:
 ```javascript
 {
-    conferenceId: String, // associated with confID
-    dumpId: String, // assciated with clientId
-    baseDumpId: String, // associated with clientId
+    conferenceId: String, // associated with confName
+	  conferenceUrl: String, // associated with confID
+    dumpId: String, // assciated with statsSessionId
+    baseDumpId: String, // associated with statsSessionId
     userId: String, // associated with displayName
     app: String, // associated with applicationName
     sessionId: String, // associated with meetingUniqueId
@@ -58,9 +59,10 @@ Sample request:
 ```javascript
 {
 	type: "identity",
-	clientId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
+	statsSessionId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
 	data:  {
-		confID: "RandomConferenceNameIsRandom",
+		confName: "RandomConferenceNameIsRandom",
+		confID: "https://meet.jit.si/rndDomain/RandomConferenceNameIsRandom",
 		displayName: "John Doe",
 		applicationName: "Jitsi Meet",
 		meetingUniqueId: "d823kas-32fvb-4551-ggq1-d3mc1k1cpmmc",
@@ -74,7 +76,7 @@ The data value of this request will be saved in the dump file as is, so in order
 ```javascript
 {
 	type: "stats-entry",
-	clientId: String,
+	statsSessionId: String,
 	data: String
 }
 ```
@@ -83,25 +85,26 @@ Sample request:
 ```javascript
 {
 	type: "stats-entry",
-	clientId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
+	statsSessionId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
 	data: "[\n\"getstats\", \n\"PC_0\", \n{\"8dc5feb0\":{ \n\"timestamp\": 1604057071438, \"bytesReceived\": 83363,\"bytesSent\": 9313547, \"lastPacketReceivedTimestamp\": 363635983420, \"lastPacketSentTimestamp\": 363635983428}}, \n1604057071458\n]\n"
 }
 ```
 ### close request
- Mark a specific `clientId` as done. This means that feature extraction will first run on it depending on the type. For the time being JVB dumps might not go through this step. The second step involves having the dump archived and uploaded to s3, push the features to amplitude and identity metadata to dynamo.
+ Mark a specific `statsSessionId` as done. This means that feature extraction will first run on it depending on the type. For the time being JVB dumps might not go through this step. The second step involves having the dump archived and uploaded to s3, push the features to amplitude and identity metadata to dynamo.
  Sample request:
  ```javascript
 {
 	type: "close",
-	clientId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
+	statsSessionId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
 }
  ```
  ### keepalive request
- A connection will expire after 60 seconds if no requests are sent. The same applies for statistic dumps associated with `clientId`, if no requests are sent for it, the server will trigger a close.
+ A connection will expire after 60 seconds if no requests are sent. The same applies for statistic dumps associated with `statsSessionId`, if no requests are sent for it, the server will trigger a close.
+
  Sample request:
 ```javascript
 {
 	type: "keepalive",
-	clientId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
+	statsSessionId: "3bc291e8-852e-46da-bf9d-403e98c6bf3c",
 }
  ```

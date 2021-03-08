@@ -250,10 +250,10 @@ class DemuxSink extends Writable {
      * @param {string} clientId
      * @param {string} type
      */
-    _requestPrecondition({ clientId, type }) {
+    _requestPrecondition({ statsSessionId, type }) {
 
-        if (!clientId) {
-            throw new Error('[Demux] clientId missing from request!');
+        if (!statsSessionId) {
+            throw new Error('[Demux] statsSessionId missing from request!');
         }
 
         if (!type) {
@@ -269,23 +269,23 @@ class DemuxSink extends Writable {
     async _handleRequest(request) {
         this._requestPrecondition(request);
 
-        const { clientId, type, data } = request;
+        const { statsSessionId, type, data } = request;
 
         // If this is the first request coming from this client id ,create a new sink (file write stream in this case)
         // and it's associated metadata.
         // In case of reconnects the incremental sink naming convention described in _sinkCreate
         // will take care of it.
-        const sinkData = this.sinkMap.get(clientId) || await this._sinkCreate(clientId);
+        const sinkData = this.sinkMap.get(statsSessionId) || await this._sinkCreate(statsSessionId);
 
         if (!sinkData) {
-            this.log.warn('[Demux] Received data for already closed sink: ', clientId);
+            this.log.warn('[Demux] Received data for already closed sink: ', statsSessionId);
 
             return;
         }
 
         switch (type) {
 
-        // Close will be sent by a client when operations on a clientId have been completed.
+        // Close will be sent by a client when operations on a statsSessionId have been completed.
         // Subsequent operations will be taken by services in the upper level, like upload to store and persist
         // metadata do a db.
         case 'close':
