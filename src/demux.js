@@ -303,7 +303,7 @@ class DemuxSink extends Writable {
 
         // Request sent by clients in order to keep the timeout from triggering.
         case 'keepalive':
-            this.log.debug('[Demux] Keepalive received for :', clientId);
+            this.log.debug('[Demux] Keepalive received for :', statsSessionId);
 
             return;
 

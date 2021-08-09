@@ -272,9 +272,14 @@ function setupWebSocketsServer(wsServer) {
                 sessionId: String(meta.meetingUniqueId)
             };
 
+            if (config.features.disableFeatExtraction) {
+                persistDumpData(sinkMetadata);
+            } else {
             // Add the clientId in the worker pool so it can process the associated dump file.
-            workerPool.addTask({ type: RequestType.PROCESS,
-                body: sinkMetadata });
+                workerPool.addTask({ type: RequestType.PROCESS,
+                    body: sinkMetadata });
+            }
+
         });
 
         const connectionPipeline = pipeline(

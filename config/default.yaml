@@ -14,6 +14,7 @@ server:
 
 
 features:
+    disableFeatExtraction: true
     # White list of client related features to be extracted possible values can be found in featured-client.js
     # inside the module.exports object e.g. ['origin', 'getUserMediaSuccess', 'calledMediadevicesGetUserMedia']
     clientFeat: []
