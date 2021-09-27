@@ -1,6 +1,6 @@
 {
   "name": "rtcstats-server",
-  "version": "2.2.0",
+  "version": "2.3.2",
   "description": "",
   "main": "websocket.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "lint": "eslint ./src/",
     "integration": "node ./src/test/client.js",
     "test": "npm run lint && npm run integration",
+    "jest": "jest",
     "start": "NODE_ENV=production node ./src/app.js",
     "watch:dev": "nodemon --exec 'NODE_ENV=debug node ./src/app.js'",
     "debug": "NODE_ENV=debug node ./src/app.js",
@@ -50,6 +51,7 @@
     "eslint-config-jitsi": "github:jitsi/eslint-config-jitsi",
     "eslint-plugin-flowtype": "^5.2.0",
     "eslint-plugin-import": "^2.22.1",
+    "jest": "^27.0.6",
     "line-by-line": "^0.1.6",
     "nodemon": "^2.0.2",
     "uglify-js": "^2.6.1"

@@ -3,6 +3,7 @@ const path = require('path');
 const { Writable } = require('stream');
 const util = require('util');
 
+const PromCollector = require('./metrics/PromCollector.js');
 const { uuidV4 } = require('./utils/utils.js');
 
 
@@ -21,16 +22,16 @@ class DemuxSink extends Writable {
      * C'tor
      *
      * @param {string} dumpFolder - Path to where sink files will be temporarily stored.
-     * @param {Object} connMeta - Object containing information about the ws connection which stream the data.
+     * @param {Object} connectionInfo - Object containing information about the ws connection which stream the data.
      * @param {Object} log - Log object.
      * @param {boolean} persistDump - Flag used for generating a complete dump of the data coming to the stream.
      * Required when creating mock tests.
      */
-    constructor({ dumpFolder, connMeta, log, persistDump = false }) {
+    constructor({ dumpFolder, connectionInfo, log, persistDump = false }) {
         super({ objectMode: true });
 
         this.dumpFolder = dumpFolder;
-        this.connMeta = connMeta;
+        this.connectionInfo = connectionInfo;
         this.log = log;
         this.timeoutId = -1;
         this.sinkMap = new Map();
@@ -76,7 +77,7 @@ class DemuxSink extends Writable {
      * @param {Function} - Needs to be called in order to successfully end the state of the stream.
      */
     _destroy(err, cb) {
-        this.log.info('[Demux] Destroy called with err:', err);
+        this.log.debug('[Demux] Destroy called with err:', err);
         this._clearState();
 
         // Forward the state in which the stream closed, required by the stream api.
@@ -147,6 +148,7 @@ class DemuxSink extends Writable {
      * @returns {Object} - Associated metadata object that will be saved in the local map.
      */
     async _sinkCreate(id) {
+        PromCollector.sessionCount.inc();
 
         let resolvedId = id;
         let i = 0;
@@ -158,8 +160,8 @@ class DemuxSink extends Writable {
         // If a client reconnects the same client id will be provided thus cases can occur where the previous dump
         // with the same id is still present on the disk, in order to avoid conflicts and states where multiple
         // handles are taken on the same file, we establish a convention appending an incremental number at the end
-        // of the file ${id}_${i}. Thus any client that needs to read the dumps can search for ${id} and get an incremental
-        // list.
+        // of the file ${id}_${i}. Thus any client that needs to read the dumps can search for ${id} and get an
+        // incremental list.
         // Warning. This will resolve local reconnect conflicts, when uploading the associated metadata to a store
         // logic that handles conflicts at the store level also needs to be added e.g. when uploading to dynamodb
         // if the entry already exists because some other instance uploaded first, the same incremental approach needs
@@ -176,7 +178,7 @@ class DemuxSink extends Writable {
             }
         }
 
-        this.log.info('[Demux] open-sink for id %s, path %s', id, filePath);
+        this.log.info('[Demux] open-sink id: %s; path %s; connection: %o', id, filePath, this.connectionInfo);
 
         const sink = fs.createWriteStream(idealPath, { fd });
 
@@ -185,7 +187,8 @@ class DemuxSink extends Writable {
             id: resolvedId,
             sink,
             meta: {
-                startDate: Date.now()
+                startDate: Date.now(),
+                dumpPath: filePath
             }
         };
 
@@ -198,7 +201,7 @@ class DemuxSink extends Writable {
 
         // Initialize the dump file by adding the connection metadata at the beginning. This data is usually used
         // by visualizer tools for identifying the originating client (browser, jvb or other).
-        sink.write(JSON.stringify(this.connMeta));
+        sink.write(JSON.stringify([ 'connectionInfo', null, JSON.stringify(this.connectionInfo), Date.now() ]));
         sink.write('\n');
 
         return sinkData;

@@ -2,6 +2,7 @@ const config = require('config');
 const dynamoose = require('dynamoose');
 
 const logger = require('../logging');
+const PromCollector = require('../metrics/PromCollector');
 
 if (!config.dynamo.tableName) {
     return;
@@ -54,22 +55,23 @@ async function saveEntry({ ...data }) {
 
         // overwrite: false will returns an exception in case the entry already exists
         await document.save({ overwrite: false });
-        logger.info('[Dynamo] Saved metadata %j', entry);
+        logger.info('[Dynamo] Saved metadata %o', entry);
 
         return true;
     } catch (error) {
         // Dynamo returns this error code in case there is a duplicate entry
         if (error.code === 'ConditionalCheckFailedException') {
-            logger.warn('[Dynamo] duplicate entry %j, %j', data, error);
+            logger.warn('[Dynamo] duplicate entry: %o; error: %o', data, error);
 
             return false;
         }
 
+        PromCollector.dynamoErrorCount.inc();
+
         logger.error('[Dynamo] Error saving metadata %o, %o', data, error);
 
-
         // we don't want any exception leaving the boundaries of the dynamo client. At this point
-        // just logging them will suffice, although it would be healthyier for whoever is using this client
+        // just logging them will suffice, although it would be healthier for whoever is using this client
         // to make that decision.
         return true;
     }
