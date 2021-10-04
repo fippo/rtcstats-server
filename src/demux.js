@@ -1,4 +1,5 @@
 const fs = require('fs');
+const sizeof = require('object-sizeof');
 const path = require('path');
 const { Writable } = require('stream');
 const util = require('util');
@@ -271,6 +272,8 @@ class DemuxSink extends Writable {
      */
     async _handleRequest(request) {
         this._requestPrecondition(request);
+
+        PromCollector.requestSizeBytes.observe(sizeof(request));
 
         const { statsSessionId, type, data } = request;
 

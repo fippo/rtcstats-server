@@ -2,6 +2,7 @@
 
 const assert = require('assert').strict;
 const fs = require('fs');
+const sizeof = require('object-sizeof');
 const { AggregatorRegistry } = require('prom-client');
 const readline = require('readline');
 
@@ -25,6 +26,8 @@ class FeatureExtractor {
 
         this.dumpPath = dumpPath;
         this.endpointId = endpointId;
+        this.conferenceStartTime = 0;
+        this.conferenceEndTime = 0;
 
         this.dominantSpeakerData = {
             dominantSpeakerStartTimeStamp: undefined,
@@ -34,11 +37,28 @@ class FeatureExtractor {
 
         this.features = {
             dominantSpeakerChanges: 0,
-            speakerTime: 0
+            speakerTime: 0,
+            metrics: {
+                statsRequestBytes: 0,
+                statsRequestCount: 0,
+                otherRequestBytes: 0,
+                otherRequestCount: 0,
+                sdpRequestBytes: 0,
+                sdpRequestCount: 0,
+                dsRequestBytes: 0,
+                dsRequestCount: 0,
+                totalProcessedBytes: 0,
+                totalProcessedCount: 0
+            }
         };
 
         this.extractFunctions = {
-            dominantSpeaker: this._handleDominantSpeaker
+            dominantSpeaker: this._handleDominantSpeaker,
+            createAnswerOnSuccess: this._handleSDPRequest,
+            setLocalDescription: this._handleSDPRequest,
+            setRemoteDescription: this._handleSDPRequest,
+            other: this._handleOtherRequest,
+            getstats: this._handleStatsRequest
         };
     }
 
@@ -47,8 +67,12 @@ class FeatureExtractor {
      * @param {*} data
      * @param {*} timestamp
      */
-    _handleDominantSpeaker = (data, timestamp) => {
+    _handleDominantSpeaker = (data, timestamp, requestSize) => {
         assert(timestamp, 'timestamp field missing from dominantSpeaker data');
+        const { metrics } = this.features;
+
+        metrics.dsRequestBytes += requestSize;
+        metrics.dsRequestCount++;
 
         // Expected data format for dominant speaker:
         // {"dominantSpeakerEndpoint": "1a404b1b","previousSpeakers": ["bb211808","1a4dqdb",
@@ -82,6 +106,45 @@ class FeatureExtractor {
 
     /**
      *
+     * @param {*} data
+     * @param {*} timestamp
+     * @param {*} requestSize
+     */
+    _handleSDPRequest = (data, timestamp, requestSize) => {
+        const { metrics } = this.features;
+
+        metrics.sdpRequestBytes += requestSize;
+        metrics.sdpRequestCount++;
+    }
+
+    /**
+     *
+     * @param {*} data
+     * @param {*} timestamp
+     * @param {*} requestSize
+     */
+    _handleStatsRequest = (data, timestamp, requestSize) => {
+        const { metrics } = this.features;
+
+        metrics.statsRequestBytes += requestSize;
+        metrics.statsRequestCount++;
+    }
+
+    /**
+     *
+     * @param {*} data
+     * @param {*} timestamp
+     * @param {*} requestSize
+     */
+    _handleOtherRequest = (data, timestamp, requestSize) => {
+        const { metrics } = this.features;
+
+        metrics.otherRequestBytes += requestSize;
+        metrics.otherRequestCount++;
+    }
+
+    /**
+     *
      */
     extractDominantSpeakerFeatures = () => {
         const { speakerStats, currentDominantSpeaker, dominantSpeakerStartTimeStamp } = this.dominantSpeakerData;
@@ -108,33 +171,61 @@ class FeatureExtractor {
 
     /**
      *
+     * @param {*} requestType
+     * @param {*} timestamp
+     */
+    _recordSessionDuration(requestType, timestamp) {
+
+        if (requestType !== 'connectionInfo' && requestType !== 'identity') {
+            if (!this.conferenceStartTime && timestamp) {
+                this.conferenceStartTime = timestamp;
+            }
+
+            this.conferenceEndTime = timestamp;
+        }
+    }
+
+    /**
+     *
      */
     async extract() {
+
+        const dumpFileStats = fs.statSync(this.dumpPath);
+        const dumpFileSizeBytes = dumpFileStats.size;
+
         const dumpReadLineI = readline.createInterface({
             input: fs.createReadStream(this.dumpPath),
             console: false
         });
 
-        for await (const dumpLine of dumpReadLineI) {
 
+        for await (const dumpLine of dumpReadLineI) {
+            const requestSize = sizeof(dumpLine);
             const dumpLineObj = JSON.parse(dumpLine);
 
             assert(Array.isArray(dumpLineObj), 'Unexpected dump format');
 
             const [ requestType, peerCon, data, timestamp ] = dumpLineObj;
 
-            if (!this.conferenceStartTime && timestamp) {
-                this.conferenceStartTime = timestamp;
-            }
+            this._recordSessionDuration(requestType, timestamp);
 
             if (this.extractFunctions[requestType]) {
-                this.extractFunctions[requestType](data, timestamp);
+                this.extractFunctions[requestType](data, timestamp, requestSize);
+            } else {
+                this.extractFunctions.other(data, timestamp, requestSize);
             }
-
-            this.conferenceEndTime = timestamp;
         }
 
         this.extractDominantSpeakerFeatures();
+
+        const { metrics } = this.features;
+        const { dsRequestBytes, sdpRequestBytes, statsRequestBytes, otherRequestBytes } = metrics;
+        const { dsRequestCount, sdpRequestCount, statsRequestCount, otherRequestCount } = metrics;
+
+        metrics.sessionDurationMs = this.conferenceEndTime - this.conferenceStartTime;
+        metrics.totalProcessedBytes = sdpRequestBytes + dsRequestBytes + statsRequestBytes + otherRequestBytes;
+        metrics.totalProcessedCount = sdpRequestCount + dsRequestCount + statsRequestCount + otherRequestCount;
+        metrics.dumpFileSizeBytes = dumpFileSizeBytes;
 
         return this.features;
     }

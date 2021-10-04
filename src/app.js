@@ -83,11 +83,27 @@ const workerScriptPath = path.join(__dirname, './worker-pool/ExtractWorker.js');
 const workerPool = new WorkerPool(workerScriptPath, getIdealWorkerCount());
 
 workerPool.on(ResponseType.DONE, body => {
-    logger.info('Handling DONE event with body %o', body);
-    PromCollector.processed.inc();
+    logger.info('[App] Handling DONE event with body %o', body);
 
     const { dumpInfo = {}, features = {} } = body;
+    const { metrics: { dsRequestBytes = 0,
+        dumpFileSizeBytes = 0,
+        otherRequestBytes = 0,
+        statsRequestBytes = 0,
+        sdpRequestBytes = 0,
+        sessionDurationMs = 0,
+        totalProcessedBytes = 0,
+        totalProcessedCount = 0 } } = features;
 
+    PromCollector.processed.inc();
+    PromCollector.dsRequestSizeBytes.observe(dsRequestBytes);
+    PromCollector.otherRequestSizeBytes.observe(otherRequestBytes);
+    PromCollector.statsRequestSizeBytes.observe(statsRequestBytes);
+    PromCollector.sdpRequestSizeBytes.observe(sdpRequestBytes);
+    PromCollector.sessionDurationMs.observe(sessionDurationMs);
+    PromCollector.totalProcessedBytes.observe(totalProcessedBytes);
+    PromCollector.totalProcessedCount.observe(totalProcessedCount);
+    PromCollector.dumpSize.observe(dumpFileSizeBytes);
 
     // Amplitude has constraints and limits of what information one sends, so it has a designated backend which
     // only sends specific features.
@@ -286,12 +302,12 @@ function wsConnectionHandler(client, upgradeReq) {
                 // the whole pipeline does as well,
                 PromCollector.sessionErrorCount.inc();
 
-                logger.error('[App] Pipeline error: ', err);
+                logger.error('[App] Connection pipeline: %o;  error: %o', connectionInfo, err);
             }
         });
 
     connectionPipeline.on('finish', () => {
-        logger.info('[App] Pipeline successfully finished');
+        logger.info('[App] Connection pipeline successfully finished %o', connectionInfo);
 
         // We need to explicity close the ws, you might notice that we don't do the same in case of an error
         // that's because in that case the error will propagate up the pipeline chain and the ws stream will also
