@@ -4,6 +4,10 @@ server:
 amplitude:
     key: RTCSTATS_AMPLITUDE_KEY
 
+firehose:
+    region: RTCSTATS_AWS_REGION
+    stream: RTCSTATS_FIREHOSE_STREAM
+
 s3:
     region: RTCSTATS_S3_AWS_REGION
     bucket: RTCSTATS_S3_BUCKET

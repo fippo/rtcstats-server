@@ -284,6 +284,15 @@ function getIdealWorkerCount() {
     return os.cpus().length - 2;
 }
 
+/**
+ * Get a SQL compliant timestamp (MDY DateStyle)
+ * @returns
+ */
+function getSQLTimestamp() {
+    return new Date().toISOString()
+        .slice(0, 19)
+        .replace('T', ' ');
+}
 
 const RequestType = Object.freeze({
     PROCESS: 'PROCESS'
@@ -314,5 +323,6 @@ module.exports = {
     ResponseType,
     standardizedMoment,
     timeBetween,
-    uuidV4
+    uuidV4,
+    getSQLTimestamp
 };

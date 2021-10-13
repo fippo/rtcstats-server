@@ -33,6 +33,11 @@ const PromCollector = {
         help: 'number of dynamo inserts failed'
     }),
 
+    firehoseErrorCount: new prom.Counter({
+        name: 'rtcstats_firehose_error_count',
+        help: 'number of firehose put fails'
+    }),
+
     processErrorCount: new prom.Counter({
         name: 'rtcstats_process_error_count',
         help: 'number of files with errors during processing'

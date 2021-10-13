@@ -10,6 +10,7 @@ const WebSocket = require('ws');
 const { name: appName, version: appVersion } = require('../package');
 
 const AmplitudeConnector = require('./database/AmplitudeConnector');
+const FirehoseConnector = require('./database/FirehoseConnector');
 const DemuxSink = require('./demux');
 const logger = require('./logging');
 const PromCollector = require('./metrics/PromCollector');
@@ -30,8 +31,19 @@ let amplitude;
 if (config.amplitude && config.amplitude.key) {
     amplitude = new AmplitudeConnector(config.amplitude.key);
 } else {
-    logger.warn('Amplitude is not configured!');
+    logger.warn('[App] Amplitude is not configured!');
 }
+
+
+let dataWarehouse;
+
+if (config.firehose.stream && config.firehose.region) {
+    dataWarehouse = new FirehoseConnector(config.firehose);
+    dataWarehouse.connect();
+} else {
+    logger.warn('[App] Firehose is not configured!');
+}
+
 
 const tempPath = config.server.tempPath;
 
@@ -109,6 +121,10 @@ workerPool.on(ResponseType.DONE, body => {
     // only sends specific features.
     if (amplitude) {
         amplitude.track(dumpInfo, features);
+    }
+
+    if (dataWarehouse) {
+        dataWarehouse.put(body);
     }
 
     persistDumpData(dumpInfo);
