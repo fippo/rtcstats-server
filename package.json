@@ -3,6 +3,7 @@
   "version": "2.5.0",
   "description": "",
   "main": "websocket.js",
+  "private": true,
   "scripts": {
     "lint:fix": "eslint --fix ./src/",
     "lint": "eslint ./src/",
