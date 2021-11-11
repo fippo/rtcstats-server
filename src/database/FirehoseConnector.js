@@ -15,9 +15,10 @@ class FirehoseConnector {
      *
      * @param {*} param0
      */
-    constructor({ region, stream }) {
+    constructor({ region, stream, appEnv }) {
         this._awsRegion = region;
         this._awsFirehoseStream = stream;
+        this._appEnv = appEnv;
     }
 
     /**
@@ -27,6 +28,8 @@ class FirehoseConnector {
         this._firehose = new AWS.Firehose({
             region: this._awsRegion
         });
+
+        logger.info('[Firehose] Successfully connected.');
     }
 
     /**
@@ -35,7 +38,8 @@ class FirehoseConnector {
      */
     put = ({ dumpInfo, features }) => {
         // The schemaObj needs to match the redshift table schema.
-        const schemaObj = { statsSessionId: dumpInfo.clientId,
+        const schemaObj = { appEnv: this._appEnv,
+            statsSessionId: dumpInfo.clientId,
             displayName: dumpInfo.userId,
             createDate: getSQLTimestamp(),
             meetingName: dumpInfo.conferenceId,

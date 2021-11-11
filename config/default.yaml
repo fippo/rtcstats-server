@@ -11,14 +11,11 @@ server:
     keyPath: './certs/key.pem'
     certPath: './certs/cert.pem'
     tempPath : 'temp'
-
+    appEnvironment: dev
 
 features:
     disableFeatExtraction: false
-    # White list of client related features to be extracted possible values can be found in featured-client.js
-    # inside the module.exports object e.g. ['origin', 'getUserMediaSuccess', 'calledMediadevicesGetUserMedia']
-    clientFeat: []
-    connectionFeat: ['*']
+
 amplitude:
     key:
 

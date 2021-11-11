@@ -37,8 +37,13 @@ if (config.amplitude && config.amplitude.key) {
 
 let dataWarehouse;
 
-if (config.firehose.stream && config.firehose.region) {
-    dataWarehouse = new FirehoseConnector(config.firehose);
+if (config.firehose?.stream && config.firehose?.region) {
+
+    const appEnv = config.server?.appEnvironment;
+
+    dataWarehouse = new FirehoseConnector({ ...config.firehose,
+        appEnv });
+
     dataWarehouse.connect();
 } else {
     logger.warn('[App] Firehose is not configured!');

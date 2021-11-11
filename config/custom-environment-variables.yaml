@@ -1,11 +1,12 @@
 server:
     logLevel: RTCSTATS_LOG_LEVEL
+    appEnvironment: RTCSTATS_ENVIRONMENT
 
 amplitude:
     key: RTCSTATS_AMPLITUDE_KEY
 
 firehose:
-    region: RTCSTATS_AWS_REGION
+    region: RTCSTATS_FIREHOSE_AWS_REGION
     stream: RTCSTATS_FIREHOSE_STREAM
 
 s3:
