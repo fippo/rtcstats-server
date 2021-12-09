@@ -30,13 +30,16 @@ class FirehoseConnector {
         });
 
         logger.info('[Firehose] Successfully connected.');
-    }
+    };
 
     /**
      * Send data to the firehose stream.
      * @param {*} param0
      */
     put = ({ dumpInfo, features }) => {
+
+        const { sentiment } = features;
+
         // The schemaObj needs to match the redshift table schema.
         const schemaObj = { appEnv: this._appEnv,
             statsSessionId: dumpInfo.clientId,
@@ -48,7 +51,14 @@ class FirehoseConnector {
             endpointId: dumpInfo.endpointId,
             sessionDuration: features.metrics.sessionDurationMs,
             dominantSpeakerChanges: features.dominantSpeakerChanges,
-            speakerTime: features.speakerTime
+            speakerTime: features.speakerTime,
+            sentimentAngry: sentiment.angry,
+            sentimentDisgusted: sentiment.disgusted,
+            sentimentFearful: sentiment.fearful,
+            sentimentHappy: sentiment.happy,
+            sentimentNeutral: sentiment.neutral,
+            sentimentSad: sentiment.sad,
+            sentimentSurprised: sentiment.surprised
         };
 
         this._firehose.putRecord({
@@ -65,7 +75,7 @@ class FirehoseConnector {
             }
             logger.info('[Firehose] Sent data: %o', schemaObj);
         });
-    }
+    };
 }
 
 module.exports = FirehoseConnector;

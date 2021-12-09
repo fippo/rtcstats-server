@@ -95,6 +95,14 @@ const PromCollector = {
         percentiles: [ 0.1, 0.25, 0.5, 0.75, 0.9 ]
     }),
 
+    sentimentRequestSizeBytes: new prom.Summary({
+        name: 'rtcstats_sentiment_request_size_bytes',
+        help: 'Summary for inbound sentiment request size in bytes',
+        maxAgeSeconds: 600,
+        ageBuckets: 5,
+        percentiles: [ 0.1, 0.25, 0.5, 0.75, 0.9 ]
+    }),
+
     statsRequestSizeBytes: new prom.Summary({
         name: 'rtcstats_stats_request_size_bytes',
         help: 'Summary for inbound stats request size in bytes',

@@ -1,6 +1,6 @@
 {
   "name": "rtcstats-server",
-  "version": "2.5.4",
+  "version": "2.7.0",
   "description": "",
   "main": "websocket.js",
   "private": true,
@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/opentok/rtcstats-server#readme",
   "dependencies": {
-    "JSONStream": "^1.3.5",
     "amplitude": "^4.0.1",
     "aws-sdk": "^2.441.0",
     "bluebird": "^3.3.1",
@@ -34,6 +33,7 @@
     "dynamoose": "^2.5.0",
     "get-folder-size": "^2.0.1",
     "js-yaml": "^3.13.1",
+    "JSONStream": "^1.3.5",
     "object-sizeof": "^1.6.1",
     "pem": "^1.14.2",
     "platform": "https://github.com/bestiejs/platform.js.git",
@@ -46,11 +46,8 @@
     "ws": "^7.4.2"
   },
   "devDependencies": {
-    "babel-eslint": "^10.1.0",
-    "eslint": "^5.16.0",
-    "eslint-config-jitsi": "github:jitsi/eslint-config-jitsi",
-    "eslint-plugin-flowtype": "^5.2.0",
-    "eslint-plugin-import": "^2.22.1",
+    "@jitsi/eslint-config": "^4.0.0",
+    "eslint-plugin-import": "^2.25.3",
     "jest": "^27.0.6",
     "line-by-line": "^0.1.6",
     "nodemon": "^2.0.2",

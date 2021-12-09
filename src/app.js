@@ -108,6 +108,7 @@ workerPool.on(ResponseType.DONE, body => {
         otherRequestBytes = 0,
         statsRequestBytes = 0,
         sdpRequestBytes = 0,
+        sentimentRequestBytes = 0,
         sessionDurationMs = 0,
         totalProcessedBytes = 0,
         totalProcessedCount = 0 } } = features;
@@ -118,6 +119,7 @@ workerPool.on(ResponseType.DONE, body => {
     PromCollector.statsRequestSizeBytes.observe(statsRequestBytes);
     PromCollector.sdpRequestSizeBytes.observe(sdpRequestBytes);
     PromCollector.sessionDurationMs.observe(sessionDurationMs);
+    PromCollector.sentimentRequestSizeBytes.observe(sentimentRequestBytes);
     PromCollector.totalProcessedBytes.observe(totalProcessedBytes);
     PromCollector.totalProcessedCount.observe(totalProcessedCount);
     PromCollector.dumpSize.observe(dumpFileSizeBytes);
@@ -340,7 +342,7 @@ function wsConnectionHandler(client, upgradeReq) {
         '[App] New app connected: ua: %s, protocol: %s, referer: %s',
         ua,
         client.protocol,
-        referer,
+        referer
     );
 
     client.on('error', e => {

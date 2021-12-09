@@ -3,10 +3,7 @@
 const assert = require('assert').strict;
 const fs = require('fs');
 const sizeof = require('object-sizeof');
-const { AggregatorRegistry } = require('prom-client');
 const readline = require('readline');
-
-const logger = require('../logging');
 
 /**
  *
@@ -38,6 +35,15 @@ class FeatureExtractor {
         this.features = {
             dominantSpeakerChanges: 0,
             speakerTime: 0,
+            sentiment: {
+                angry: 0,
+                disgusted: 0,
+                fearful: 0,
+                happy: 0,
+                neutral: 0,
+                sad: 0,
+                surprised: 0
+            },
             metrics: {
                 statsRequestBytes: 0,
                 statsRequestCount: 0,
@@ -48,19 +54,40 @@ class FeatureExtractor {
                 dsRequestBytes: 0,
                 dsRequestCount: 0,
                 totalProcessedBytes: 0,
-                totalProcessedCount: 0
+                totalProcessedCount: 0,
+                sentimentRequestBytes: 0,
+                sentimentRequestCount: 0
             }
         };
 
         this.extractFunctions = {
-            dominantSpeaker: this._handleDominantSpeaker,
             createAnswerOnSuccess: this._handleSDPRequest,
-            setLocalDescription: this._handleSDPRequest,
-            setRemoteDescription: this._handleSDPRequest,
+            dominantSpeaker: this._handleDominantSpeaker,
+            facialExpression: this._handleFacialExpression,
+            getstats: this._handleStatsRequest,
             other: this._handleOtherRequest,
-            getstats: this._handleStatsRequest
+            setLocalDescription: this._handleSDPRequest,
+            setRemoteDescription: this._handleSDPRequest
         };
     }
+
+    _handleFacialExpression = (data, timestamp, requestSize) => {
+        const { sentiment, metrics } = this.features;
+
+        metrics.sentimentRequestBytes += requestSize;
+        metrics.sentimentRequestCount++;
+
+        // {\"duration\":9,\"facialExpression\":\"neutral\"}
+        // Expected data format for facialExpression:
+        // {duration: <seconds>, facialExpression: <string>}
+        // duration is expressed in seconds and, facial expression can be one of:
+        // angry, disgusted, fearful, happy, neutral, sad, surprised
+        const { duration, facialExpression } = data;
+
+        if (facialExpression in sentiment) {
+            sentiment[facialExpression] += duration;
+        }
+    };
 
     /**
      *
@@ -102,7 +129,7 @@ class FeatureExtractor {
 
         this.dominantSpeakerData.currentDominantSpeaker = dominantSpeakerEndpoint;
         this.dominantSpeakerData.dominantSpeakerStartTimeStamp = timestamp;
-    }
+    };
 
     /**
      *
@@ -115,7 +142,7 @@ class FeatureExtractor {
 
         metrics.sdpRequestBytes += requestSize;
         metrics.sdpRequestCount++;
-    }
+    };
 
     /**
      *
@@ -128,7 +155,7 @@ class FeatureExtractor {
 
         metrics.statsRequestBytes += requestSize;
         metrics.statsRequestCount++;
-    }
+    };
 
     /**
      *
@@ -141,7 +168,7 @@ class FeatureExtractor {
 
         metrics.otherRequestBytes += requestSize;
         metrics.otherRequestCount++;
-    }
+    };
 
     /**
      *
@@ -167,7 +194,7 @@ class FeatureExtractor {
             this.features.dominantSpeakerChanges = dominantSpeakerChanges;
             this.features.speakerTime = speakerTime;
         }
-    }
+    };
 
     /**
      *
@@ -205,7 +232,7 @@ class FeatureExtractor {
 
             assert(Array.isArray(dumpLineObj), 'Unexpected dump format');
 
-            const [ requestType, peerCon, data, timestamp ] = dumpLineObj;
+            const [ requestType, , data, timestamp ] = dumpLineObj;
 
             this._recordSessionDuration(requestType, timestamp);
 
