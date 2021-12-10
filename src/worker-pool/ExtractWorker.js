@@ -7,9 +7,7 @@ const { RequestType, ResponseType } = require('../utils/utils');
 
 if (isMainThread) {
 
-    logger.error('[Extract] Extract worker can not run on main thread');
-
-    return;
+    throw new Error('[Extract] Extract worker can not run on main thread');
 }
 
 logger.info('[Extract] Running feature extract worker thread: %o', workerData);

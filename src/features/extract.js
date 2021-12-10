@@ -52,9 +52,7 @@ if (isMainThread) {
     const clientid = process.argv[2];
 
     if (!clientid) {
-        logger.error('[Extract] Please provide a valid clientId!');
-
-        return -1;
+        throw new Error('[Extract] Please provide a valid clientId!');
     }
 
     logger.info(`[Extract] Running feature extraction on ${clientid}...`);

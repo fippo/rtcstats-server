@@ -85,11 +85,9 @@ async function persistDumpData(sinkMeta) {
     const { clientId } = sinkMeta;
     let uniqueClientId = clientId;
 
-    if (saveEntryAssureUnique) {
-        // Because of the current reconnect mechanism some files might have the same clientId, in which case the
-        // underlying call will add an associated uniqueId to the clientId and return it.
-        uniqueClientId = await saveEntryAssureUnique(sinkMeta);
-    }
+    // Because of the current reconnect mechanism some files might have the same clientId, in which case the
+    // underlying call will add an associated uniqueId to the clientId and return it.
+    uniqueClientId = await saveEntryAssureUnique(sinkMeta);
 
     // Store the dump file associated with the clientId using uniqueClientId as the key value. In the majority of
     // cases the input parameter will have the same values.

@@ -4,10 +4,6 @@ const dynamoose = require('dynamoose');
 const logger = require('../logging');
 const PromCollector = require('../metrics/PromCollector');
 
-if (!config.dynamo.tableName) {
-    return;
-}
-
 // Set region to avoid aws config error
 dynamoose.aws.sdk.config.update({
     region: config.s3.region
@@ -33,7 +29,7 @@ const Document = dynamoose.model(
         startDate: Number,
         endDate: Number
     },
-    { create: false },
+    { create: false }
 );
 
 
@@ -82,6 +78,10 @@ async function saveEntry({ ...data }) {
  * @param {*} data
  */
 async function saveEntryAssureUnique({ ...data }) {
+    if (!config.dynamo.tableName) {
+        return;
+    }
+
     const { clientId } = data;
     const [ baseClientId, order ] = clientId.split('_');
 
