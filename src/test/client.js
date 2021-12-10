@@ -1,7 +1,6 @@
 /* eslint-disable no-invalid-this */
 /* eslint-disable no-multi-str */
 const assert = require('assert').strict;
-const config = require('config');
 const { EventEmitter } = require('events');
 const fs = require('fs');
 const LineByLine = require('line-by-line');
@@ -47,7 +46,7 @@ class RtcstatsConnection extends EventEmitter {
         this.wsOptions = wsOptions;
         this.readDelay = readDelay;
         this.protocolV = protocolV;
-        this.clientId = uuidV4();
+        this.statsSessionId = uuidV4();
 
         this._createIdentityData();
     }
@@ -55,8 +54,8 @@ class RtcstatsConnection extends EventEmitter {
     /**
      *
      */
-    getClientId() {
-        return this.clientId;
+    getStatsSessionId() {
+        return this.statsSessionId;
     }
 
     /**
@@ -85,8 +84,8 @@ class RtcstatsConnection extends EventEmitter {
             sessionId: new Date().getTime(),
             deviceId: uuidV4(),
             applicationName: 'Integration Test',
-            confID: `192.168.1.1/conf-${this.clientId}`,
-            displayName: `test-${this.clientId}`,
+            confID: `192.168.1.1/conf-${this.statsSessionId}`,
+            displayName: `test-${this.statsSessionId}`,
             meetingUniqueId: uuidV4()
         };
     }
@@ -103,7 +102,7 @@ class RtcstatsConnection extends EventEmitter {
         ];
 
         const identityRequest = {
-            clientId: this.clientId,
+            statsSessionId: this.statsSessionId,
             type: 'identity',
             data: identity
         };
@@ -117,7 +116,7 @@ class RtcstatsConnection extends EventEmitter {
      */
     _sendStats(data) {
         const statsRequest = {
-            clientId: this.clientId,
+            statsSessionId: this.statsSessionId,
             type: 'stats-entry',
             data
         };
@@ -207,8 +206,8 @@ class TestCheckRouter {
      * @param {*} responseBody
      */
     checkResponseFormat(responseBody) {
-        assert('clientId' in responseBody);
-        assert(responseBody.clientId in this.testCheckMap);
+        assert('clientId' in responseBody.dumpInfo);
+        assert(responseBody.dumpInfo.clientId in this.testCheckMap);
     }
 
     /**
@@ -217,7 +216,7 @@ class TestCheckRouter {
      */
     routeProcessingResponse(body) {
         this.checkResponseFormat(body);
-        this.testCheckMap[body.clientId].checkProcessingResponse(body);
+        this.testCheckMap[body.dumpInfo.clientId].checkProcessingResponse(body);
     }
 
     /**
@@ -226,7 +225,7 @@ class TestCheckRouter {
      */
     routeDoneResponse(body) {
         this.checkResponseFormat(body);
-        this.testCheckMap[body.clientId].checkDoneResponse(body);
+        this.testCheckMap[body.dumpInfo.clientId].checkDoneResponse(body);
     }
 
     /**
@@ -235,7 +234,7 @@ class TestCheckRouter {
      */
     routeErrorResponse(body) {
         this.checkResponseFormat(body);
-        this.testCheckMap[body.clientId].checkErrorResponse(body);
+        this.testCheckMap[body.dumpInfo.clientId].checkErrorResponse(body);
     }
 
     /**
@@ -244,7 +243,7 @@ class TestCheckRouter {
      */
     routeMetricsResponse(body) {
         this.checkResponseFormat(body);
-        this.testCheckMap[body.clientId].checkMetricsResponse(body);
+        this.testCheckMap[body.dumpInfo.clientId].checkMetricsResponse(body);
     }
 
     /**
@@ -252,11 +251,11 @@ class TestCheckRouter {
      * @param {*} testCheck
      */
     attachTest(testCheck) {
-        // Make sure that the test object contains at least the clientId key so we can route results to their
+        // Make sure that the test object contains at least the statsSessionId key so we can route results to their
         // appropriate tests.
-        assert('clientId' in testCheck);
+        assert('statsSessionId' in testCheck);
 
-        this.testCheckMap[testCheck.clientId] = testCheck;
+        this.testCheckMap[testCheck.statsSessionId] = testCheck;
     }
 }
 
@@ -265,7 +264,7 @@ class TestCheckRouter {
  * @param {*} server
  */
 function checkTestCompletion(appServer) {
-    if (appServer.processed.get().values[0].value === 9) {
+    if (appServer.PromCollector.processed.get().values[0].value === 9) {
         appServer.stop();
     } else {
         setTimeout(checkTestCompletion, 4000, appServer);
@@ -298,22 +297,24 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
     };
 
     const connection = new RtcstatsConnection(rtcstatsWsOptions);
-    const clientId = connection.getClientId();
+    const statsSessionId = connection.getStatsSessionId();
     const identityData = connection.getIdentityData();
 
 
     testCheckRouter.attachTest({
-        clientId,
+        statsSessionId,
         checkDoneResponse: body => {
             logger.info('[TEST] Handling DONE event with body %j', body);
         },
         checkProcessingResponse: body => {
-            logger.info('[TEST] Handling PROCESSING event with clientId %j, features %j', body.clientId, body);
+            logger.info(
+              '[TEST] Handling PROCESSING event with statsSessionId %j, features %j',
+              body.dumpInfo.clientId, body);
 
             const parsedBody = JSON.parse(JSON.stringify(body));
             const resultTemplate = resultList.shift();
 
-            resultTemplate.clientId = clientId;
+            resultTemplate.statsSessionId = statsSessionId;
             resultTemplate.url = 'localhost/';
             resultTemplate.userId = identityData.displayName;
             resultTemplate.app = identityData.applicationName;

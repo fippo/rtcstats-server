@@ -1,6 +1,6 @@
 [{
     "url": "https://localhost/google-standard-stats-sfu",
-    "clientId": "google-standard-stats-sfu",
+    "statsSessionId": "google-standard-stats-sfu",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {

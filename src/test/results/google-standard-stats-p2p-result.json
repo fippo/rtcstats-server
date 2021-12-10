@@ -1,6 +1,6 @@
 [{
     "url": "https://localhost/google-standard-stats-p2p",
-    "clientId": "google-standard-stats-p2p",
+    "statsSessionId": "google-standard-stats-p2p",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {
@@ -249,7 +249,7 @@
 },
 {
     "url": "https://localhost/google-standard-stats-p2p",
-    "clientId": "google-standard-stats-p2p",
+    "statsSessionId": "google-standard-stats-p2p",
     "connId": "PC_1",
     "clientFeatures": {},
     "identity": {

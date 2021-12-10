@@ -1,6 +1,6 @@
 [{
     "url": "https://localhost/google-legacy-stats-multiple-pc",
-    "clientId": "google-legacy-stats-multiple-pc",
+    "statsSessionId": "google-legacy-stats-multiple-pc",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {
@@ -251,7 +251,7 @@
 ,
 {
     "url": "https://localhost/google-legacy-stats-multiple-pc",
-    "clientId": "google-legacy-stats-multiple-pc",
+    "statsSessionId": "google-legacy-stats-multiple-pc",
     "connId": "PC_1",
     "clientFeatures": {},
     "identity": {
@@ -500,7 +500,7 @@
 },
 {
     "url": "https://localhost/google-legacy-stats-multiple-pc",
-    "clientId": "google-legacy-stats-multiple-pc",
+    "statsSessionId": "google-legacy-stats-multiple-pc",
     "connId": "PC_2",
     "clientFeatures": {},
     "identity": {

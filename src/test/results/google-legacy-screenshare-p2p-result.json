@@ -1,6 +1,6 @@
 [{
     "url": "https://localhost/google-legacy-screenshare-p2p",
-    "clientId": "google-legacy-screenshare-p2p",
+    "statsSessionId": "google-legacy-screenshare-p2p",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {

@@ -1,7 +1,7 @@
 [
 {
     "url": "https://localhost/safari-standard-stats",
-    "clientId": "safari-standard-stats",
+    "statsSessionId": "safari-standard-stats",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {

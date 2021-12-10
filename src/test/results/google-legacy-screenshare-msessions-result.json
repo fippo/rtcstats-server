@@ -1,6 +1,6 @@
 [{
     "url": "https://localhost/google-legacy-screenshare-msessions",
-    "clientId": "google-legacy-screenshare-msessions",
+    "statsSessionId": "google-legacy-screenshare-msessions",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {
@@ -242,7 +242,7 @@
 },
 {
     "url": "https://localhost/google-legacy-screenshare-msessions",
-    "clientId": "google-legacy-screenshare-msessions",
+    "statsSessionId": "google-legacy-screenshare-msessions",
     "connId": "PC_1",
     "clientFeatures": {},
     "identity": {

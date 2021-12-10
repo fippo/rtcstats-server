@@ -1,6 +1,6 @@
 [{
     "url": "https://localhost/firefox-standard-stats-sfu",
-    "clientId": "firefox-standard-stats-sfu",
+    "statsSessionId": "firefox-standard-stats-sfu",
     "connId": "PC_0",
     "clientFeatures": {},
     "identity": {

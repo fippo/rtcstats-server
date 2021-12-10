@@ -31,7 +31,7 @@ class RtcstatsConnection extends EventEmitter {
         this.readDelay = readDelay;
         this.minCloseMs = minCloseMs;
         this.maxCloseMs = maxCloseMs;
-        this.clientId = uuid.v4();
+        this.statsSessionId = uuid.v4();
     }
 
     connect() {
@@ -50,15 +50,15 @@ class RtcstatsConnection extends EventEmitter {
                 sessionId: new Date().getTime(),
                 deviceId: uuid.v4(),
                 applicationName: 'Load Test',
-                confID: `192.168.1.1/conf-${this.clientId}`,
-                displayName: `test-${this.clientId}`,
+                confID: `192.168.1.1/conf-${this.statsSessionId}`,
+                displayName: `test-${this.statsSessionId}`,
                 meetingUniqueId: uuid.v4()
             },
             new Date()
         ];
 
         const identityRequest = {
-            clientId: this.clientId,
+            statsSessionId: this.statsSessionId,
             type: 'identity',
             data: identityData
         };
@@ -68,7 +68,7 @@ class RtcstatsConnection extends EventEmitter {
 
     _sendStats(data) {
         const statsRequest = {
-            clientId: this.clientId,
+            statsSessionId: this.statsSessionId,
             type: 'stats-entry',
             data
         };
