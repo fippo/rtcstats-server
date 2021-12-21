@@ -184,10 +184,6 @@ class TestCheckRouter {
     constructor(appServer) {
         this.testCheckMap = {};
 
-        appServer.workerPool.on(ResponseType.PROCESSING, body => {
-            this.routeProcessingResponse(body);
-        });
-
         appServer.workerPool.on(ResponseType.DONE, body => {
             this.routeDoneResponse(body);
         });
@@ -208,15 +204,6 @@ class TestCheckRouter {
     checkResponseFormat(responseBody) {
         assert('clientId' in responseBody.dumpInfo);
         assert(responseBody.dumpInfo.clientId in this.testCheckMap);
-    }
-
-    /**
-     *
-     * @param {*} body
-     */
-    routeProcessingResponse(body) {
-        this.checkResponseFormat(body);
-        this.testCheckMap[body.dumpInfo.clientId].checkProcessingResponse(body);
     }
 
     /**
@@ -304,24 +291,20 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
     testCheckRouter.attachTest({
         statsSessionId,
         checkDoneResponse: body => {
-            logger.info('[TEST] Handling DONE event with body %j', body);
-        },
-        checkProcessingResponse: body => {
-            logger.info(
-              '[TEST] Handling PROCESSING event with statsSessionId %j, features %j',
+            logger.info('[TEST] Handling DONE event with statsSessionId %j, body %j',
               body.dumpInfo.clientId, body);
 
             const parsedBody = JSON.parse(JSON.stringify(body));
             const resultTemplate = resultList.shift();
 
-            resultTemplate.statsSessionId = statsSessionId;
-            resultTemplate.url = 'localhost/';
-            resultTemplate.userId = identityData.displayName;
-            resultTemplate.app = identityData.applicationName;
-            resultTemplate.conferenceId = identityData.confID;
-            resultTemplate.sessionId = identityData.meetingUniqueId;
-            resultTemplate.startDate = body.startDate;
-            resultTemplate.endDate = body.endDate;
+            resultTemplate.dumpInfo.statsSessionId = statsSessionId;
+            resultTemplate.dumpInfo.url = 'localhost/';
+            resultTemplate.dumpInfo.userId = identityData.displayName;
+            resultTemplate.dumpInfo.app = identityData.applicationName;
+            resultTemplate.dumpInfo.conferenceId = identityData.confID;
+            resultTemplate.dumpInfo.sessionId = identityData.meetingUniqueId;
+            resultTemplate.dumpInfo.startDate = body.startDate;
+            resultTemplate.dumpInfo.endDate = body.endDate;
 
             assert.deepStrictEqual(parsedBody, resultTemplate);
         },
