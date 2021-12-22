@@ -55,7 +55,7 @@ const fileLogger = format.combine(
     json()
 );
 
-// Winston rolling file common configuration used for both error and and normal logs file transports.
+// Winston rolling file common configuration used for both error and normal logs file transports.
 const logFileCommonCfg = {
     format: fileLogger,
     auditFile: 'logs/app-log-audit.json',
