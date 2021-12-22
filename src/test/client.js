@@ -297,14 +297,17 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
             const parsedBody = JSON.parse(JSON.stringify(body));
             const resultTemplate = resultList.shift();
 
-            resultTemplate.dumpInfo.statsSessionId = statsSessionId;
-            resultTemplate.dumpInfo.url = 'localhost/';
+            resultTemplate.dumpInfo.clientId = statsSessionId;
             resultTemplate.dumpInfo.userId = identityData.displayName;
             resultTemplate.dumpInfo.app = identityData.applicationName;
-            resultTemplate.dumpInfo.conferenceId = identityData.confID;
             resultTemplate.dumpInfo.sessionId = identityData.meetingUniqueId;
-            resultTemplate.dumpInfo.startDate = body.startDate;
-            resultTemplate.dumpInfo.endDate = body.endDate;
+            resultTemplate.dumpInfo.ampDeviceId = identityData.deviceId;
+            resultTemplate.dumpInfo.ampSessionId = identityData.sessionId;
+            resultTemplate.dumpInfo.conferenceUrl = identityData.confID;
+
+            resultTemplate.dumpInfo.startDate = body.dumpInfo.startDate;
+            resultTemplate.dumpInfo.endDate = body.dumpInfo.endDate;
+            resultTemplate.dumpInfo.dumpPath = body.dumpInfo.dumpPath;
 
             assert.deepStrictEqual(parsedBody, resultTemplate);
         },
