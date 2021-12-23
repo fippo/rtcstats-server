@@ -5,6 +5,13 @@ const fs = require('fs');
 const sizeof = require('object-sizeof');
 const readline = require('readline');
 
+const logger = require('../logging');
+const statsDecompressor = require('../utils//getstats-deltacompression').decompress;
+
+const QualityStatsCollector = require('./quality-stats/QualityStatsCollector');
+const StatsAggregator = require('./quality-stats/StatsAggregator');
+
+
 /**
  *
  */
@@ -18,13 +25,21 @@ class FeatureExtractor {
 
         const {
             dumpPath,
-            endpointId
+            endpointId,
+            statsFormat
         } = dumpInfo;
 
         this.dumpPath = dumpPath;
         this.endpointId = endpointId;
+        this.statsFormat = statsFormat;
         this.conferenceStartTime = 0;
         this.conferenceEndTime = 0;
+
+        this.collector = new QualityStatsCollector(statsFormat);
+        this.aggregator = new StatsAggregator();
+
+
+        this.baseStats = {};
 
         this.dominantSpeakerData = {
             dominantSpeakerStartTimeStamp: undefined,
@@ -61,6 +76,8 @@ class FeatureExtractor {
         };
 
         this.extractFunctions = {
+            constraints: this._handleConstraints,
+            create: this._handleCreate,
             createAnswerOnSuccess: this._handleSDPRequest,
             dominantSpeaker: this._handleDominantSpeaker,
             facialExpression: this._handleFacialExpression,
@@ -69,9 +86,29 @@ class FeatureExtractor {
             setLocalDescription: this._handleSDPRequest,
             setRemoteDescription: this._handleSDPRequest
         };
+
+        // try {
+        //     fs.unlinkSync('decompress.txt');
+        // } catch (e) {
+        //     //
+        // }
+
+        // this.decompressFile = fs.createWriteStream('decompress.txt', {
+        //     flags: 'a' // 'a' means appending (old data will be preserved)
+        // });
     }
 
-    _handleFacialExpression = (data, timestamp, requestSize) => {
+
+    _handleConstraints = dumpLineObj => {
+        const [ , pc, constraintsEntry ] = dumpLineObj;
+
+        this.collector.processConstraintsEntry(pc, constraintsEntry);
+    };
+
+    _handleFacialExpression = (dumpLineObj, requestSize) => {
+
+        const [ , , data ] = dumpLineObj;
+
         const { sentiment, metrics } = this.features;
 
         metrics.sentimentRequestBytes += requestSize;
@@ -94,8 +131,12 @@ class FeatureExtractor {
      * @param {*} data
      * @param {*} timestamp
      */
-    _handleDominantSpeaker = (data, timestamp, requestSize) => {
+    _handleDominantSpeaker = (dumpLineObj, requestSize) => {
+
+        const [ , , data, timestamp ] = dumpLineObj;
+
         assert(timestamp, 'timestamp field missing from dominantSpeaker data');
+
         const { metrics } = this.features;
 
         metrics.dsRequestBytes += requestSize;
@@ -137,7 +178,7 @@ class FeatureExtractor {
      * @param {*} timestamp
      * @param {*} requestSize
      */
-    _handleSDPRequest = (data, timestamp, requestSize) => {
+    _handleSDPRequest = (dumpLineObj, requestSize) => {
         const { metrics } = this.features;
 
         metrics.sdpRequestBytes += requestSize;
@@ -150,8 +191,22 @@ class FeatureExtractor {
      * @param {*} timestamp
      * @param {*} requestSize
      */
-    _handleStatsRequest = (data, timestamp, requestSize) => {
+    _handleStatsRequest = (dumpLineObj, requestSize) => {
         const { metrics } = this.features;
+
+        const [ , pc, statsReport ] = dumpLineObj;
+
+        // The rtcstats client applies a delta compression for sent stats entries, i.e. it only sends the difference
+        // from the prior stat entry, so we need to decompress them.
+        if (this.baseStats[pc]) {
+            this.baseStats[pc] = statsDecompressor(this.baseStats[pc], statsReport);
+        } else {
+            this.baseStats[pc] = statsReport;
+        }
+
+        // this.decompressFile.write(JSON.stringify([ pc, null, this.baseStats[pc] ]));
+
+        this.collector.processStatsEntry(pc, this.baseStats[pc]);
 
         metrics.statsRequestBytes += requestSize;
         metrics.statsRequestCount++;
@@ -163,7 +218,7 @@ class FeatureExtractor {
      * @param {*} timestamp
      * @param {*} requestSize
      */
-    _handleOtherRequest = (data, timestamp, requestSize) => {
+    _handleOtherRequest = (dumpLineObj, requestSize) => {
         const { metrics } = this.features;
 
         metrics.otherRequestBytes += requestSize;
@@ -232,14 +287,14 @@ class FeatureExtractor {
 
             assert(Array.isArray(dumpLineObj), 'Unexpected dump format');
 
-            const [ requestType, , data, timestamp ] = dumpLineObj;
+            const [ requestType, , , timestamp ] = dumpLineObj;
 
             this._recordSessionDuration(requestType, timestamp);
 
             if (this.extractFunctions[requestType]) {
-                this.extractFunctions[requestType](data, timestamp, requestSize);
+                this.extractFunctions[requestType](dumpLineObj, requestSize);
             } else {
-                this.extractFunctions.other(data, timestamp, requestSize);
+                this.extractFunctions.other(dumpLineObj, requestSize);
             }
         }
 
@@ -253,6 +308,46 @@ class FeatureExtractor {
         metrics.totalProcessedBytes = sdpRequestBytes + dsRequestBytes + statsRequestBytes + otherRequestBytes;
         metrics.totalProcessedCount = sdpRequestCount + dsRequestCount + statsRequestCount + otherRequestCount;
         metrics.dumpFileSizeBytes = dumpFileSizeBytes;
+
+        // Expected result format.
+        // PC_0: {
+        //     transport: {
+        //         rtts: [],
+        //     },
+        //     ssrc1: {
+        //         mediaType: 'audio',
+        //         packetsLost: [],
+        //         packetsSent: [],
+        //         jitter: []
+        //     },
+        //     ssrc2: {
+        //         mediaType: 'video',
+        //         packetsLost: [],
+        //         packetsSent: [],
+        //         jitter: []
+        //     },
+        // }
+        // PC_1: { ... }
+        const processedStats = this.collector.getProcessedStats();
+
+        logger.debug('Collected stats: %o', processedStats);
+
+        // Expected result format.
+        // PC_0: {
+        //     isP2P: false,
+        //     trackAggregates: {
+        //       totalPacketsLost: 100,
+        //       totalPacketsSent: 10676,
+        //       packetsLostPct: 0.94
+        //     },
+        //     transportAggregates: { meanRtt: 0.19 }
+        //  },
+        // PC_1: { ... }
+        const aggregateResults = this.aggregator.calculateAggregates(processedStats);
+
+        this.features.aggregates = aggregateResults;
+
+        logger.debug('Aggregate results: %o', aggregateResults);
 
         return this.features;
     }

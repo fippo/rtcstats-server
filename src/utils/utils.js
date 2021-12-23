@@ -294,6 +294,13 @@ function getSQLTimestamp() {
         .replace('T', ' ');
 }
 
+/**
+ * Checks wheather or not the passed in variable is an Object.
+ */
+function isObject(input) {
+    return typeof input === 'object' && !Array.isArray(input) && input !== null;
+}
+
 const RequestType = Object.freeze({
     PROCESS: 'PROCESS'
 });
@@ -324,5 +331,6 @@ module.exports = {
     standardizedMoment,
     timeBetween,
     uuidV4,
-    getSQLTimestamp
+    getSQLTimestamp,
+    isObject
 };

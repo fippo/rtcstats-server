@@ -1,22 +1,22 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable */
 /* eslint-disable no-loop-func */
 const config = require('config');
 const fs = require('fs');
 const readline = require('readline');
 const { parentPort, workerData, isMainThread } = require('worker_threads');
 
-const logger = require('../logging');
-const statsDecompressor = require('../utils//getstats-deltacompression').decompress;
-const statsMangler = require('../utils/getstats-mangle');
+const logger = require('../../logging');
+const statsDecompressor = require('../../utils/getstats-deltacompression').decompress;
+const statsMangler = require('../../utils/getstats-mangle');
 const { StatsFormat,
-    getStatsFormat } = require('../utils/stats-detection');
+    getStatsFormat } = require('../../utils/stats-detection');
 const {
     extractTracks,
     extractStreams,
     isProduction,
     ResponseType,
     RequestType
-} = require('../utils/utils');
+} = require('../../utils/utils');
 
 const clientFeaturesFns = require('./features-client');
 const connectionFeaturesFns = require('./features-connection');

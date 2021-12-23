@@ -264,7 +264,7 @@ class TestCheckRouter {
  * @param {*} server
  */
 function checkTestCompletion(appServer) {
-    if (appServer.PromCollector.processed.get().values[0].value === 9) {
+    if (appServer.PromCollector.processed.get().values[0].value === 4) {
         appServer.stop();
     } else {
         setTimeout(checkTestCompletion, 4000, appServer);
@@ -327,6 +327,7 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
         },
         checkErrorResponse: body => {
             logger.info('[TEST] Handling ERROR event with body %j', body);
+            throw Error(`Processing failed with: ${body}`);
         },
         checkMetricsResponse: body => {
             logger.info('[TEST] Handling METRICS event with body %j', body);
@@ -344,40 +345,42 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
 function runTest() {
     testCheckRouter = new TestCheckRouter(server);
 
-    simulateConnection(
-        './src/test/dumps/google-legacy-screenshare-p2p',
-        './src/test/results/google-legacy-screenshare-p2p-result.json',
-        BrowserUASamples.CHROME,
-        ProtocolV.LEGACY
-    );
+    // Chrome legacy stats have been disabled for time being.
 
-    simulateConnection(
-        './src/test/dumps/google-legacy-screenshare-msessions',
-        './src/test/results/google-legacy-screenshare-msessions-result.json',
-        BrowserUASamples.CHROME,
-        ProtocolV.LEGACY
-    );
+    // simulateConnection(
+    //     './src/test/dumps/google-legacy-screenshare-p2p',
+    //     './src/test/results/google-legacy-screenshare-p2p-result.json',
+    //     BrowserUASamples.CHROME,
+    //     ProtocolV.LEGACY
+    // );
 
-    simulateConnection(
-        './src/test/dumps/google-legacy-stats-sfu',
-        './src/test/results/google-legacy-stats-sfu-result.json',
-        BrowserUASamples.CHROME,
-        ProtocolV.LEGACY
-    );
+    // simulateConnection(
+    //     './src/test/dumps/google-legacy-screenshare-msessions',
+    //     './src/test/results/google-legacy-screenshare-msessions-result.json',
+    //     BrowserUASamples.CHROME,
+    //     ProtocolV.LEGACY
+    // );
 
-    simulateConnection(
-        './src/test/dumps/google-legacy-stats-p2p',
-        './src/test/results/google-legacy-stats-p2p-result.json',
-        BrowserUASamples.CHROME,
-        ProtocolV.LEGACY
-    );
+    // simulateConnection(
+    //     './src/test/dumps/google-legacy-stats-sfu',
+    //     './src/test/results/google-legacy-stats-sfu-result.json',
+    //     BrowserUASamples.CHROME,
+    //     ProtocolV.LEGACY
+    // );
 
-    simulateConnection(
-        './src/test/dumps/google-legacy-stats-multiple-pc',
-        './src/test/results/google-legacy-stats-multiple-pc-result.json',
-        BrowserUASamples.CHROME,
-        ProtocolV.LEGACY
-    );
+    // simulateConnection(
+    //     './src/test/dumps/google-legacy-stats-p2p',
+    //     './src/test/results/google-legacy-stats-p2p-result.json',
+    //     BrowserUASamples.CHROME,
+    //     ProtocolV.LEGACY
+    // );
+
+    // simulateConnection(
+    //     './src/test/dumps/google-legacy-stats-multiple-pc',
+    //     './src/test/results/google-legacy-stats-multiple-pc-result.json',
+    //     BrowserUASamples.CHROME,
+    //     ProtocolV.LEGACY
+    // );
 
     simulateConnection(
         './src/test/dumps/google-standard-stats-p2p',

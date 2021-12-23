@@ -211,7 +211,7 @@ function getTotalPacketsFirefox(report) {
  * @param {Object} statsEntry - Complete rtcstats entry
  * @returns {PacketsSummary}
  */
-function getTotalPacketsStandard(report, statsEntry) {
+function getTotalPacketsStandard(statsEntry, report) {
     if (report.type === 'outbound-rtp' && statsEntry[report.remoteId]) {
 
         return {
@@ -443,9 +443,13 @@ module.exports = {
     isStatisticEntry,
     getBitRateFn,
     getRTTFn,
+    getRTTStandard,
+    getRTTFirefox,
     getScreenShareDataFn,
     getStatsFormat,
     getTotalPacketsFn,
+    getTotalPacketsStandard,
+    getTotalPacketsFirefox,
     getTransportInfoFn,
     getUsedResolutionFn,
     StatsFormat

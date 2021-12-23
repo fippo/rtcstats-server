@@ -62,7 +62,7 @@ class WorkerPool extends EventEmitter {
             worker: workerInstance,
             status: WorkerStatus.IDLE };
 
-        logger.debug('[WorkerPool] Created worker %o', workerMeta);
+        // logger.debug('[WorkerPool] Created worker %o', workerMeta);
 
         workerInstance.on('message', message => {
             this.emit(message.type, message.body);
