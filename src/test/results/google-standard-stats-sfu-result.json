@@ -2,15 +2,16 @@
   {
     "dumpInfo": {
       "app": "Integration Test",
-      "clientId": "11bee3c8-98d2-4f59-b8d0-5d2024e43f2a",
-      "conferenceUrl": "192.168.1.1/conf-11bee3c8-98d2-4f59-b8d0-5d2024e43f2a",
-      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/11bee3c8-98d2-4f59-b8d0-5d2024e43f2a",
-      "endDate": 1640209097042,
-      "startDate": 1640209096985,
-      "sessionId": "7bf4329b-3f6d-4d7d-838a-c202f6c2157f",
-      "userId": "test-11bee3c8-98d2-4f59-b8d0-5d2024e43f2a",
-      "ampSessionId": 1640209096965,
-      "ampDeviceId": "c8c9325b-0ff7-405e-8ed6-4ccee52d2c68"
+      "clientId": "e414629b-4be4-4bfb-af4b-129b191d1e4a",
+      "conferenceUrl": "192.168.1.1/conf-e414629b-4be4-4bfb-af4b-129b191d1e4a",
+      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/e414629b-4be4-4bfb-af4b-129b191d1e4a",
+      "endDate": 1640308082274,
+      "startDate": 1640308082217,
+      "sessionId": "772aad23-5399-4a3e-ab16-0374dda71ac5",
+      "userId": "test-e414629b-4be4-4bfb-af4b-129b191d1e4a",
+      "ampSessionId": 1640308082176,
+      "ampDeviceId": "7f77552f-8a62-4a0e-93a9-db5bad7ce6f6",
+      "statsFormat": "chrome_standard"
     },
     "features": {
       "dominantSpeakerChanges": 0,
@@ -27,18 +28,31 @@
       "metrics": {
         "statsRequestBytes": 532462,
         "statsRequestCount": 34,
-        "otherRequestBytes": 22064,
-        "otherRequestCount": 47,
+        "otherRequestBytes": 21546,
+        "otherRequestCount": 46,
         "sdpRequestBytes": 19664,
         "sdpRequestCount": 3,
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
-        "totalProcessedBytes": 574190,
-        "totalProcessedCount": 84,
+        "totalProcessedBytes": 573672,
+        "totalProcessedCount": 83,
         "sentimentRequestBytes": 0,
         "sentimentRequestCount": 0,
         "sessionDurationMs": 77001,
-        "dumpFileSizeBytes": 287180
+        "dumpFileSizeBytes": 287216
+      },
+      "aggregates": {
+        "PC_0": {
+          "isP2P": false,
+          "trackAggregates": {
+            "totalPacketsLost": 0,
+            "totalPacketsSent": 5280,
+            "packetsLostPct": 0
+          },
+          "transportAggregates": {
+            "meanRtt": 0.05
+          }
+        }
       }
     }
   }
