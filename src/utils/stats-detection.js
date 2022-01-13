@@ -90,6 +90,9 @@ function getRTTStandard(statsEntry, report) {
     if (isTransportReport(report) && statsEntry[report.selectedCandidatePairId]) {
         return statsEntry[report.selectedCandidatePairId].currentRoundTripTime;
     }
+    if (report.type === 'googCandidatePair' && report.googActiveConnection === 'true') {
+        return Number(report.googRtt);
+    }
 }
 
 /**
@@ -175,7 +178,7 @@ function getStatsFormat(clientMeta) {
  * @param {Object} report - Individual stat report.
  * @returns {PacketsSummary}
  */
-function getTotalPacketsLegacy(report) {
+function getTotalSentPacketsLegacy(report) {
     if (isLegacySsrcReport(report)) {
         return {
             packetsLost: report.packetsLost,
@@ -192,11 +195,11 @@ function getTotalPacketsLegacy(report) {
  * @param {Object} report - Individual stat report.
  * @returns {PacketsSummary}
  */
-function getTotalPacketsFirefox(report) {
+function getTotalSentPacketsFirefox(report) {
     if (report.type === 'remote-inbound-rtp') {
         return {
             packetsLost: report.packetsLost,
-            packetsSent: report.packetsSent,
+            packetsSent: report.packetsSent || 0,
             ssrc: report.ssrc,
             mediaType: report.mediaType
         };
@@ -211,12 +214,39 @@ function getTotalPacketsFirefox(report) {
  * @param {Object} statsEntry - Complete rtcstats entry
  * @returns {PacketsSummary}
  */
-function getTotalPacketsStandard(statsEntry, report) {
+function getTotalSentPacketsStandard(statsEntry, report) {
     if (report.type === 'outbound-rtp' && statsEntry[report.remoteId]) {
 
         return {
-            packetsLost: statsEntry[report.remoteId].packetsLost,
-            packetsSent: report.packetsSent,
+            packetsLost: statsEntry[report.remoteId].packetsLost || 0,
+            packetsSent: report.packetsSent || 0,
+            ssrc: report.ssrc,
+            mediaType: report.mediaType
+        };
+    }
+
+    if (report.packetsSent && !report.packetsReceived && report.ssrc) {
+        return {
+            packetsLost: Number(report.packetsLost) || 0,
+            packetsSent: Number(report.packetsSent) || 0,
+            ssrc: report.ssrc,
+            mediaType: report.mediaType
+        };
+    }
+}
+
+/**
+ * Return standard statistics for received and lost packets.
+ *
+ * @param {Object} report - Individual stat report.
+ * @param {Object} statsEntry - Complete rtcstats entry
+ * @returns {PacketsSummary}
+ */
+function getTotalReceivedPacketsStandard(statsEntry, report) {
+    if (report.packetsReceived && !report.packetsSent && report.ssrc) {
+        return {
+            packetsLost: Number(report.packetsLost) || 0,
+            packetsReceived: Number(report.packetsReceived) || 0,
             ssrc: report.ssrc,
             mediaType: report.mediaType
         };
@@ -245,14 +275,14 @@ function extractValidResolution(resolution) {
  * @param {Object} client - Object view of the rtcstats dump.
  * @returns {Function}
  */
-function getTotalPacketsFn(client) {
+function getTotalSentPacketsFn(client) {
     if (client.statsFormat === StatsFormat.CHROME_LEGACY) {
-        return getTotalPacketsLegacy;
+        return getTotalSentPacketsLegacy;
     } else if (client.statsFormat === StatsFormat.FIREFOX) {
-        return getTotalPacketsFirefox;
+        return getTotalSentPacketsFirefox;
     }
 
-    return getTotalPacketsStandard;
+    return getTotalSentPacketsStandard;
 }
 
 /**
@@ -447,9 +477,10 @@ module.exports = {
     getRTTFirefox,
     getScreenShareDataFn,
     getStatsFormat,
-    getTotalPacketsFn,
-    getTotalPacketsStandard,
-    getTotalPacketsFirefox,
+    getTotalSentPacketsFn,
+    getTotalReceivedPacketsStandard,
+    getTotalSentPacketsStandard,
+    getTotalSentPacketsFirefox,
     getTransportInfoFn,
     getUsedResolutionFn,
     StatsFormat

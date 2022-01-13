@@ -2,15 +2,15 @@
   {
     "dumpInfo": {
       "app": "Integration Test",
-      "clientId": "37d50b9c-753a-467b-9992-b1b8f3d370d0",
-      "conferenceUrl": "192.168.1.1/conf-37d50b9c-753a-467b-9992-b1b8f3d370d0",
-      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/37d50b9c-753a-467b-9992-b1b8f3d370d0",
-      "endDate": 1640308236585,
-      "startDate": 1640308236468,
-      "sessionId": "dd23cc5a-60b5-4d96-9180-27a4fcd74af0",
-      "userId": "test-37d50b9c-753a-467b-9992-b1b8f3d370d0",
-      "ampSessionId": 1640308236421,
-      "ampDeviceId": "703598d0-4032-4473-bb40-af6d77d9ce96",
+      "clientId": "9195e361-2a5b-4749-923d-7f4d5d111c36",
+      "conferenceUrl": "192.168.1.1/conf-9195e361-2a5b-4749-923d-7f4d5d111c36",
+      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/9195e361-2a5b-4749-923d-7f4d5d111c36",
+      "endDate": 1641600699878,
+      "startDate": 1641600699825,
+      "sessionId": "d4fe59fa-d0ca-4984-9e8d-0ac8fd6780ed",
+      "userId": "test-9195e361-2a5b-4749-923d-7f4d5d111c36",
+      "ampSessionId": 1641600699795,
+      "ampDeviceId": "60cba6ea-790a-4ec3-bf1c-b0d4f486c739",
       "statsFormat": "firefox"
     },
     "features": {
@@ -45,9 +45,12 @@
         "PC_0": {
           "isP2P": false,
           "trackAggregates": {
-            "totalPacketsLost": 0,
-            "totalPacketsSent": null,
-            "packetsLostPct": null
+            "totalSentPacketsLost": 0,
+            "totalPacketsSent": 0,
+            "sentPacketsLostPct": 0,
+            "totalReceivedPacketsLost": 8,
+            "totalPacketsReceived": 62459,
+            "receivedPacketsLostPct": 0.01
           },
           "transportAggregates": {
             "meanRtt": 0.05

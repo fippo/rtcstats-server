@@ -11,9 +11,10 @@ class StatsAggregator {
      * @returns
      */
     _calculateTrackAggregates(pcData) {
-        let totalPacketsLost = 0;
         let totalPacketsSent = 0;
-        let packetsLostPct = 0;
+        let totalSentPacketsLost = 0;
+        let totalPacketsReceived = 0;
+        let totalReceivedPacketsLost = 0;
 
         const tracks = Object.keys(pcData).filter(
             pcDataEntry => isObject(pcData[pcDataEntry]) && pcData[pcDataEntry].hasOwnProperty('mediaType')
@@ -23,23 +24,32 @@ class StatsAggregator {
         // the last value in the array is going to be the total lost/sent for a track.
         // We then add them together to get the totals for the peer connection.
         tracks.forEach(trackSsrc => {
-            const { packetsLost = [], packetsSent = [] } = pcData[trackSsrc];
+            const { packetsSentLost = [], packetsSent = [],
+                packetsReceivedLost = [], packetsReceived = [] } = pcData[trackSsrc];
 
-            if (!(packetsLost.length && packetsSent.length)) {
-                return;
+            if (packetsSentLost.length && packetsSent.length) {
+                totalSentPacketsLost += packetsSentLost.at(-1);
+                totalPacketsSent += packetsSent.at(-1);
             }
 
-            totalPacketsLost += packetsLost.at(-1);
-            totalPacketsSent += packetsSent.at(-1);
-
+            if (packetsReceivedLost.length && packetsReceived.length) {
+                totalReceivedPacketsLost += packetsReceivedLost.at(-1);
+                totalPacketsReceived += packetsReceived.at(-1);
+            }
         });
 
-        packetsLostPct = totalPacketsSent && percentOf(totalPacketsLost, totalPacketsSent);
+        const sentPacketsLostPct = (totalPacketsSent
+            && percentOf(totalSentPacketsLost, totalPacketsSent)) || 0;
+        const receivedPacketsLostPct = (totalPacketsReceived
+            && percentOf(totalReceivedPacketsLost, totalPacketsReceived)) || 0;
 
         return {
-            totalPacketsLost,
+            totalSentPacketsLost,
             totalPacketsSent,
-            packetsLostPct
+            sentPacketsLostPct,
+            totalReceivedPacketsLost,
+            totalPacketsReceived,
+            receivedPacketsLostPct
         };
     }
 

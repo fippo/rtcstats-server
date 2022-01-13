@@ -2,15 +2,15 @@
   {
     "dumpInfo": {
       "app": "Integration Test",
-      "clientId": "2d3f43b8-cfa5-4f3d-9dbb-c3e0a78a3633",
-      "conferenceUrl": "192.168.1.1/conf-2d3f43b8-cfa5-4f3d-9dbb-c3e0a78a3633",
-      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/2d3f43b8-cfa5-4f3d-9dbb-c3e0a78a3633",
-      "endDate": 1640307881860,
-      "startDate": 1640307881791,
-      "sessionId": "b8ce19f0-e815-4bab-8323-d4e08bedc95a",
-      "userId": "test-2d3f43b8-cfa5-4f3d-9dbb-c3e0a78a3633",
-      "ampSessionId": 1640307881755,
-      "ampDeviceId": "ab8aefe7-6db6-446f-91d3-b7e5736dc901",
+      "clientId": "83072254-e24b-4f8d-8162-23e94958ccb3",
+      "conferenceUrl": "192.168.1.1/conf-83072254-e24b-4f8d-8162-23e94958ccb3",
+      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/83072254-e24b-4f8d-8162-23e94958ccb3",
+      "endDate": 1641600327015,
+      "startDate": 1641600326943,
+      "sessionId": "bd918844-47a7-4985-a01d-22042108742a",
+      "userId": "test-83072254-e24b-4f8d-8162-23e94958ccb3",
+      "ampSessionId": 1641600326907,
+      "ampDeviceId": "38e672be-5e96-4d19-905e-1692a81eb09c",
       "statsFormat": "chrome_standard"
     },
     "features": {
@@ -45,9 +45,12 @@
         "PC_0": {
           "isP2P": true,
           "trackAggregates": {
-            "totalPacketsLost": 0,
+            "totalSentPacketsLost": 0,
             "totalPacketsSent": 11063,
-            "packetsLostPct": 0
+            "sentPacketsLostPct": 0,
+            "totalReceivedPacketsLost": 0,
+            "totalPacketsReceived": 12230,
+            "receivedPacketsLostPct": 0
           },
           "transportAggregates": {
             "meanRtt": 0
@@ -56,9 +59,12 @@
         "PC_1": {
           "isP2P": false,
           "trackAggregates": {
-            "totalPacketsLost": 11,
+            "totalSentPacketsLost": 11,
             "totalPacketsSent": 6317,
-            "packetsLostPct": 0.17
+            "sentPacketsLostPct": 0.17,
+            "totalReceivedPacketsLost": 36,
+            "totalPacketsReceived": 5008,
+            "receivedPacketsLostPct": 0.72
           },
           "transportAggregates": {
             "meanRtt": 0.05

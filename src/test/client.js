@@ -251,7 +251,7 @@ class TestCheckRouter {
  * @param {*} server
  */
 function checkTestCompletion(appServer) {
-    if (appServer.PromCollector.processed.get().values[0].value === 4) {
+    if (appServer.PromCollector.processed.get().values[0].value === 6) {
         appServer.stop();
     } else {
         setTimeout(checkTestCompletion, 4000, appServer);
@@ -390,9 +390,23 @@ function runTest() {
     );
 
     simulateConnection(
+        './src/test/dumps/firefox97-standard-stats-sfu',
+        './src/test/results/firefox97-standard-stats-sfu-result.json',
+        BrowserUASamples.FIREFOX,
+        ProtocolV.STANDARD
+    );
+
+    simulateConnection(
         './src/test/dumps/safari-standard-stats',
         './src/test/results/safari-standard-stats-result.json',
         BrowserUASamples.SAFARI,
+        ProtocolV.STANDARD
+    );
+
+    simulateConnection(
+        './src/test/dumps/chrome96-standard-stats-p2p-add-transceiver',
+        './src/test/results/chrome96-standard-stats-p2p-add-transceiver-result.json',
+        BrowserUASamples.CHROME,
         ProtocolV.STANDARD
     );
 }
