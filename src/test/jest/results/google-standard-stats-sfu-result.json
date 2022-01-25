@@ -1,0 +1,62 @@
+[
+  {
+    "dumpInfo": {
+      "app": "Integration Test",
+      "clientId": "d0667072-0689-43bd-b34a-89e147cbf9ce",
+      "conferenceUrl": "192.168.1.1/conf-d0667072-0689-43bd-b34a-89e147cbf9ce",
+      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/d0667072-0689-43bd-b34a-89e147cbf9ce",
+      "endDate": 1641600611905,
+      "startDate": 1641600611868,
+      "sessionId": "4755c766-a069-4316-b1f1-54829dbc7a69",
+      "userId": "test-d0667072-0689-43bd-b34a-89e147cbf9ce",
+      "ampSessionId": 1641600611831,
+      "ampDeviceId": "4982d7c4-01ae-4570-8599-09283b42766a",
+      "statsFormat": "chrome_standard"
+    },
+    "features": {
+      "dominantSpeakerChanges": 0,
+      "speakerTime": 0,
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "metrics": {
+        "dsRequestBytes": 0,
+        "dsRequestCount": 0,
+        "dumpFileSizeBytes": 286562,
+        "otherRequestBytes": 20242,
+        "otherRequestCount": 44,
+        "sdpRequestBytes": 19664,
+        "sdpRequestCount": 3,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 77001,
+        "statsRequestBytes": 532462,
+        "statsRequestCount": 34,
+        "totalProcessedBytes": 572368,
+        "totalProcessedCount": 81
+      },
+      "aggregates": {
+        "PC_0": {
+          "isP2P": false,
+          "trackAggregates": {
+            "receivedPacketsLostPct": 0.05,
+            "sentPacketsLostPct": 0,
+            "totalPacketsReceived": 19495,
+            "totalPacketsSent": 5280,
+            "totalReceivedPacketsLost": 9,
+            "totalSentPacketsLost": 0
+          },
+          "transportAggregates": {
+            "meanRtt": 0.05
+          }
+        }
+      }
+    }
+  }
+]

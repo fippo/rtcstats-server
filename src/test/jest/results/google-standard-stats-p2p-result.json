@@ -1,0 +1,76 @@
+[
+  {
+    "dumpInfo": {
+      "app": "Integration Test",
+      "clientId": "83072254-e24b-4f8d-8162-23e94958ccb3",
+      "conferenceUrl": "192.168.1.1/conf-83072254-e24b-4f8d-8162-23e94958ccb3",
+      "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/83072254-e24b-4f8d-8162-23e94958ccb3",
+      "endDate": 1641600327015,
+      "startDate": 1641600326943,
+      "sessionId": "bd918844-47a7-4985-a01d-22042108742a",
+      "userId": "test-83072254-e24b-4f8d-8162-23e94958ccb3",
+      "ampSessionId": 1641600326907,
+      "ampDeviceId": "38e672be-5e96-4d19-905e-1692a81eb09c",
+      "statsFormat": "chrome_standard"
+    },
+    "features": {
+      "dominantSpeakerChanges": 0,
+      "speakerTime": 0,
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "metrics": {
+        "dsRequestBytes": 0,
+        "dsRequestCount": 0,
+        "dumpFileSizeBytes": 621030,
+        "otherRequestBytes": 59376,
+        "otherRequestCount": 122,
+        "sdpRequestBytes": 209774,
+        "sdpRequestCount": 24,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 137304,
+        "statsRequestBytes": 971272,
+        "statsRequestCount": 81,
+        "totalProcessedBytes": 1240422,
+        "totalProcessedCount": 227
+      },
+      "aggregates": {
+        "PC_0": {
+          "isP2P": true,
+          "trackAggregates": {
+            "receivedPacketsLostPct": 0,
+            "sentPacketsLostPct": 0,
+            "totalPacketsReceived": 12230,
+            "totalPacketsSent": 11063,
+            "totalReceivedPacketsLost": 0,
+            "totalSentPacketsLost": 0
+          },
+          "transportAggregates": {
+            "meanRtt": 0
+          }
+        },
+        "PC_1": {
+          "isP2P": false,
+          "trackAggregates": {
+            "receivedPacketsLostPct": 0.72,
+            "sentPacketsLostPct": 0.17,
+            "totalPacketsReceived": 5008,
+            "totalPacketsSent": 6317,
+            "totalReceivedPacketsLost": 36,
+            "totalSentPacketsLost": 11
+          },
+          "transportAggregates": {
+            "meanRtt": 0.05
+          }
+        }
+      }
+    }
+  }
+]

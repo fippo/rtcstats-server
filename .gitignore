@@ -22,3 +22,6 @@ GeoLite2-City.*
 
 static
 samples
+
+.idea/
+*.iml
