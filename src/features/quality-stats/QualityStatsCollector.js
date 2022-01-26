@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { StatsFormat } = require('../../utils/stats-detection');
 const { isObject } = require('../../utils/utils');
 
@@ -70,7 +71,9 @@ class QualityStatsCollector {
                 transport: {
                     rtts: []
                 },
-                isP2P: null
+                isP2P: null,
+                dtlsErrors: 0,
+                dtlsFailure: 0
             };
         }
 
@@ -161,6 +164,34 @@ class QualityStatsCollector {
             if (optional[i].hasOwnProperty('rtcStatsSFUP2P')) {
                 pcData.isP2P = optional[i].rtcStatsSFUP2P;
             }
+        }
+    }
+
+    /**
+     * Dtls error entries contain an explanation of the error, which we ignore for now.
+     *
+     * @param {string} pc - Associated PeerConnection
+     * @param {string} errormsg - The Dtls error message from the client
+     */
+    processDtlsErrorEntry(pc, errormsg) {
+        const pcData = this._getPcData(pc);
+
+        pcData.dtlsErrors += 1;
+    }
+
+    /**
+     * Dtls state entries are generated for every state transition. Currently we are only
+     * counting the failures.
+     *
+     * @param {string} pc - Associated PeerConnection
+     * @param {string} state - The name of the new Dtls connection state
+     */
+    processDtlsStateEntry(pc, state) {
+        const pcData = this._getPcData(pc);
+
+        // Possible states are: new, connecting, connected, closed, failed
+        if (state === 'failed') {
+            pcData.dtlsFailure += 1;
         }
     }
 

@@ -78,7 +78,9 @@ class StatsAggregator {
 
         // Go through each peer connection and compute aggregates.
         Object.keys(extractedData).forEach(pc => {
-            resultMap[pc] = { isP2P: extractedData[pc].isP2P };
+            resultMap[pc] = { isP2P: extractedData[pc].isP2P,
+                dtlsErrors: extractedData[pc].dtlsErrors,
+                dtlsFailure: extractedData[pc].dtlsFailure };
 
             const pcTrackResults = this._calculateTrackAggregates(extractedData[pc]);
             const pcTransportResults = this._calculateTransportAggregates(extractedData[pc]);

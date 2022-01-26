@@ -51,6 +51,14 @@ describe('Feature extraction tests', () => {
         );
     });
 
+    test('Chrome 96 in a peer-to-peer call with addTransceiver', async () => {
+        await simulateConnection(
+            './src/test/dumps/chrome96-standard-stats-p2p-add-transceiver',
+            './src/test/jest/results/chrome96-standard-stats-p2p-add-transceiver-result.json',
+            StatsFormat.CHROME_STANDARD
+        );
+    });
+
     test('Chrome in a multi-party call', async () => {
         await simulateConnection(
             './src/test/dumps/google-standard-stats-sfu',
@@ -63,6 +71,14 @@ describe('Feature extraction tests', () => {
         await simulateConnection(
             './src/test/dumps/firefox-standard-stats-sfu',
             './src/test/jest/results/firefox-standard-stats-sfu-result.json',
+            StatsFormat.FIREFOX
+        );
+    });
+
+    test('Firefox 97 in a multi-party call', async () => {
+        await simulateConnection(
+            './src/test/dumps/firefox97-standard-stats-sfu',
+            './src/test/jest/results/firefox97-standard-stats-sfu-result.json',
             StatsFormat.FIREFOX
         );
     });

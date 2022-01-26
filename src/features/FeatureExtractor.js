@@ -83,6 +83,8 @@ class FeatureExtractor {
             facialExpression: this._handleFacialExpression,
             getstats: this._handleStatsRequest,
             other: this._handleOtherRequest,
+            ondtlserror: this._handleDtlsError,
+            ondtlsstatechange: this._handleDtlsStateChange,
             setLocalDescription: this._handleSDPRequest,
             setRemoteDescription: this._handleSDPRequest
         };
@@ -183,6 +185,18 @@ class FeatureExtractor {
 
         metrics.sdpRequestBytes += requestSize;
         metrics.sdpRequestCount++;
+    };
+
+    _handleDtlsError = dumpLineObj => {
+        const [ , pc, errormsg ] = dumpLineObj;
+
+        this.collector.processDtlsErrorEntry(pc, errormsg);
+    };
+
+    _handleDtlsStateChange = dumpLineObj => {
+        const [ , pc, state ] = dumpLineObj;
+
+        this.collector.processDtlsStateEntry(pc, state);
     };
 
     /**

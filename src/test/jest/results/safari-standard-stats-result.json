@@ -43,6 +43,8 @@
       },
       "aggregates": {
         "PC_0": {
+          "dtlsErrors": 0,
+          "dtlsFailure": 0,
           "isP2P": false,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
