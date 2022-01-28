@@ -1,44 +1,4 @@
 server:
-    port: 3000
-    metrics: 8095
-    # Set to true if you've a LB in front of RTCStats and you are obtaining
-    # its IP address as part of the X-Forwarded-For header
-    skipLoadBalancerIp: false
     logLevel: debug
     jsonConsoleLog: false
     useHTTPS: true
-    appEnvironment:
-
-amplitude:
-    key: ''
-
-s3:
-    accessKeyId:
-    secretAccessKey:
-    region: us-west-2
-    bucket:
-    useIAMAuth: false
-
-firehose:
-    accessKeyId:
-    secretAccessKey:
-    region:
-    stream:
-
-gcp:
-    bucket:
-    dataset:
-    table:
-    fields:
-    maxFlushTime:
-    bufferSize:
-
-github:
-    client_id: GITHUB_CLIENT_ID
-    client_secret: GITHUB_SECRET
-    callback_url: GITHUB_CALLBACK_URL
-
-dynamo:
-  tableName: rtcstats-meta-table-local
-  endpoint: http://localhost:8000
-

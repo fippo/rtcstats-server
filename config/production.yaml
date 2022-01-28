@@ -1,47 +1,6 @@
 server:
-    port: 3000
-    metrics: 8095
-    # Set to true if you've a LB in front of RTCStats and you are obtaining
-    # its IP address as part of the X-Forwarded-For header
-    skipLoadBalancerIp: false
     logLevel: info
     jsonConsoleLog: true
     # The provided certificates are intended for local testing usign a HTTPS server
     useHTTPS: false
     tempPath : 'temp'
-    appEnvironment:
-
-features:
-    disableFeatExtraction: false
-
-amplitude:
-    key:
-
-s3:
-    accessKeyId:
-    secretAccessKey:
-    region:
-    bucket:
-    useIAMAuth: true
-
-firehose:
-    accessKeyId:
-    secretAccessKey:
-    region:
-    stream:
-
-gcp:
-    bucket:
-    dataset:
-    table:
-    maxFlushTime:
-    bufferSize:
-
-github:
-    client_id: GITHUB_CLIENT_ID
-    client_secret: GITHUB_SECRET
-    callback_url: GITHUB_CALLBACK_URL
-
-dynamo:
-  tableName:
-

@@ -7,7 +7,8 @@ amplitude:
 
 firehose:
     region: RTCSTATS_FIREHOSE_AWS_REGION
-    stream: RTCSTATS_FIREHOSE_STREAM
+    meetingStatsStream: RTCSTATS_FIREHOSE_MEETING_STREAM
+    pcStatsStream: RTCSTATS_FIREHOSE_PC_STREAM
 
 s3:
     region: RTCSTATS_S3_AWS_REGION

@@ -30,7 +30,8 @@ firehose:
     accessKeyId:
     secretAccessKey:
     region:
-    stream:
+    meetingStatsStream:
+    pcStatsStream:
 
 gcp:
     bucket:
