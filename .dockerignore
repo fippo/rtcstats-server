@@ -1,5 +1,6 @@
 .git
 node_modules
 GeoLite2-City.*
+logs/*
 *.log
 
