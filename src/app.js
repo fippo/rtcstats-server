@@ -38,7 +38,7 @@ if (config.amplitude && config.amplitude.key) {
 
 let dataWarehouse;
 
-const { firehose: { meetingStatsStream, pcStatsStream, region: firehoseAwsRegion }} = config;
+const { firehose: { meetingStatsStream, pcStatsStream, region: firehoseAwsRegion } } = config;
 
 if (meetingStatsStream && pcStatsStream && firehoseAwsRegion) {
 

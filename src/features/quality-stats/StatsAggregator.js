@@ -38,10 +38,20 @@ class StatsAggregator {
             }
         });
 
-        const sentPacketsLostPct = (totalPacketsSent
-            && percentOf(totalSentPacketsLost, totalPacketsSent)) || 0;
-        const receivedPacketsLostPct = (totalPacketsReceived
-            && percentOf(totalReceivedPacketsLost, totalPacketsReceived)) || 0;
+        let sentPacketsLostPct = 0;
+
+        if (totalPacketsSent
+            && totalSentPacketsLost > 0
+            && totalSentPacketsLost < totalPacketsSent) {
+            sentPacketsLostPct = percentOf(totalSentPacketsLost, totalPacketsSent) || 0;
+        }
+        let receivedPacketsLostPct = 0;
+
+        if (totalPacketsReceived
+            && totalReceivedPacketsLost > 0
+            && totalReceivedPacketsLost < totalPacketsReceived) {
+            receivedPacketsLostPct = percentOf(totalReceivedPacketsLost, totalPacketsReceived) || 0;
+        }
 
         return {
             totalSentPacketsLost,
