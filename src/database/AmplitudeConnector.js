@@ -24,7 +24,7 @@ class AmplitudeConnector {
      *
      * @param {*} rtcstatsFeatures
      */
-    track(dumpInfo, features) {
+    track(dumpInfo, features = {}) {
         try {
             const { ampDeviceId: device_id,
                 ampSessionId: session_id,
@@ -46,7 +46,8 @@ class AmplitudeConnector {
                 event_properties: {
                     statsSessionId,
                     displayName,
-                    ...features
+                    ...features.metrics,
+                    ...features.sentiment
                 }
             };
 
