@@ -54,6 +54,68 @@
             "totalReceivedPacketsLost": 9,
             "totalSentPacketsLost": 0
           },
+          "tracks": {
+            "receiverTracks": {
+              "1030784244": {
+                "mediaType": "video",
+                "packets": 4473,
+                "packetsLost": 2,
+                "packetsLostPct": 0.04,
+                "packetsLostVariance": 0.12109375
+              },
+              "1661050740": {
+                "mediaType": "audio",
+                "packets": 3253,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "1845975655": {
+                "mediaType": "video",
+                "packets": 4385,
+                "packetsLost": 5,
+                "packetsLostPct": 0.11,
+                "packetsLostVariance": 0.1943359375
+              },
+              "3489317734": {
+                "mediaType": "audio",
+                "packets": 3252,
+                "packetsLost": 2,
+                "packetsLostPct": 0.06,
+                "packetsLostVariance": 0.12109375
+              },
+              "428706097": {
+                "mediaType": "video",
+                "packets": 1898,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "757648711": {
+                "mediaType": "audio",
+                "packets": 2234,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              }
+            },
+            "senderTracks": {
+              "1950053863": {
+                "mediaType": "video",
+                "packets": 2026,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "3525379525": {
+                "mediaType": "audio",
+                "packets": 3254,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              }
+            }
+          },
           "transportAggregates": {
             "meanRtt": 0.05
           }

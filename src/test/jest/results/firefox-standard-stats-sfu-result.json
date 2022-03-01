@@ -54,6 +54,96 @@
             "totalReceivedPacketsLost": 8,
             "totalSentPacketsLost": 0
           },
+          "tracks": {
+            "receiverTracks": {
+              "1291750480": {
+                "mediaType": "audio",
+                "packets": 6778,
+                "packetsLost": 3,
+                "packetsLostPct": 0.04,
+                "packetsLostVariance": 0.0399305555555556
+              },
+              "1426121629": {
+                "mediaType": "audio",
+                "packets": 7683,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "1449778799": {
+                "mediaType": "audio",
+                "packets": 6065,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "2047229442": {
+                "mediaType": "video",
+                "packets": 7177,
+                "packetsLost": 1,
+                "packetsLostPct": 0.01,
+                "packetsLostVariance": 0.014921946740128528
+              },
+              "2403718901": {
+                "mediaType": "video",
+                "packets": 8352,
+                "packetsLost": 2,
+                "packetsLostPct": 0.02,
+                "packetsLostVariance": 0.027006172839506123
+              },
+              "271883463": {
+                "mediaType": "video",
+                "packets": 4580,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "4051566705": {
+                "mediaType": "audio",
+                "packets": 7770,
+                "packetsLost": 1,
+                "packetsLostPct": 0.01,
+                "packetsLostVariance": 0.012818350480688152
+              },
+              "876450406": {
+                "mediaType": "audio",
+                "packets": 3229,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "891790093": {
+                "mediaType": "video",
+                "packets": 8408,
+                "packetsLost": 1,
+                "packetsLostPct": 0.01,
+                "packetsLostVariance": 0.012818350480688152
+              },
+              "972539169": {
+                "mediaType": "video",
+                "packets": 2417,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              }
+            },
+            "senderTracks": {
+              "1426121629": {
+                "mediaType": "audio",
+                "packets": 0,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              },
+              "271883463": {
+                "mediaType": "video",
+                "packets": 0,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0
+              }
+            }
+          },
           "transportAggregates": {
             "meanRtt": 0.05
           }

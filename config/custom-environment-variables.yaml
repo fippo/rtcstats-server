@@ -9,6 +9,7 @@ firehose:
     region: RTCSTATS_FIREHOSE_AWS_REGION
     meetingStatsStream: RTCSTATS_FIREHOSE_MEETING_STREAM
     pcStatsStream: RTCSTATS_FIREHOSE_PC_STREAM
+    trackStatsStream: RTCSTATS_FIREHOSE_TRACKS_STREAM
 
 s3:
     region: RTCSTATS_S3_AWS_REGION

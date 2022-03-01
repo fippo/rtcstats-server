@@ -1,13 +1,105 @@
-const { isObject, percentOf, round } = require('../../utils/utils');
+const { isObject, percentOf, round, standardizedMoment } = require('../../utils/utils');
 
 /**
  *
  */
 class StatsAggregator {
     /**
+     * Converts a series of ever increasing values and returns a series of differences
+     *
+     * @param {Array} series - an array of increasing numbers
+     * @return {Array}
+     */
+    _calculateSeriesDifferences(series) {
+        const result = [];
+
+        if (series.length > 0) {
+            for (let i = 1; i < series.length; i++) {
+                result.push(series[i] - series[i - 1]);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculate the stats for a single track.
+     *
+     * @param {Array} packets - a list of numbers of received/send packets
+     * @param {Array} packetsLost - a list of number of missing packets
+     * @param {String} mediaType - indicated if the track was audio or video
+     * @return {Object}
+     */
+    _calculateSingleTrackStats(packets, packetsLost, mediaType) {
+        const stats = {
+            mediaType,
+            packets: 0,
+            packetsLost: 0,
+            packetsLostPct: 0,
+            packetsLostVariance: 0
+        };
+
+        if (!packets.length) {
+            return stats;
+        }
+        const pcts = packets.at(-1);
+
+        stats.packets = pcts;
+        const pctsLost = packetsLost.at(-1);
+
+        stats.packetsLost = pctsLost;
+
+        if (pcts
+            && pctsLost > 0
+            && pctsLost < pcts) {
+            stats.packetsLostPct = percentOf(pctsLost, pcts) || 0;
+        }
+
+        stats.packetsLostVariance = standardizedMoment(
+            this._calculateSeriesDifferences(packetsLost), 2);
+
+        return stats;
+    }
+
+    /**
+     * Calculate the stats for all tracks within a single peer connection
+     *
+     * @param {Object} pcData - Data associated with a single peer connection.
+     * @return {Object} - two maps with stats for all received and send tracks.
+     */
+    _calculateTrackStats(pcData) {
+        const senderTracks = {};
+        const receiverTracks = {};
+
+        const tracks = Object.keys(pcData).filter(
+            pcDataEntry => isObject(pcData[pcDataEntry]) && pcData[pcDataEntry].hasOwnProperty('mediaType')
+        );
+
+        tracks.forEach(trackSsrc => {
+            const { packetsSentLost = [], packetsSent = [], packetsReceivedLost = [],
+                packetsReceived = [], mediaType = '' } = pcData[trackSsrc];
+
+            if (packetsSentLost.length && packetsSent.length) {
+                senderTracks[trackSsrc] = this._calculateSingleTrackStats(packetsSent,
+                    packetsSentLost, mediaType);
+            }
+
+            if (packetsReceivedLost.length && packetsReceived.length) {
+                receiverTracks[trackSsrc] = this._calculateSingleTrackStats(packetsReceived,
+                    packetsReceivedLost, mediaType);
+            }
+        });
+
+        return {
+            receiverTracks,
+            senderTracks
+        };
+    }
+
+    /**
      * Calculate aggregates associated with the peer connection tracks
      *
-     * @param {Object} extractedData - Data associated with a single peer connection.
+     * @param {Object} pcData - Data associated with a single peer connection.
      * @returns
      */
     _calculateTrackAggregates(pcData) {
@@ -28,8 +120,8 @@ class StatsAggregator {
                 packetsReceivedLost = [], packetsReceived = [] } = pcData[trackSsrc];
 
             if (packetsSentLost.length && packetsSent.length) {
-                totalSentPacketsLost += packetsSentLost.at(-1);
                 totalPacketsSent += packetsSent.at(-1);
+                totalSentPacketsLost += packetsSentLost.at(-1);
             }
 
             if (packetsReceivedLost.length && packetsReceived.length) {
@@ -92,9 +184,11 @@ class StatsAggregator {
                 dtlsErrors: extractedData[pc].dtlsErrors,
                 dtlsFailure: extractedData[pc].dtlsFailure };
 
+            const pcTrackStats = this._calculateTrackStats(extractedData[pc]);
             const pcTrackResults = this._calculateTrackAggregates(extractedData[pc]);
             const pcTransportResults = this._calculateTransportAggregates(extractedData[pc]);
 
+            resultMap[pc].tracks = pcTrackStats;
             resultMap[pc].trackAggregates = pcTrackResults;
             resultMap[pc].transportAggregates = pcTransportResults;
         });

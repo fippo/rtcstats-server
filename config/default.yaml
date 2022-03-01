@@ -32,6 +32,7 @@ firehose:
     region:
     meetingStatsStream:
     pcStatsStream:
+    trackStatsStream:
 
 gcp:
     bucket:

@@ -14,10 +14,11 @@ class FirehoseConnector {
      *
      * @param {*} param0
      */
-    constructor({ region, meetingStatsStream, pcStatsStream, appEnv }) {
+    constructor({ region, meetingStatsStream, pcStatsStream, trackStatsStream, appEnv }) {
         this._awsRegion = region;
         this._meetingStatsStream = meetingStatsStream;
         this._pcStatsStream = pcStatsStream;
+        this._trackStatsStream = trackStatsStream;
         this._appEnv = appEnv;
     }
 
@@ -50,6 +51,29 @@ class FirehoseConnector {
                 logger.info('[Firehose] Sent data: %o', schemaObj);
             }
         );
+    };
+
+    _putTrackRecord = (track, dir, id, p2p) => {
+        const {
+            mediaType,
+            packets,
+            packetsLost,
+            packetsLostPct,
+            packetsLostVariance
+        } = track;
+
+        const trackSchemaObj = {
+            statsSessionId: id,
+            isP2P: p2p,
+            direction: dir,
+            mediaType,
+            packets,
+            packetsLost,
+            packetsLostPct,
+            packetsLostVariance
+        };
+
+        this._putRecord(trackSchemaObj, this._trackStatsStream);
     };
 
     /**
@@ -119,6 +143,10 @@ class FirehoseConnector {
                     totalReceivedPacketsLost,
                     totalSentPacketsLost
                 },
+                tracks: {
+                    receiverTracks,
+                    senderTracks
+                },
                 transportAggregates: { meanRtt }
             } = aggregates[pc];
 
@@ -137,6 +165,14 @@ class FirehoseConnector {
             };
 
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);
+
+            Object.keys(receiverTracks).forEach(rtrack => {
+                this._putTrackRecord(receiverTracks[rtrack], 'received', statsSessionId, isP2P);
+            });
+
+            Object.keys(senderTracks).forEach(strack => {
+                this._putTrackRecord(senderTracks[strack], 'send', statsSessionId, isP2P);
+            });
         });
     };
 }
