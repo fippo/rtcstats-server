@@ -90,8 +90,58 @@ function getRTTStandard(statsEntry, report) {
     if (isTransportReport(report) && statsEntry[report.selectedCandidatePairId]) {
         return statsEntry[report.selectedCandidatePairId].currentRoundTripTime;
     }
+
+    // FIXME the handling of legacy stats does not fit in here.
     if (report.type === 'googCandidatePair' && report.googActiveConnection === 'true') {
         return Number(report.googRtt);
+    }
+}
+
+/**
+ * Determines whether a TURN server is used (Firefox way).
+ *
+ * @param {Object} statsEntry - Complete rtcstats entry
+ * @param {Object} report - Individual stat report.
+ * @returns {Boolean|undefined} - true/false if a TURN server is used/not used in the selected candidate pair, or
+ * undefined if the report isn't of the necessary type.
+ */
+function isUsingRelayFirefox(statsEntry, report) {
+    if (report.type === 'candidate-pair' && report.selected) {
+
+        const remoteCandidateType
+            = statsEntry[report.remoteCandidateId].candidateType;
+        const localCandidateType
+            = statsEntry[report.remoteCandidateId].candidateType;
+
+        return localCandidateType === 'relay' || remoteCandidateType === 'relay';
+    }
+}
+
+/**
+ * Determines whether a TURN server is used (Standard compliant way).
+ *
+ * @param {Object} statsEntry - Complete rtcstats entry
+ * @param {Object} report - Individual stat report.
+ * @returns {Boolean|undefined} - true/false if a TURN server is used/not used in the selected candidate pair, or
+ * undefined if the report isn't of the necessary type.
+ */
+function isUsingRelayStandard(statsEntry, report) {
+    if (report.type === 'transport' && report.selectedCandidatePairId) {
+
+        const remoteCandidateType
+            = statsEntry[statsEntry[report.selectedCandidatePairId].remoteCandidateId].candidateType;
+        const localCandidateType
+            = statsEntry[statsEntry[report.selectedCandidatePairId].remoteCandidateId].candidateType;
+
+        return localCandidateType === 'relay' || remoteCandidateType === 'relay';
+    }
+
+    // FIXME the handling of legacy stats does not fit in here.
+    if (report.type === 'googCandidatePair' && report.googActiveConnection === 'true') {
+        const remoteCandidateType = report.googRemoteCandidateType;
+        const localCandidateType = report.googLocalCandidateType;
+
+        return localCandidateType === 'relay' || remoteCandidateType === 'relay';
     }
 }
 
@@ -253,6 +303,71 @@ function getTotalReceivedPacketsStandard(statsEntry, report) {
     }
 }
 
+
+/**
+ * Return standard statistics for received and lost packets.
+ *
+ * @param {Object} report - Individual stat report.
+ * @param {Object} statsEntry - Complete rtcstats entry
+ * @returns  {VideoSummary|undefined}
+ */
+function getInboundVideoSummaryStandard(statsEntry, report) {
+
+    if (report.type === 'outbound-rtp') {
+        // we ignore outbound video for now.
+        return;
+    }
+
+    if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+        // Handles google-standard-stats-*
+        return {
+            frameHeight: report.frameHeight,
+            framesPerSecond: report.framesPerSecond
+        };
+    }
+
+    // FIXME the handling of legacy google stats does not fit in here.
+    if (report.type === 'ssrc' && report.googFrameHeightReceived) {
+        // Found in chrome96-standard-stats-p2p-add-transceiver and in google-legacy-*
+        return {
+            frameHeight: report.googFrameHeightReceived,
+            framesPerSecond: report.googFrameRateOutput
+        };
+    }
+
+    if (report.type === 'track' && report.remoteSource === true && report.frameHeight) {
+        // Found in google-standard-stats-* and safari-standard-stats. Unfortunately it contains cumulative frames, so
+        // no rate that we can extract.
+        return {
+            frameHeight: report.frameHeight
+        };
+    }
+}
+
+
+/**
+ * Return standard statistics for received and lost packets.
+ *
+ * @param {Object} report - Individual stat report.
+ * @param {Object} statsEntry - Complete rtcstats entry
+ * @returns  {VideoSummary|undefined}
+ */
+function getInboundVideoSummaryFirefox(statsEntry, report) {
+
+    if (report.type === 'outbound-rtp') {
+        // we ignore outbound video for now.
+        return;
+    }
+
+    if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+        // Handles firefox-standard-stats-sfu. Unfortunately, Firefox does not report video resolution currently,
+        // so having the frame rate is of little use to us.
+        return {
+            framesPerSecond: report.framerateMean
+        };
+    }
+}
+
 /**
  * Return the resolution as a valid number, guard against Object/Null/NaN/Undefined/Infinity values
  *
@@ -295,6 +410,7 @@ function getUsedResolutionFirefox() {
 /**
  *
  * @param {Object} report - Individual stat report.
+ * @param statsEntry
  * @return {Number} Used send resolution.
  */
 function getUsedResolutionStandard(report, statsEntry) {
@@ -368,6 +484,7 @@ function getBitRateLegacy(report, lastStatsEntry) {
  *
  * @param {*} report
  * @param {*} lastStatsEntry
+ * @param currentStatsEntry
  */
 function getBitRateStandard(report, lastStatsEntry, currentStatsEntry) {
     if (!lastStatsEntry) {
@@ -411,7 +528,6 @@ function getBitRateFn(client) {
 /**
  * Not supported.
  *
- * @param {*} report
  */
 function getScreenShareDataStandard() {
     return;
@@ -420,7 +536,6 @@ function getScreenShareDataStandard() {
 /**
  * Not supported.
  *
- * @param {*} report
  */
 function getScreenShareDataFirefox() {
     return;
@@ -473,6 +588,8 @@ module.exports = {
     isStatisticEntry,
     getBitRateFn,
     getRTTFn,
+    isUsingRelayStandard,
+    isUsingRelayFirefox,
     getRTTStandard,
     getRTTFirefox,
     getScreenShareDataFn,
@@ -481,6 +598,8 @@ module.exports = {
     getTotalReceivedPacketsStandard,
     getTotalSentPacketsStandard,
     getTotalSentPacketsFirefox,
+    getInboundVideoSummaryStandard,
+    getInboundVideoSummaryFirefox,
     getTransportInfoFn,
     getUsedResolutionFn,
     StatsFormat

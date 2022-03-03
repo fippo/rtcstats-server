@@ -25,12 +25,21 @@
         "sad": 0,
         "surprised": 0
       },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-andreig2",
+        "userRegion": ""
+      },
       "metrics": {
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
         "dumpFileSizeBytes": 621030,
-        "otherRequestBytes": 59376,
-        "otherRequestCount": 122,
+        "otherRequestBytes": 51156,
+        "otherRequestCount": 121,
         "sdpRequestBytes": 209774,
         "sdpRequestCount": 24,
         "sentimentRequestBytes": 0,
@@ -38,14 +47,15 @@
         "sessionDurationMs": 137304,
         "statsRequestBytes": 971272,
         "statsRequestCount": 81,
-        "totalProcessedBytes": 1240422,
-        "totalProcessedCount": 227
+        "totalProcessedBytes": 1232202,
+        "totalProcessedCount": 226
       },
       "aggregates": {
         "PC_0": {
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": true,
+          "usesRelay": false,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -90,12 +100,23 @@
           },
           "transportAggregates": {
             "meanRtt": 0
+          },
+          "inboundVideoExperience": {
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 23.36
+            },
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 23.36
+            }
           }
         },
         "PC_1": {
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": false,
+          "usesRelay": false,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.72,
             "sentPacketsLostPct": 0.17,
@@ -196,6 +217,16 @@
           },
           "transportAggregates": {
             "meanRtt": 0.05
+          },
+          "inboundVideoExperience": {
+            "upperBoundAggregates": {
+              "meanFrameHeight": 504.71,
+              "meanFramesPerSecond": 19.71
+            },
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 469.41,
+              "meanFramesPerSecond": 19.1
+            }
           }
         }
       }

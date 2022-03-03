@@ -76,6 +76,7 @@ class FeatureExtractor {
         };
 
         this.extractFunctions = {
+            identity: this._handleIdentity,
             constraints: this._handleConstraints,
             create: this._handleCreate,
             createAnswerOnSuccess: this._handleSDPRequest,
@@ -105,6 +106,31 @@ class FeatureExtractor {
         const [ , pc, constraintsEntry ] = dumpLineObj;
 
         this.collector.processConstraintsEntry(pc, constraintsEntry);
+    };
+
+
+    _handleIdentity = dumpLineObj => {
+        const [ , , identityEntry ] = dumpLineObj;
+        const { crossRegion,
+            envType,
+            environment,
+            region,
+            releaseNumber,
+            shard,
+            userRegion } = identityEntry.deploymentInfo;
+
+        // We copy the individual properties instead of just the whole object to protect against
+        // unexpected changes in the deploymentInfo format that the client is sending.
+
+        this.features.deploymentInfo = {
+            crossRegion,
+            envType,
+            environment,
+            region,
+            releaseNumber,
+            shard,
+            userRegion
+        };
     };
 
     _handleFacialExpression = (dumpLineObj, requestSize) => {

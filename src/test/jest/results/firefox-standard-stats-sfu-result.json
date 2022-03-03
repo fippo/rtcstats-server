@@ -25,12 +25,21 @@
         "sad": 0,
         "surprised": 0
       },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-andreig2",
+        "userRegion": ""
+      },
       "metrics": {
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
         "dumpFileSizeBytes": 352003,
-        "otherRequestBytes": 21636,
-        "otherRequestCount": 61,
+        "otherRequestBytes": 13422,
+        "otherRequestCount": 60,
         "sdpRequestBytes": 185530,
         "sdpRequestCount": 12,
         "sentimentRequestBytes": 0,
@@ -38,14 +47,15 @@
         "sessionDurationMs": 161480,
         "statsRequestBytes": 496382,
         "statsRequestCount": 79,
-        "totalProcessedBytes": 703548,
-        "totalProcessedCount": 152
+        "totalProcessedBytes": 695334,
+        "totalProcessedCount": 151
       },
       "aggregates": {
         "PC_0": {
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": false,
+          "usesRelay": false,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.01,
             "sentPacketsLostPct": 0,

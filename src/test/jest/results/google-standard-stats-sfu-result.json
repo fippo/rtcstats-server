@@ -25,12 +25,21 @@
         "sad": 0,
         "surprised": 0
       },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-andreig2",
+        "userRegion": ""
+      },
       "metrics": {
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
         "dumpFileSizeBytes": 286562,
-        "otherRequestBytes": 20242,
-        "otherRequestCount": 44,
+        "otherRequestBytes": 12022,
+        "otherRequestCount": 43,
         "sdpRequestBytes": 19664,
         "sdpRequestCount": 3,
         "sentimentRequestBytes": 0,
@@ -38,14 +47,15 @@
         "sessionDurationMs": 77001,
         "statsRequestBytes": 532462,
         "statsRequestCount": 34,
-        "totalProcessedBytes": 572368,
-        "totalProcessedCount": 81
+        "totalProcessedBytes": 564148,
+        "totalProcessedCount": 80
       },
       "aggregates": {
         "PC_0": {
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": false,
+          "usesRelay": false,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.05,
             "sentPacketsLostPct": 0,
@@ -118,6 +128,16 @@
           },
           "transportAggregates": {
             "meanRtt": 0.05
+          },
+          "inboundVideoExperience": {
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 27.82
+            },
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 180,
+              "meanFramesPerSecond": 28.85
+            }
           }
         }
       }

@@ -1,5 +1,8 @@
 const { getRTTFirefox, getTotalSentPacketsFirefox,
-    getTotalReceivedPacketsStandard } = require('../../utils/stats-detection');
+    getTotalReceivedPacketsStandard,
+    getInboundVideoSummaryFirefox,
+    isUsingRelayFirefox
+} = require('../../utils/stats-detection');
 
 /**
  * Collection of functions used to extract data from standard formatted webrtc stats.
@@ -14,6 +17,18 @@ class FirefoxStatsExtractor {
      */
     extractRtt(statsEntry, report) {
         return getRTTFirefox(statsEntry, report);
+    }
+
+    /**
+     * Determines whether a TURN server is used.
+     *
+     * @param {Object} statsEntry - Complete rtcstats entry
+     * @param {Object} report - Individual stat report.
+     * @returns {Boolean|undefined} - true/false if a TURN server is used/not used in the selected candidate pair, or
+     * undefined if the report isn't of the necessary type.
+     */
+    isUsingRelay(statsEntry, report) {
+        return isUsingRelayFirefox(statsEntry, report);
     }
 
 
@@ -46,6 +61,17 @@ class FirefoxStatsExtractor {
      */
     extractInboundPacketLoss(statsEntry, report) {
         return getTotalReceivedPacketsStandard(statsEntry, report);
+    }
+
+    /**
+     * Extract the inbound video summary.
+     *
+     * @param {Object} statsEntry - Complete rtcstats entry
+     * @param {Object} report - Individual stat report.
+     * @returns {VideoSummary|undefined} - Video summary or undefined if the report isn't of the necessary type.
+     */
+    extractInboundVideoSummary(statsEntry, report) {
+        return getInboundVideoSummaryFirefox(statsEntry, report);
     }
 }
 

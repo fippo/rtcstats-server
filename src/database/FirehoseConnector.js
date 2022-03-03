@@ -92,6 +92,14 @@ class FirehoseConnector {
 
         const {
             aggregates = {},
+            deploymentInfo: {
+                crossRegion,
+                environment,
+                region,
+                releaseNumber,
+                shard,
+                userRegion
+            },
             metrics: { sessionDurationMs: sessionDuration },
             dominantSpeakerChanges,
             speakerTime,
@@ -112,6 +120,12 @@ class FirehoseConnector {
             createDate: getSQLTimestamp(),
             statsSessionId,
             displayName,
+            crossRegion,
+            environment,
+            region,
+            releaseNumber,
+            shard,
+            userRegion,
             meetingName,
             meetingUrl,
             meetingUniqueId,
@@ -147,8 +161,14 @@ class FirehoseConnector {
                     receiverTracks,
                     senderTracks
                 },
-                transportAggregates: { meanRtt }
+                transportAggregates: { meanRtt },
+                inboundVideoExperience: {
+                    upperBoundAggregates,
+                    lowerBoundAggregates
+                }
             } = aggregates[pc];
+
+            // TODO make sure that values missing won't break stuff and simply insert a null
 
             const aggregateSchemaObj = {
                 statsSessionId,
@@ -161,7 +181,11 @@ class FirehoseConnector {
                 totalPacketsSent,
                 totalReceivedPacketsLost,
                 totalSentPacketsLost,
-                meanRtt
+                meanRtt,
+                meanUpperBoundFrameHeight: upperBoundAggregates.meanFrameHeight,
+                meanUpperBoundFramesPerSecond: upperBoundAggregates.meanFramesPerSecond,
+                meanLowerBoundFrameHeight: lowerBoundAggregates.meanFrameHeight,
+                meanLowerBoundFramesPerSecond: lowerBoundAggregates.meanFramesPerSecond
             };
 
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);

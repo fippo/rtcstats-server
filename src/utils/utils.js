@@ -41,6 +41,13 @@ function mode(series) {
 }
 
 /**
+ * A reducer that computes the average.
+ */
+function average(accumulator, currentValue, index, array) {
+    return accumulator + (currentValue / array.length);
+}
+
+/**
  * Round half up ('round half towards positive infinity')
  * Uses exponential notation to avoid floating-point issues.
  * Negative numbers round differently than positive numbers.
@@ -314,6 +321,7 @@ const ResponseType = Object.freeze({
 });
 
 module.exports = {
+    average,
     capitalize,
     asyncDeleteFile,
     extractTracks,

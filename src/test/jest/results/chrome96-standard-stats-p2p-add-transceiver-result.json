@@ -25,17 +25,26 @@
         "sad": 0,
         "surprised": 0
       },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "us-west-2",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-drno",
+        "userRegion": ""
+      },
       "metrics": {
         "statsRequestBytes": 69628,
         "statsRequestCount": 6,
-        "otherRequestBytes": 30898,
-        "otherRequestCount": 116,
+        "otherRequestBytes": 21578,
+        "otherRequestCount": 115,
         "sdpRequestBytes": 2104,
         "sdpRequestCount": 22,
         "dsRequestBytes": 506,
         "dsRequestCount": 3,
-        "totalProcessedBytes": 103136,
-        "totalProcessedCount": 147,
+        "totalProcessedBytes": 93816,
+        "totalProcessedCount": 146,
         "sentimentRequestBytes": 0,
         "sentimentRequestCount": 0,
         "sessionDurationMs": 23040,
@@ -46,6 +55,7 @@
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": true,
+          "usesRelay": false,
           "trackAggregates": {
             "totalSentPacketsLost": 0,
             "totalPacketsSent": 3947,
@@ -90,12 +100,23 @@
           },
           "transportAggregates": {
             "meanRtt": 0
+          },
+          "inboundVideoExperience": {
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 30
+            },
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 30
+            }
           }
         },
         "PC_1": {
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": false,
+          "usesRelay": false,
           "trackAggregates": {
             "totalSentPacketsLost": 0,
             "totalPacketsSent": 83,
@@ -154,6 +175,16 @@
           },
           "transportAggregates": {
             "meanRtt": 40.33
+          },
+          "inboundVideoExperience": {
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 27
+            },
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 27
+            }
           }
         }
       }
