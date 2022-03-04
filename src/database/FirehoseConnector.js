@@ -169,8 +169,6 @@ class FirehoseConnector {
                 }
             } = aggregates[pc];
 
-            // TODO make sure that values missing won't break stuff and simply insert a null
-
             const aggregateSchemaObj = {
                 statsSessionId,
                 dtlsErrors,
@@ -184,10 +182,10 @@ class FirehoseConnector {
                 totalReceivedPacketsLost,
                 totalSentPacketsLost,
                 meanRtt,
-                meanUpperBoundFrameHeight: upperBoundAggregates.meanFrameHeight,
-                meanUpperBoundFramesPerSecond: upperBoundAggregates.meanFramesPerSecond,
-                meanLowerBoundFrameHeight: lowerBoundAggregates.meanFrameHeight,
-                meanLowerBoundFramesPerSecond: lowerBoundAggregates.meanFramesPerSecond
+                meanUpperBoundFrameHeight: upperBoundAggregates?.meanFrameHeight,
+                meanUpperBoundFramesPerSecond: upperBoundAggregates?.meanFramesPerSecond,
+                meanLowerBoundFrameHeight: lowerBoundAggregates?.meanFrameHeight,
+                meanLowerBoundFramesPerSecond: lowerBoundAggregates?.meanFramesPerSecond
             };
 
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);
