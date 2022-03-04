@@ -164,9 +164,9 @@ class FirehoseConnector {
                 },
                 transportAggregates: { meanRtt },
                 inboundVideoExperience: {
-                    upperBoundAggregates,
-                    lowerBoundAggregates
-                }
+                    upperBoundAggregates = { },
+                    lowerBoundAggregates = { }
+                } = { }
             } = aggregates[pc];
 
             const aggregateSchemaObj = {
@@ -182,10 +182,10 @@ class FirehoseConnector {
                 totalReceivedPacketsLost,
                 totalSentPacketsLost,
                 meanRtt,
-                meanUpperBoundFrameHeight: upperBoundAggregates?.meanFrameHeight,
-                meanUpperBoundFramesPerSecond: upperBoundAggregates?.meanFramesPerSecond,
-                meanLowerBoundFrameHeight: lowerBoundAggregates?.meanFrameHeight,
-                meanLowerBoundFramesPerSecond: lowerBoundAggregates?.meanFramesPerSecond
+                meanUpperBoundFrameHeight: upperBoundAggregates.meanFrameHeight,
+                meanUpperBoundFramesPerSecond: upperBoundAggregates.meanFramesPerSecond,
+                meanLowerBoundFrameHeight: lowerBoundAggregates.meanFrameHeight,
+                meanLowerBoundFramesPerSecond: lowerBoundAggregates.meanFramesPerSecond
             };
 
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);

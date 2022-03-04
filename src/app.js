@@ -132,7 +132,11 @@ workerPool.on(ResponseType.DONE, body => {
     }
 
     if (dataWarehouse) {
-        dataWarehouse.put(body);
+        try {
+            dataWarehouse.put(body);
+        } catch (e) {
+            logger.error('[App] Handling ERROR event with error %o and body %o', e, body);
+        }
     }
 
     persistDumpData(dumpInfo);
