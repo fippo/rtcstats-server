@@ -149,6 +149,7 @@ class FirehoseConnector {
                 dtlsErrors,
                 dtlsFailure,
                 isP2P,
+                usesRelay,
                 trackAggregates: {
                     receivedPacketsLostPct,
                     sentPacketsLostPct,
@@ -175,6 +176,7 @@ class FirehoseConnector {
                 dtlsErrors,
                 dtlsFailure,
                 isP2P,
+                usesRelay,
                 receivedPacketsLostPct,
                 sentPacketsLostPct,
                 totalPacketsReceived,
