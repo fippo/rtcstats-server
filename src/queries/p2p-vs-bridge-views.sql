@@ -1,4 +1,4 @@
-SELECT appenv, isp2p,
+SELECT appenv, isp2p, usesrelay,
 	COUNT(sentpacketslostpct) AS samples_count,
     AVG(sentpacketslostpct) AS sentpacketslostpct_avg,
     AVG(receivedpacketslostpct) AS receivedpacketslostpct_avg,
@@ -10,4 +10,4 @@ WHERE sessionduration >= 10000
     AND sentpacketslostpct < 100
     AND receivedpacketslostpct > 0
     AND receivedpacketslostpct < 100
-GROUP BY isp2p, appenv
+GROUP BY isp2p, appenv, usesrelay
