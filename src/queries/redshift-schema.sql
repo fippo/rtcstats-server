@@ -3,7 +3,7 @@
  */
 CREATE TABLE IF NOT EXISTS rtcstats (
     appEnv VARCHAR(128),
-    statssessionid VARCHAR ( 256 ),
+    statssessionid VARCHAR ( 256 ) NOT NULL,
     displayname VARCHAR ( 256 ),
     meetingname VARCHAR ( 256 ),
     meetingurl VARCHAR ( 2048 ),
@@ -26,15 +26,21 @@ CREATE TABLE IF NOT EXISTS rtcstats (
     releaseNumber INT DEFAULT 0,
     shard VARCHAR ( 256 ),
     userRegion VARCHAR ( 256 ),
+    PRIMARY KEY(statssessionid)
 )
 
 /**
  * Initial schema for redshift rtcstats_pc_metrics table
+ * Note, redshift does not enforce primary/foreign key constraints however the planner can use them
+ * to improve performance.
  */
 CREATE TABLE IF NOT EXISTS rtcstats_pc_metrics (
+    id VARCHAR(128) NOT NULL,
+    createdate TIMESTAMP,
     statssessionid VARCHAR ( 256 ),
     dtlsErrors INT,
     dtlsFailure INT,
+    pcname VARCHAR(128),
     receivedPacketsLostPct REAL,
     sentPacketsLostPct REAL,
     totalPacketsReceived BIGINT,
@@ -47,13 +53,18 @@ CREATE TABLE IF NOT EXISTS rtcstats_pc_metrics (
     meanUpperBoundFrameHeight REAL,
     meanUpperBoundFramesPerSecond REAL,
     meanLowerBoundFrameHeight REAL,
-    meanLowerBoundFramesPerSecond REAL
+    meanLowerBoundFramesPerSecond REAL,
+    PRIMARY KEY(id),
+    FOREIGN KEY (statssessionid) REFERENCES rtcstats(statssessionid)
 )
 
 /**
  * Initial schema for redshift rtcstats_track_metrics table
  */
 CREATE TABLE IF NOT EXISTS rtcstats_track_metrics (
+    id VARCHAR(128) NOT NULL,
+    pcId VARCHAR(128),
+    createdate TIMESTAMP,
     statssessionid VARCHAR ( 256 ),
     isP2P BOOLEAN,
     direction VARCHAR(128),
@@ -61,5 +72,7 @@ CREATE TABLE IF NOT EXISTS rtcstats_track_metrics (
     packets BIGINT,
     packetsLost BIGINT,
     packetsLostPct REAL,
-    packetsLostVariance REAL
+    packetsLostVariance REAL,
+    PRIMARY KEY(id),
+    FOREIGN KEY (pcId) REFERENCES rtcstats_pc_metrics(id)
 )

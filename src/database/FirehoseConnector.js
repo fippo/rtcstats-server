@@ -1,5 +1,6 @@
 /* eslint-disable no-invalid-this */
 const AWS = require('aws-sdk');
+const uuid = require('uuid');
 
 const logger = require('../logging');
 const PromCollector = require('../metrics/PromCollector');
@@ -53,7 +54,7 @@ class FirehoseConnector {
         );
     };
 
-    _putTrackRecord = (track, dir, id, p2p) => {
+    _putTrackRecord = (track, { direction, statsSessionId, isP2P, pcId, createDate }) => {
         const {
             mediaType,
             packets,
@@ -62,10 +63,15 @@ class FirehoseConnector {
             packetsLostVariance
         } = track;
 
+        const id = uuid.v4();
+
         const trackSchemaObj = {
-            statsSessionId: id,
-            isP2P: p2p,
-            direction: dir,
+            id,
+            createDate,
+            pcId,
+            statsSessionId,
+            isP2P,
+            direction,
             mediaType,
             packets,
             packetsLost,
@@ -114,10 +120,12 @@ class FirehoseConnector {
             }
         } = features;
 
+        const createDate = getSQLTimestamp();
+
         // The schemaObj needs to match the redshift table schema.
         const schemaObj = {
             appEnv: this._appEnv,
-            createDate: getSQLTimestamp(),
+            createDate,
             statsSessionId,
             displayName,
             crossRegion,
@@ -169,7 +177,11 @@ class FirehoseConnector {
                 } = { }
             } = aggregates[pc];
 
+            const id = uuid.v4();
             const aggregateSchemaObj = {
+                pcname: pc,
+                id,
+                createDate,
                 statsSessionId,
                 dtlsErrors,
                 dtlsFailure,
@@ -191,11 +203,19 @@ class FirehoseConnector {
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);
 
             Object.keys(receiverTracks).forEach(rtrack => {
-                this._putTrackRecord(receiverTracks[rtrack], 'received', statsSessionId, isP2P);
+                this._putTrackRecord(receiverTracks[rtrack], { direction: 'received',
+                    statsSessionId,
+                    isP2P,
+                    pcId: id,
+                    createDate });
             });
 
             Object.keys(senderTracks).forEach(strack => {
-                this._putTrackRecord(senderTracks[strack], 'send', statsSessionId, isP2P);
+                this._putTrackRecord(senderTracks[strack], { direction: 'send',
+                    statsSessionId,
+                    isP2P,
+                    pcId: id,
+                    createDate });
             });
         });
     };
