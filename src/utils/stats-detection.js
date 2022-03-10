@@ -128,10 +128,11 @@ function isUsingRelayFirefox(statsEntry, report) {
 function isUsingRelayStandard(statsEntry, report) {
     if (report.type === 'transport' && report.selectedCandidatePairId) {
 
-        const remoteCandidateType
-            = statsEntry[statsEntry[report.selectedCandidatePairId].remoteCandidateId].candidateType;
-        const localCandidateType
-            = statsEntry[statsEntry[report.selectedCandidatePairId].remoteCandidateId].candidateType;
+        const selectedCandidatePair = statsEntry[report.selectedCandidatePairId];
+        const remoteCandidate = statsEntry[selectedCandidatePair?.remoteCandidateId];
+        const remoteCandidateType = remoteCandidate?.candidateType;
+        const localCandidate = statsEntry[selectedCandidatePair?.localCandidateId];
+        const localCandidateType = localCandidate?.candidateType;
 
         return localCandidateType === 'relay' || remoteCandidateType === 'relay';
     }

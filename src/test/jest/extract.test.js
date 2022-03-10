@@ -27,6 +27,14 @@ async function simulateConnection(dumpPath, resultPath, statsFormat) {
 
 describe('Feature extraction tests', () => {
 
+    test('Undefined ICE candidate from production', async () => {
+        await simulateConnection(
+            './src/test/dumps/050bf1c4-8d52-43dd-ba94-8b58089f0020',
+            './src/test/jest/results/050bf1c4-8d52-43dd-ba94-8b58089f0020-result.json',
+            StatsFormat.CHROME_STANDARD
+        );
+    });
+
     test.skip('SFU dump feature extraction', async () => {
         await simulateConnection(
             './src/test/jest/sfu',
