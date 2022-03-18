@@ -74,7 +74,7 @@ class WorkerPool extends EventEmitter {
 
         // Uncaught error thrown in the worker script, a exit event will follow so we just log the error.
         workerInstance.on('error', error => {
-            logger.error('[WorkerPool] %o; error %o: ', workerMeta, error);
+            logger.error('[WorkerPool] %j; error %o: ', workerMeta, error);
 
             // Check if there was an ongoing operation during the worker crash and notify the client.
             if (workerMeta.currentTaskMeta) {
@@ -84,7 +84,7 @@ class WorkerPool extends EventEmitter {
         });
 
         workerInstance.on('exit', exitCode => {
-            logger.info('[WorkerPool] Worker %o exited with code %d.', workerMeta, exitCode);
+            logger.info('[WorkerPool] Worker %j exited with code %d.', workerMeta, exitCode);
             workerMeta.status = WorkerStatus.STOPPED;
 
             // Remove current worker from pool as it's no longer usable.
@@ -108,7 +108,7 @@ class WorkerPool extends EventEmitter {
                 status: workerMeta.status };
         });
 
-        logger.info('[WorkerPool] Worker pool introspect: %o ', workerPoolInfo);
+        logger.info('[WorkerPool] Worker pool introspect: %j ', workerPoolInfo);
     }
 
     /**
@@ -116,7 +116,7 @@ class WorkerPool extends EventEmitter {
      * @param {*} worker
      */
     _removeWorkerFromPool(worker) {
-        logger.info('[WorkerPool] Removing worker from pool: %o', worker);
+        logger.info('[WorkerPool] Removing worker from pool: %j', worker);
         const workerIndex = this.workerPool.indexOf(worker);
 
         if (workerIndex > -1) {

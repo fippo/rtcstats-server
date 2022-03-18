@@ -83,6 +83,7 @@ class FeatureExtractor {
             dominantSpeaker: this._handleDominantSpeaker,
             facialExpression: this._handleFacialExpression,
             getstats: this._handleStatsRequest,
+            onconnectionstatechange: this._handleConnectionStateChange,
             other: this._handleOtherRequest,
             ondtlserror: this._handleDtlsError,
             ondtlsstatechange: this._handleDtlsStateChange,
@@ -111,13 +112,13 @@ class FeatureExtractor {
 
     _handleIdentity = dumpLineObj => {
         const [ , , identityEntry ] = dumpLineObj;
-        const { crossRegion,
+        const { deploymentInfo: { crossRegion,
             envType,
             environment,
             region,
             releaseNumber,
             shard,
-            userRegion } = identityEntry.deploymentInfo;
+            userRegion } = { } } = identityEntry;
 
         // We copy the individual properties instead of just the whole object to protect against
         // unexpected changes in the deploymentInfo format that the client is sending.
@@ -131,6 +132,15 @@ class FeatureExtractor {
             shard,
             userRegion
         };
+    };
+
+    /**
+     *
+     * @param {*} dumpLineObj
+     */
+    _handleConnectionStateChange = dumpLineObj => {
+
+        this.collector.processConnectionState(dumpLineObj);
     };
 
     _handleFacialExpression = (dumpLineObj, requestSize) => {
@@ -267,6 +277,15 @@ class FeatureExtractor {
 
     /**
      *
+     * @param {*} dumpLineObj
+     */
+    _handleGenericEntry(dumpLineObj) {
+        this._recordSessionDuration(dumpLineObj);
+        this.collector.processGenericEntry(dumpLineObj);
+    }
+
+    /**
+     *
      */
     extractDominantSpeakerFeatures = () => {
         const { speakerStats, currentDominantSpeaker, dominantSpeakerStartTimeStamp } = this.dominantSpeakerData;
@@ -293,10 +312,10 @@ class FeatureExtractor {
 
     /**
      *
-     * @param {*} requestType
-     * @param {*} timestamp
+     * @param {*} dumpLineObj
      */
-    _recordSessionDuration(requestType, timestamp) {
+    _recordSessionDuration(dumpLineObj) {
+        const [ requestType, , , timestamp ] = dumpLineObj;
 
         if (requestType !== 'connectionInfo' && requestType !== 'identity') {
             if (!this.conferenceStartTime && timestamp) {
@@ -327,9 +346,9 @@ class FeatureExtractor {
 
             assert(Array.isArray(dumpLineObj), 'Unexpected dump format');
 
-            const [ requestType, , , timestamp ] = dumpLineObj;
+            const [ requestType, , , ] = dumpLineObj;
 
-            this._recordSessionDuration(requestType, timestamp);
+            this._handleGenericEntry(dumpLineObj);
 
             if (this.extractFunctions[requestType]) {
                 this.extractFunctions[requestType](dumpLineObj, requestSize);

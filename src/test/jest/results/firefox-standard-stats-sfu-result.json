@@ -38,8 +38,8 @@
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
         "dumpFileSizeBytes": 352003,
-        "otherRequestBytes": 13422,
-        "otherRequestCount": 60,
+        "otherRequestBytes": 13180,
+        "otherRequestCount": 58,
         "sdpRequestBytes": 185530,
         "sdpRequestCount": 12,
         "sentimentRequestBytes": 0,
@@ -47,11 +47,14 @@
         "sessionDurationMs": 161480,
         "statsRequestBytes": 496382,
         "statsRequestCount": 79,
-        "totalProcessedBytes": 695334,
-        "totalProcessedCount": 151
+        "totalProcessedBytes": 695092,
+        "totalProcessedCount": 149
       },
       "aggregates": {
         "PC_0": {
+          "pcSessionDurationMs": 155540,
+          "iceFailed": false,
+          "iceReconnects": 0,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": false,

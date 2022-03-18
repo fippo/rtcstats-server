@@ -1,0 +1,388 @@
+[
+    {
+        "features": {
+            "aggregates": {
+                "PC_0": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "inboundVideoExperience": {
+                        "lowerBoundAggregates": {
+                            "meanFrameHeight": 690,
+                            "meanFramesPerSecond": 29.67
+                        },
+                        "upperBoundAggregates": {
+                            "meanFrameHeight": 690,
+                            "meanFramesPerSecond": 29.67
+                        }
+                    },
+                    "isP2P": true,
+                    "pcSessionDurationMs": 181770,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 57223,
+                        "totalPacketsSent": 65889,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {
+                            "2137521633": {
+                                "mediaType": "video",
+                                "packets": 48305,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "2889766682": {
+                                "mediaType": "audio",
+                                "packets": 8918,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            }
+                        },
+                        "senderTracks": {
+                            "1620858383": {
+                                "mediaType": "video",
+                                "packets": 48385,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "2889766682": {
+                                "mediaType": "audio",
+                                "packets": 8586,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "4064199265": {
+                                "mediaType": "audio",
+                                "packets": 8918,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            }
+                        }
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": false
+                },
+                "PC_1": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "isP2P": null,
+                    "pcSessionDurationMs": 0,
+                    "iceFailed": true,
+                    "iceReconnects": 0,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 0,
+                        "totalPacketsSent": 0,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {},
+                        "senderTracks": {}
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": null
+                },
+                "PC_2": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "isP2P": null,
+                    "pcSessionDurationMs": 0,
+                    "iceFailed": true,
+                    "iceReconnects": 0,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 0,
+                        "totalPacketsSent": 0,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {},
+                        "senderTracks": {}
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": null
+                },
+                "PC_3": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "inboundVideoExperience": {
+                        "lowerBoundAggregates": {
+                            "meanFrameHeight": 396,
+                            "meanFramesPerSecond": 29.4
+                        },
+                        "upperBoundAggregates": {
+                            "meanFrameHeight": 396,
+                            "meanFramesPerSecond": 29.7
+                        }
+                    },
+                    "isP2P": false,
+                    "pcSessionDurationMs": 323712,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 25703,
+                        "totalPacketsSent": 27560,
+                        "totalReceivedPacketsLost": 1,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {
+                            "1047537249": {
+                                "mediaType": "audio",
+                                "packets": 4812,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "213033406": {
+                                "mediaType": "video",
+                                "packets": 8888,
+                                "packetsLost": 1,
+                                "packetsLostPct": 0.01,
+                                "packetsLostVariance": 0.09876543209876543
+                            },
+                            "383827991": {
+                                "mediaType": "video",
+                                "packets": 7705,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "3890837313": {
+                                "mediaType": "audio",
+                                "packets": 4298,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            }
+                        },
+                        "senderTracks": {
+                            "1047537249": {
+                                "mediaType": "audio",
+                                "packets": 4783,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "1970267439": {
+                                "mediaType": "video",
+                                "packets": 1628,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "2178445542": {
+                                "mediaType": "audio",
+                                "packets": 5021,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "3711962879": {
+                                "mediaType": "video",
+                                "packets": 3046,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "3890837313": {
+                                "mediaType": "audio",
+                                "packets": 4254,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "439337024": {
+                                "mediaType": "video",
+                                "packets": 8828,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            }
+                        }
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0.19
+                    },
+                    "usesRelay": false
+                },
+                "PC_4": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "inboundVideoExperience": {
+                        "lowerBoundAggregates": {
+                            "meanFrameHeight": 585,
+                            "meanFramesPerSecond": 30
+                        },
+                        "upperBoundAggregates": {
+                            "meanFrameHeight": 585,
+                            "meanFramesPerSecond": 30
+                        }
+                    },
+                    "isP2P": true,
+                    "pcSessionDurationMs": 40658,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 10768,
+                        "totalPacketsSent": 12835,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {
+                            "1800846447": {
+                                "mediaType": "video",
+                                "packets": 8824,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "4223390196": {
+                                "mediaType": "audio",
+                                "packets": 1944,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            }
+                        },
+                        "senderTracks": {
+                            "2684505137": {
+                                "mediaType": "audio",
+                                "packets": 1944,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "4223390196": {
+                                "mediaType": "audio",
+                                "packets": 1802,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            },
+                            "75366989": {
+                                "mediaType": "video",
+                                "packets": 9089,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0
+                            }
+                        }
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": false
+                },
+                "PC_5": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "isP2P": null,
+                    "pcSessionDurationMs": 0,
+                    "iceFailed": true,
+                    "iceReconnects": 0,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 0,
+                        "totalPacketsSent": 0,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {},
+                        "senderTracks": {}
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": null
+                },
+                "PC_6": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "isP2P": null,
+                    "pcSessionDurationMs": 0,
+                    "iceFailed": true,
+                    "iceReconnects": 0,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 0,
+                        "totalPacketsSent": 0,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": {},
+                        "senderTracks": {}
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": null
+                }
+            },
+            "deploymentInfo": {
+                "crossRegion": 0,
+                "envType": "dev",
+                "environment": "alpha",
+                "region": "us-west-2",
+                "releaseNumber": "",
+                "shard": "all",
+                "userRegion": ""
+            },
+            "dominantSpeakerChanges": 0,
+            "metrics": {
+                "dsRequestBytes": 198,
+                "dsRequestCount": 1,
+                "dumpFileSizeBytes": 535931,
+                "otherRequestBytes": 74964,
+                "otherRequestCount": 432,
+                "sdpRequestBytes": 6660,
+                "sdpRequestCount": 70,
+                "sentimentRequestBytes": 0,
+                "sentimentRequestCount": 0,
+                "sessionDurationMs": 325201,
+                "statsRequestBytes": 977330,
+                "statsRequestCount": 129,
+                "totalProcessedBytes": 1059152,
+                "totalProcessedCount": 632
+            },
+            "sentiment": {
+                "angry": 0,
+                "disgusted": 0,
+                "fearful": 0,
+                "happy": 0,
+                "neutral": 0,
+                "sad": 0,
+                "surprised": 0
+            },
+            "speakerTime": 0
+        }
+    }
+]

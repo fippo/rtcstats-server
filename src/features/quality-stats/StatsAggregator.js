@@ -23,6 +23,21 @@ class StatsAggregator {
     }
 
     /**
+     * The duration for which the PeerConnection was active since ice connection was successful.
+     *
+     * @param {*} pcData
+     */
+    _calculateSessionDurationMs(pcData) {
+        const { startTime, endTime } = pcData;
+
+        if (startTime && endTime && (endTime > startTime)) {
+            return endTime - startTime;
+        }
+
+        return 0;
+    }
+
+    /**
      * Calculate the stats for a single track.
      *
      * @param {Array} packets - a list of numbers of received/send packets
@@ -220,6 +235,33 @@ class StatsAggregator {
     }
 
     /**
+     * If multiple ice 'connected' states were pressent that generaly means there were disconnects present as well.
+     *
+     * @param {*} pcData
+     */
+    _calculateReconnects(pcData) {
+        const { connectionStates = [] } = pcData;
+
+        const connectedStates = connectionStates.filter(connectionState => connectionState.state === 'connected');
+
+        // We substract one because the first 'connected' state is not a reconnect.
+        const reconnects = connectedStates.length > 0 ? connectedStates.length - 1 : 0;
+
+        return reconnects;
+    }
+
+    /**
+     * Check the connection timeline for 'failed' states.
+     *
+     * @param {*} pcData
+     */
+    _didIceConnectionFail(pcData) {
+        const { connectionStates = [] } = pcData;
+
+        return connectionStates.filter(connectionState => connectionState.state === 'failed').length > 0;
+    }
+
+    /**
      *
      * @param {*} extractedData - Data extracted by the QualityStatsCollector.
      */
@@ -228,22 +270,26 @@ class StatsAggregator {
 
         // Go through each peer connection and compute aggregates.
         Object.keys(extractedData).forEach(pc => {
-            resultMap[pc] = { isP2P: extractedData[pc].isP2P,
-                usesRelay: extractedData[pc].usesRelay,
-                dtlsErrors: extractedData[pc].dtlsErrors,
-                dtlsFailure: extractedData[pc].dtlsFailure };
+            const pcData = extractedData[pc];
 
-            const pcTrackStats = this._calculateTrackStats(extractedData[pc]);
-            const pcTrackResults = this._calculateTrackAggregates(extractedData[pc]);
-            const pcTransportResults = this._calculateTransportAggregates(extractedData[pc]);
+            resultMap[pc] = { isP2P: pcData.isP2P,
+                usesRelay: pcData.usesRelay,
+                dtlsErrors: pcData.dtlsErrors,
+                dtlsFailure: pcData.dtlsFailure };
+
+            const pcResults = resultMap[pc];
             const pcVideoExperienceResults
-                = this._calculateVideoExperienceAggregates(extractedData[pc].inboundVideoExperiences);
+                = this._calculateVideoExperienceAggregates(pcData.inboundVideoExperiences);
 
-            resultMap[pc].tracks = pcTrackStats;
-            resultMap[pc].trackAggregates = pcTrackResults;
-            resultMap[pc].transportAggregates = pcTransportResults;
+            pcResults.tracks = this._calculateTrackStats(pcData);
+            pcResults.trackAggregates = this._calculateTrackAggregates(pcData);
+            pcResults.transportAggregates = this._calculateTransportAggregates(pcData);
+            pcResults.iceReconnects = this._calculateReconnects(pcData);
+            pcResults.pcSessionDurationMs = this._calculateSessionDurationMs(pcData);
+            pcResults.iceFailed = this._didIceConnectionFail(pcData);
+
             if (pcVideoExperienceResults) {
-                resultMap[pc].inboundVideoExperience = pcVideoExperienceResults;
+                pcResults.inboundVideoExperience = pcVideoExperienceResults;
             }
         });
 

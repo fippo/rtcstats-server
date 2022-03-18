@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { StatsFormat } = require('../../utils/stats-detection');
-const { isObject } = require('../../utils/utils');
+const { isObject, isConnectionSuccessful } = require('../../utils/utils');
 
 const FirefoxStatsExtractor = require('./FirefoxStatsExtractor');
 const StandardStatsExtractor = require('./StandardStatsExtractor');
@@ -71,10 +71,14 @@ class QualityStatsCollector {
                 transport: {
                     rtts: []
                 },
+                connectionStates: [],
                 isP2P: null,
                 dtlsErrors: 0,
                 dtlsFailure: 0,
-                inboundVideoExperiences: []
+                usesRelay: null,
+                inboundVideoExperiences: [],
+                startTime: 0,
+                endTime: 0
             };
         }
 
@@ -203,6 +207,48 @@ class QualityStatsCollector {
                 videoExperience.lowerBound = inboundVideoSummary;
             }
         }
+    }
+
+    /**
+     * Handler used for all stat entries
+     *
+     * @param {*} dumpLineObj
+     */
+    processGenericEntry(dumpLineObj) {
+        const [ , pc, state, timestamp ] = dumpLineObj;
+
+        // Stat dumps contain entries without any PeerConnection associations, ignore them in order
+        // to avoid creation of "null" pc entries.
+        if (!pc) {
+            return;
+        }
+
+        const pcData = this._getPcData(pc);
+
+        // Make an educated guess about how long this peerconnection lasted.
+        // If startTime has a value that means that ice successfully connected prior to this point
+        if (pcData.startTime) {
+            pcData.endTime = timestamp;
+        }
+    }
+
+    /**
+     * Handle connection state entries, calculate the session time and creates a timeline
+     * of ice states throgout the connection's durration.
+     *
+     * @param {*} dumpLineObj
+     */
+    processConnectionState(dumpLineObj) {
+        const [ , pc, state, timestamp ] = dumpLineObj;
+
+        const pcData = this._getPcData(pc);
+
+        if (isConnectionSuccessful(state) && !pcData.startTime) {
+            pcData.startTime = timestamp;
+        }
+
+        pcData.connectionStates.push({ state,
+            timestamp });
     }
 
     /**

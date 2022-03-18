@@ -27,10 +27,26 @@ async function simulateConnection(dumpPath, resultPath, statsFormat) {
 
 describe('Feature extraction tests', () => {
 
+    test('Chrome PC reconnect', async () => {
+        await simulateConnection(
+            './src/test/dumps/chrome-standard-pc-reconnect',
+            './src/test/jest/results/chrome-standard-pc-reconnect.json',
+            StatsFormat.CHROME_STANDARD
+        );
+    });
+
+    test('Chrome PC failure', async () => {
+        await simulateConnection(
+            './src/test/dumps/chrome-standard-pc-failed',
+            './src/test/jest/results/chrome-standard-pc-failed.json',
+            StatsFormat.CHROME_STANDARD
+        );
+    });
+
     test('Undefined ICE candidate from production', async () => {
         await simulateConnection(
-            './src/test/dumps/050bf1c4-8d52-43dd-ba94-8b58089f0020',
-            './src/test/jest/results/050bf1c4-8d52-43dd-ba94-8b58089f0020-result.json',
+            './src/test/dumps/undefined-ice-candidate',
+            './src/test/jest/results/undefined-ice-candidate-result.json',
             StatsFormat.CHROME_STANDARD
         );
     });
@@ -39,7 +55,7 @@ describe('Feature extraction tests', () => {
         await simulateConnection(
             './src/test/jest/sfu',
             '',
-            StatsFormat.STANDARD
+            StatsFormat.CHROME_STANDARD
         );
     });
 
@@ -47,7 +63,7 @@ describe('Feature extraction tests', () => {
         await simulateConnection(
             './src/test/jest/sfu-p2p',
             '',
-            StatsFormat.STANDARD
+            StatsFormat.CHROME_STANDARD
         );
     });
 
@@ -96,6 +112,14 @@ describe('Feature extraction tests', () => {
             './src/test/dumps/safari-standard-stats',
             './src/test/jest/results/safari-standard-stats-result.json',
             StatsFormat.SAFARI
+        );
+    });
+
+    test('Chrome multiple peer-to-peer connections', async () => {
+        await simulateConnection(
+            './src/test/dumps/chrome-standard-multiple-p2p',
+            './src/test/jest/results/chrome-standard-multiple-p2p.json',
+            StatsFormat.CHROME_STANDARD
         );
     });
 });
