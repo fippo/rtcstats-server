@@ -34,6 +34,12 @@
         "shard": "hcv-lonely-drno",
         "userRegion": ""
       },
+      "e2epings": {
+        "as458df9": {
+          "remoteRegion": "us-west-1",
+          "rtt": 223
+        }
+      },
       "metrics": {
         "statsRequestBytes": 69628,
         "statsRequestCount": 6,
@@ -48,7 +54,7 @@
         "sentimentRequestBytes": 0,
         "sentimentRequestCount": 0,
         "sessionDurationMs": 23040,
-        "dumpFileSizeBytes": 52000
+        "dumpFileSizeBytes": 52090
       },
       "aggregates": {
         "PC_0": {

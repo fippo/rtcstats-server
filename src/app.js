@@ -38,9 +38,10 @@ if (config.amplitude && config.amplitude.key) {
 
 let dataWarehouse;
 
-const { firehose: { meetingStatsStream, pcStatsStream, trackStatsStream, region: firehoseAwsRegion } } = config;
+const { firehose: { meetingStatsStream, pcStatsStream, trackStatsStream, e2ePingStream,
+    region: firehoseAwsRegion } } = config;
 
-if (meetingStatsStream && pcStatsStream && trackStatsStream && firehoseAwsRegion) {
+if (meetingStatsStream && pcStatsStream && trackStatsStream && e2ePingStream && firehoseAwsRegion) {
 
     const appEnv = config.server?.appEnvironment;
 

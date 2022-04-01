@@ -33,6 +33,7 @@ firehose:
     meetingStatsStream:
     pcStatsStream:
     trackStatsStream:
+    e2ePingStream:
 
 gcp:
     bucket:

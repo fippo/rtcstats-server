@@ -81,6 +81,7 @@ class FeatureExtractor {
             create: this._handleCreate,
             createAnswerOnSuccess: this._handleSDPRequest,
             dominantSpeaker: this._handleDominantSpeaker,
+            e2eRtt: this._handleE2eRtt,
             facialExpression: this._handleFacialExpression,
             getstats: this._handleStatsRequest,
             onconnectionstatechange: this._handleConnectionStateChange,
@@ -233,6 +234,21 @@ class FeatureExtractor {
         const [ , pc, state ] = dumpLineObj;
 
         this.collector.processDtlsStateEntry(pc, state);
+    };
+
+    _handleE2eRtt = dumpLineObj => {
+        const [ , , line ] = dumpLineObj;
+
+        const { remoteEndpointId, rtt, remoteRegion } = line;
+
+        if (!('e2epings' in this.features)) {
+            this.features.e2epings = {};
+        }
+
+        this.features.e2epings[remoteEndpointId] = {
+            remoteRegion,
+            rtt
+        };
     };
 
     /**

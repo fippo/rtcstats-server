@@ -15,11 +15,12 @@ class FirehoseConnector {
      *
      * @param {*} param0
      */
-    constructor({ region, meetingStatsStream, pcStatsStream, trackStatsStream, appEnv }) {
+    constructor({ region, meetingStatsStream, pcStatsStream, trackStatsStream, e2ePingStream, appEnv }) {
         this._awsRegion = region;
         this._meetingStatsStream = meetingStatsStream;
         this._pcStatsStream = pcStatsStream;
         this._trackStatsStream = trackStatsStream;
+        this._e2ePingStream = e2ePingStream;
         this._appEnv = appEnv;
     }
 
@@ -106,6 +107,7 @@ class FirehoseConnector {
                 shard,
                 userRegion
             },
+            e2epings = {},
             metrics: { sessionDurationMs: sessionDuration },
             dominantSpeakerChanges,
             speakerTime,
@@ -151,6 +153,22 @@ class FirehoseConnector {
         };
 
         this._putRecord(schemaObj, this._meetingStatsStream);
+
+        Object.keys(e2epings).forEach(remoteEndpointId => {
+            const {
+                remoteRegion,
+                rtt
+            } = e2epings[remoteEndpointId];
+
+            const pingSchemaObj = {
+                statsSessionId,
+                remoteEndpointId,
+                remoteRegion,
+                rtt
+            };
+
+            this._putRecord(pingSchemaObj, this._e2ePingStream);
+        });
 
         Object.keys(aggregates).forEach(pc => {
             const {
