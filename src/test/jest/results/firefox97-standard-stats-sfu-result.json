@@ -74,35 +74,40 @@
                 "packets": 3366,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "2555995057"
               },
               "275935317": {
                 "mediaType": "video",
                 "packets": 4294906587,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "275935317"
               },
               "3145113315": {
                 "mediaType": "video",
                 "packets": 11779,
                 "packetsLost": 28,
                 "packetsLostPct": 0.24,
-                "packetsLostVariance": 8.888888888888891
+                "packetsLostVariance": 8.888888888888891,
+                "ssrc": "3145113315"
               },
               "420677523": {
                 "mediaType": "video",
                 "packets": 12076,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "420677523"
               },
               "676202912": {
                 "mediaType": "video",
                 "packets": 2089,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "676202912"
               }
             },
             "senderTracks": {
@@ -111,21 +116,24 @@
                 "packets": 0,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "275935317"
               },
               "420677523": {
                 "mediaType": "video",
                 "packets": 0,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "420677523"
               },
               "676202912": {
                 "mediaType": "video",
                 "packets": 0,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "676202912"
               }
             }
           },

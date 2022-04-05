@@ -74,42 +74,48 @@
                 "packets": 4473,
                 "packetsLost": 2,
                 "packetsLostPct": 0.04,
-                "packetsLostVariance": 0.12109375
+                "packetsLostVariance": 0.12109375,
+                "ssrc": "1030784244"
               },
               "1661050740": {
                 "mediaType": "audio",
                 "packets": 3253,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "1661050740"
               },
               "1845975655": {
                 "mediaType": "video",
                 "packets": 4385,
                 "packetsLost": 5,
                 "packetsLostPct": 0.11,
-                "packetsLostVariance": 0.1943359375
+                "packetsLostVariance": 0.1943359375,
+                "ssrc": "1845975655"
               },
               "3489317734": {
                 "mediaType": "audio",
                 "packets": 3252,
                 "packetsLost": 2,
                 "packetsLostPct": 0.06,
-                "packetsLostVariance": 0.12109375
+                "packetsLostVariance": 0.12109375,
+                "ssrc": "3489317734"
               },
               "428706097": {
                 "mediaType": "video",
                 "packets": 1898,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "428706097"
               },
               "757648711": {
                 "mediaType": "audio",
                 "packets": 2234,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "757648711"
               }
             },
             "senderTracks": {
@@ -118,14 +124,16 @@
                 "packets": 2026,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "1950053863"
               },
               "3525379525": {
                 "mediaType": "audio",
                 "packets": 3254,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
-                "packetsLostVariance": 0
+                "packetsLostVariance": 0,
+                "ssrc": "3525379525"
               }
             }
           },

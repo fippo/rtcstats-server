@@ -34,14 +34,16 @@
                                 "packets": 1276,
                                 "packetsLost": 1,
                                 "packetsLostPct": 0.08,
-                                "packetsLostVariance": 0
+                                "packetsLostVariance": 0,
+                                "ssrc": "1744315986"
                             },
                             "69911005": {
                                 "mediaType": "video",
                                 "packets": 1277,
                                 "packetsLost": 1,
                                 "packetsLostPct": 0.08,
-                                "packetsLostVariance": 0
+                                "packetsLostVariance": 0,
+                                "ssrc": "69911005"
                             }
                         },
                         "senderTracks": {
@@ -50,7 +52,8 @@
                                 "packets": 935,
                                 "packetsLost": 0,
                                 "packetsLostPct": 0,
-                                "packetsLostVariance": 0
+                                "packetsLostVariance": 0,
+                                "ssrc": "935896327"
                             }
                         }
                     },

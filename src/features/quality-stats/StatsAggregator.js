@@ -45,9 +45,10 @@ class StatsAggregator {
      * @param {String} mediaType - indicated if the track was audio or video
      * @return {Object}
      */
-    _calculateSingleTrackStats(packets, packetsLost, mediaType) {
+    _calculateSingleTrackStats(packets, packetsLost, mediaType, ssrc) {
         const stats = {
             mediaType,
+            ssrc,
             packets: 0,
             packetsLost: 0,
             packetsLostPct: 0,
@@ -96,12 +97,12 @@ class StatsAggregator {
 
             if (packetsSentLost.length && packetsSent.length) {
                 senderTracks[trackSsrc] = this._calculateSingleTrackStats(packetsSent,
-                    packetsSentLost, mediaType);
+                    packetsSentLost, mediaType, trackSsrc);
             }
 
             if (packetsReceivedLost.length && packetsReceived.length) {
                 receiverTracks[trackSsrc] = this._calculateSingleTrackStats(packetsReceived,
-                    packetsReceivedLost, mediaType);
+                    packetsReceivedLost, mediaType, trackSsrc);
             }
         });
 
