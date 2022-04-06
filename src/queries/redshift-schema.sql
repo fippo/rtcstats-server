@@ -79,3 +79,16 @@ CREATE TABLE IF NOT EXISTS rtcstats_track_metrics (
     PRIMARY KEY(id),
     FOREIGN KEY (pcId) REFERENCES rtcstats_pc_metrics(id)
 )
+
+/**
+ * Initial schema for redshift rtcstats_e2e_ping table
+ */
+CREATE TABLE IF NOT EXISTS rtcstats_e2e_ping (
+    id VARCHAR(128) NOT NULL,
+    statssessionid VARCHAR ( 256 ),
+    remoteEndpointId VARCHAR ( 256 ),
+    remoteRegion VARCHAR ( 256 ),
+    rtt REAL,
+    PRIMARY KEY(id),
+    FOREIGN KEY (statssessionid) REFERENCES rtcstats(statssessionid)
+)

@@ -163,6 +163,7 @@ class FirehoseConnector {
             } = e2epings[remoteEndpointId];
 
             const pingSchemaObj = {
+                id: uuid.v4(),
                 statsSessionId,
                 remoteEndpointId,
                 remoteRegion,
