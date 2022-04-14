@@ -14,8 +14,8 @@
       "statsFormat": "chrome_standard"
     },
     "features": {
-      "dominantSpeakerChanges": 0,
-      "speakerTime": 0,
+      "dominantSpeakerChanges": 1,
+      "speakerTime": 3017,
       "sentiment": {
         "angry": 0,
         "disgusted": 0,
@@ -43,14 +43,14 @@
       "metrics": {
         "statsRequestBytes": 69628,
         "statsRequestCount": 6,
-        "otherRequestBytes": 21094,
-        "otherRequestCount": 111,
+        "otherRequestBytes": 20366,
+        "otherRequestCount": 110,
         "sdpRequestBytes": 2104,
         "sdpRequestCount": 22,
         "dsRequestBytes": 506,
         "dsRequestCount": 3,
-        "totalProcessedBytes": 93332,
-        "totalProcessedCount": 142,
+        "totalProcessedBytes": 92604,
+        "totalProcessedCount": 141,
         "sentimentRequestBytes": 0,
         "sentimentRequestCount": 0,
         "sessionDurationMs": 23040,

@@ -7,6 +7,7 @@ const readline = require('readline');
 
 const logger = require('../logging');
 const statsDecompressor = require('../utils//getstats-deltacompression').decompress;
+const { getStatsFormat } = require('../utils/stats-detection');
 
 const QualityStatsCollector = require('./quality-stats/QualityStatsCollector');
 const StatsAggregator = require('./quality-stats/StatsAggregator');
@@ -31,11 +32,13 @@ class FeatureExtractor {
 
         this.dumpPath = dumpPath;
         this.endpointId = endpointId;
-        this.statsFormat = statsFormat;
+        if (statsFormat) {
+            this.statsFormat = statsFormat;
+            this.collector = new QualityStatsCollector(statsFormat);
+        }
         this.conferenceStartTime = 0;
         this.conferenceEndTime = 0;
 
-        this.collector = new QualityStatsCollector(statsFormat);
         this.aggregator = new StatsAggregator();
 
 
@@ -77,6 +80,7 @@ class FeatureExtractor {
 
         this.extractFunctions = {
             identity: this._handleIdentity,
+            connectionInfo: this._handleConnectionInfo,
             constraints: this._handleConstraints,
             create: this._handleCreate,
             createAnswerOnSuccess: this._handleSDPRequest,
@@ -110,6 +114,14 @@ class FeatureExtractor {
         this.collector.processConstraintsEntry(pc, constraintsEntry);
     };
 
+    _handleConnectionInfo = dumpLineObj => {
+        const [ , , connectionInfo ] = dumpLineObj;
+
+        if (!this.statsFormat) {
+            this.statsFormat = getStatsFormat(JSON.parse(connectionInfo));
+            this.collector = new QualityStatsCollector(this.statsFormat);
+        }
+    };
 
     _handleIdentity = dumpLineObj => {
         const [ , , identityEntry ] = dumpLineObj;
@@ -120,6 +132,12 @@ class FeatureExtractor {
             releaseNumber,
             shard,
             userRegion } = { } } = identityEntry;
+
+        if (!this.endpointId) {
+            const { endpointId } = identityEntry;
+
+            this.endpointId = endpointId;
+        }
 
         // We copy the individual properties instead of just the whole object to protect against
         // unexpected changes in the deploymentInfo format that the client is sending.
@@ -364,13 +382,13 @@ class FeatureExtractor {
 
             const [ requestType, , , ] = dumpLineObj;
 
-            this._handleGenericEntry(dumpLineObj);
-
             if (this.extractFunctions[requestType]) {
                 this.extractFunctions[requestType](dumpLineObj, requestSize);
             } else {
                 this.extractFunctions.other(dumpLineObj, requestSize);
             }
+
+            this._handleGenericEntry(dumpLineObj);
         }
 
         this.extractDominantSpeakerFeatures();

@@ -145,7 +145,7 @@ if (config.get('server').jsonConsoleLog) {
     );
 }
 
-logger.info('Logger successfully initialized.');
+logger.debug('Logger successfully initialized.');
 
 
 module.exports = logger;
