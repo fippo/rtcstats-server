@@ -108,6 +108,12 @@ class FeatureExtractor {
     }
 
 
+    _handleCreate = dumpLineObj => {
+        const [ , pc, pcConstraints ] = dumpLineObj;
+
+        this.collector.processPcConstraintsEntry(pc, pcConstraints);
+    };
+
     _handleConstraints = dumpLineObj => {
         const [ , pc, constraintsEntry ] = dumpLineObj;
 

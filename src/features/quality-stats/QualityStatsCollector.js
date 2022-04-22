@@ -73,6 +73,7 @@ class QualityStatsCollector {
                 },
                 connectionStates: [],
                 isP2P: null,
+                isCallstats: false,
                 dtlsErrors: 0,
                 dtlsFailure: 0,
                 usesRelay: null,
@@ -249,6 +250,33 @@ class QualityStatsCollector {
 
         pcData.connectionStates.push({ state,
             timestamp });
+    }
+
+    /**
+     * Each PeerConnection at creation takes an optional constraints object, including the iceServers
+     * which we use to identify the PeerConnection created by CallStats to test the connection before
+     * a call.
+     *
+     * @param {string} pc - Associated PeerConnection.
+     * @param {*} constraintsEntry - The PeerConnection constraints object per W3C spec
+     */
+    processPcConstraintsEntry(pc, constraintsEntry) {
+        const pcData = this._getPcData(pc);
+
+        if (constraintsEntry.iceServers) {
+            constraintsEntry.iceServers.forEach(server => {
+                if (typeof server.urls === 'string'
+                    && server.urls.includes('callstats.io')) {
+                    pcData.isCallstats = true;
+                } else if (typeof server.urls === 'object') {
+                    server.urls.forEach(url => {
+                        if (url.includes('callstats.io')) {
+                            pcData.isCallstats = true;
+                        }
+                    });
+                }
+            });
+        }
     }
 
     /**

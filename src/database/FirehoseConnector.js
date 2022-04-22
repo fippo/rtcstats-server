@@ -179,6 +179,7 @@ class FirehoseConnector {
                 dtlsFailure,
                 isP2P,
                 usesRelay,
+                isCallstats,
                 iceReconnects,
                 pcSessionDurationMs,
                 iceFailed,
@@ -200,6 +201,11 @@ class FirehoseConnector {
                     lowerBoundAggregates = { }
                 } = { }
             } = aggregates[pc];
+
+            /* for now we don't care about recording stats for Callstats PeerConnections */
+            if (isCallstats) {
+                return;
+            }
 
             const id = uuid.v4();
             const aggregateSchemaObj = {

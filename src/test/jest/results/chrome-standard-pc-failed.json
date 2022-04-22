@@ -125,8 +125,8 @@
                 "dsRequestBytes": 198,
                 "dsRequestCount": 1,
                 "dumpFileSizeBytes": 101792,
-                "otherRequestBytes": 29384,
-                "otherRequestCount": 175,
+                "otherRequestBytes": 28056,
+                "otherRequestCount": 172,
                 "sdpRequestBytes": 1682,
                 "sdpRequestCount": 18,
                 "sentimentRequestBytes": 0,
@@ -134,8 +134,8 @@
                 "sessionDurationMs": 62840,
                 "statsRequestBytes": 160976,
                 "statsRequestCount": 19,
-                "totalProcessedBytes": 192240,
-                "totalProcessedCount": 213
+                "totalProcessedBytes": 190912,
+                "totalProcessedCount": 210
             },
             "sentiment": {
                 "angry": 0,
