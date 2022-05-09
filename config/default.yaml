@@ -34,6 +34,7 @@ firehose:
     pcStatsStream:
     trackStatsStream:
     e2ePingStream:
+    faceExpressionStream:
 
 gcp:
     bucket:

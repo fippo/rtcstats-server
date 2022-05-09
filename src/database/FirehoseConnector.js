@@ -15,12 +15,21 @@ class FirehoseConnector {
      *
      * @param {*} param0
      */
-    constructor({ region, meetingStatsStream, pcStatsStream, trackStatsStream, e2ePingStream, appEnv }) {
+    constructor({
+        region,
+        meetingStatsStream,
+        pcStatsStream,
+        trackStatsStream,
+        e2ePingStream,
+        faceExpressionStream,
+        appEnv
+    }) {
         this._awsRegion = region;
         this._meetingStatsStream = meetingStatsStream;
         this._pcStatsStream = pcStatsStream;
         this._trackStatsStream = trackStatsStream;
         this._e2ePingStream = e2ePingStream;
+        this._faceExpressionStream = faceExpressionStream;
         this._appEnv = appEnv;
     }
 
@@ -53,6 +62,40 @@ class FirehoseConnector {
                 logger.info('[Firehose] Sent data: %o', schemaObj);
             }
         );
+    };
+
+    _putRecordBatch = (schemaObjBatch, stream) => {
+        this._firehose.putRecordBatch(
+            {
+                DeliveryStreamName: stream /* required */,
+                Records: schemaObjBatch.map(obj => {
+                    return {
+                        Data: JSON.stringify(obj)
+                    };
+                })
+            },
+            err => {
+                if (err) {
+                    logger.error('[Firehose] Error sending data to firehose: %o', err);
+                    PromCollector.firehoseErrorCount.inc();
+
+                    return;
+                }
+                logger.info('[Firehose] Sent data: %o', schemaObjBatch);
+            }
+        );
+    };
+
+    _putRecords = (schemaObjs, stream) => {
+        let i = 0;
+        const batchSize = 500;
+
+        while (i < schemaObjs.length) {
+            const schemaObjBatch = schemaObjs.slice(i, i + batchSize);
+
+            this._putRecordBatch(schemaObjBatch, stream);
+            i += batchSize;
+        }
     };
 
     _putTrackRecord = (track, { direction, statsSessionId, isP2P, pcId, createDate }) => {
@@ -121,7 +164,8 @@ class FirehoseConnector {
                 neutral: sentimentNeutral,
                 sad: sentimentSad,
                 surprised: sentimentSurprised
-            }
+            },
+            faceExpressionTimestamps
         } = features;
 
         const createDate = getSQLTimestamp();
@@ -155,6 +199,17 @@ class FirehoseConnector {
         };
 
         this._putRecord(schemaObj, this._meetingStatsStream);
+
+        const faceExpressionSchemaObj = faceExpressionTimestamps.map(({ timestamp, faceExpression }) => {
+            return {
+                id: uuid.v4(),
+                statsSessionId,
+                timestamp,
+                faceExpression
+            };
+        });
+
+        this._putRecords(faceExpressionSchemaObj, this._faceExpressionStream);
 
         Object.keys(e2epings).forEach(remoteEndpointId => {
             const {

@@ -377,6 +377,7 @@
                 "userRegion": ""
             },
             "dominantSpeakerChanges": 1,
+            "faceExpressionTimestamps": [],
             "metrics": {
                 "dsRequestBytes": 198,
                 "dsRequestCount": 1,

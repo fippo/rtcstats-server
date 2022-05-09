@@ -15,6 +15,7 @@
     },
     "features": {
       "dominantSpeakerChanges": 1,
+      "faceExpressionTimestamps": [],
       "speakerTime": 3017,
       "sentiment": {
         "angry": 0,

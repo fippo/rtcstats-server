@@ -62,6 +62,7 @@ class FeatureExtractor {
                 sad: 0,
                 surprised: 0
             },
+            faceExpressionTimestamps: [],
             metrics: {
                 statsRequestBytes: 0,
                 statsRequestCount: 0,
@@ -86,7 +87,7 @@ class FeatureExtractor {
             createAnswerOnSuccess: this._handleSDPRequest,
             dominantSpeaker: this._handleDominantSpeaker,
             e2eRtt: this._handleE2eRtt,
-            facialExpression: this._handleFacialExpression,
+            faceExpression: this._handleFaceExpression,
             getstats: this._handleStatsRequest,
             onconnectionstatechange: this._handleConnectionStateChange,
             other: this._handleOtherRequest,
@@ -168,24 +169,29 @@ class FeatureExtractor {
         this.collector.processConnectionState(dumpLineObj);
     };
 
-    _handleFacialExpression = (dumpLineObj, requestSize) => {
+    _handleFaceExpression = (dumpLineObj, requestSize) => {
 
         const [ , , data ] = dumpLineObj;
 
-        const { sentiment, metrics } = this.features;
+        const { sentiment, metrics, faceExpressionTimestamps } = this.features;
 
         metrics.sentimentRequestBytes += requestSize;
         metrics.sentimentRequestCount++;
 
-        // {\"duration\":9,\"facialExpression\":\"neutral\"}
-        // Expected data format for facialExpression:
-        // {duration: <seconds>, facialExpression: <string>}
-        // duration is expressed in seconds and, facial expression can be one of:
+        // {\"duration\":9,\"faceExpression\":\"neutral\",\"timestamp\":12415652562}
+        // Expected data format for faceExpression:
+        // {duration: <seconds>, faceExpression: <string>, timestamp: <time>}
+        // duration is expressed in seconds and, face expression can be one of:
         // angry, disgusted, fearful, happy, neutral, sad, surprised
-        const { duration, facialExpression } = data;
+        const { duration, faceExpression, timestamp } = data;
 
-        if (facialExpression in sentiment) {
-            sentiment[facialExpression] += duration;
+        faceExpressionTimestamps.push({
+            timestamp,
+            faceExpression
+        });
+
+        if (faceExpression in sentiment) {
+            sentiment[faceExpression] += duration;
         }
     };
 
