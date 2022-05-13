@@ -5,6 +5,21 @@ const { isObject, isConnectionSuccessful } = require('../../utils/utils');
 const FirefoxStatsExtractor = require('./FirefoxStatsExtractor');
 const StandardStatsExtractor = require('./StandardStatsExtractor');
 
+/**
+ * Creates a new track data structure with the specified ssrc preset.
+ * 
+ * @param {string} ssrc - the ssrc of the new track data structure.
+ * @returns the newly created track data structure.
+ */
+function newTrack(ssrc) {
+    return {
+        ssrc,
+        packetsReceived: [],
+        packetsReceivedLost: [],
+        packetsSent: [],
+        packetsSentLost: [],
+    };
+}
 
 /**
  * Collects quality related data points from webrtc stats entries into a single object.
@@ -91,21 +106,13 @@ class QualityStatsCollector {
      * the initial object structure will be created.
      * @param {Object} pcData - Object containing PC collected data, including multiple ssrc data
      * @param {string} ssrc - ssrc of the track from which we want to obtain collected data
-     * @param {string} mediaType - media type of the track, we need this to initialize the object structure
-     * in case it doesn't exist yet.
      * @returns {Object}`- Track collected data.
      */
-    _getTrackData(pcData, ssrc, mediaType) {
+    _getTrackData(pcData, ssrc) {
         if (!pcData[ssrc]) {
             // At this point track data for a PC just contain packet information, additional data points will
             // be added.
-            pcData[ssrc] = {
-                packetsReceived: [],
-                packetsReceivedLost: [],
-                packetsSent: [],
-                packetsSentLost: [],
-                mediaType
-            };
+            pcData[ssrc] = newTrack(ssrc);
         }
 
         return pcData[ssrc];
@@ -125,8 +132,9 @@ class QualityStatsCollector {
         if (outboundPacketLossData) {
             const { ssrc, mediaType, packetsLost, packetsSent } = outboundPacketLossData;
 
-            const trackData = this._getTrackData(pcData, ssrc, mediaType);
+            const trackData = this._getTrackData(pcData, ssrc);
 
+            trackData.mediaType = mediaType;
             trackData.packetsSentLost.push(packetsLost);
             trackData.packetsSent.push(packetsSent);
         }
@@ -134,8 +142,9 @@ class QualityStatsCollector {
         if (inboundPacketLossData) {
             const { ssrc, mediaType, packetsLost, packetsReceived } = inboundPacketLossData;
 
-            const trackData = this._getTrackData(pcData, ssrc, mediaType);
+            const trackData = this._getTrackData(pcData, ssrc);
 
+            trackData.mediaType = mediaType;
             trackData.packetsReceivedLost.push(packetsLost);
             trackData.packetsReceived.push(packetsReceived);
         }
@@ -324,6 +333,78 @@ class QualityStatsCollector {
         if (state === 'failed') {
             pcData.dtlsFailure += 1;
         }
+    }
+
+    /**
+     * @returns {Array} - an array with all the peer connection ids that are seen so far.
+     */
+    getPeerConnectionKeys() {
+        return Object.keys(this.extractedData).filter(key => key.toString().startsWith("PC_"));
+    }
+
+    /**
+     * Handles the video type information signaled by the client.
+     * 
+     * @param {Object} videoTypeData - the video metadata.
+     */
+    processVideoTypeEntry(videoTypeData) {
+        const { ssrc, videoType } = videoTypeData;
+        // The `setVideoType` message does not carry the peer connection id, so we
+        // propagate the information to all the peer connections that we know about.
+        //
+        // NOTE that by doing this we are prone to ssrc conflicts, i.e. two peer
+        // connections (e.g. a p2p peer connection and a jvb peer connection) may
+        // have the same ssrcs but the risk of this happenning in should be small in
+        // practice.
+        this.getPeerConnectionKeys().forEach(pc => {
+            const pcData = this._getPcData(pc);
+
+            // Setting the video type properly is a bit tricky because ssrcs can be
+            // re-used depending on the following 3 different cases that need to be
+            // considered here:
+            // 
+            // 1. in Plan-b (obsolette) there would be change in the ssrc of the
+            // video track when the videoType changes.
+            // 
+            // 2. In Unified-plan, the existing ssrc is re-used when the videoType
+            // changes.
+            // 
+            // 3. In the new multi-stream mode, if there is a new videoType, its
+            // always a different track, i.e., there can be 2 tracks one as camera
+            // and the other as desktop and the source-name for each of these tracks
+            // is sent in presence along with videoType. 
+            // 
+            // Now, the client sends the videoType when a track is created or the
+            // videoType is updated. What we do here on the server side is, if a
+            // track with the specified ssrc does not exist, then we create a new
+            // track with the specified video type. If a track already exists with
+            // the specified ssrc *and* its video type is different from the one
+            // specified as an argument, the existing track will be "vacummed" and a
+            // new one will be created.
+            // 
+            // Vacuum here means that the track is removed from the pcData map and
+            // is put in an array (not a map, because there may be multiple tracks
+            // with the same ssrc) and so we also stop the stats accumulation. Any
+            // new stats that we find with the specified ssrc is collected against a
+            // new track with the new video type.
+
+            const currentTrackData = pcData[ssrc];
+            if (!currentTrackData || currentTrackData.videoType != videoType) {
+
+                if (currentTrackData) {
+                    // "Vacuum" the track for later processing.
+                    if (!pcData.vacuumedTracks) {
+                        pcData.vacuumedTracks = []
+                    }
+                    pcData.vacuumedTracks.push(currentTrackData);
+                    delete pcData[ssrc];
+                }
+
+                const newTrackData = newTrack(ssrc)
+                newTrackData.videoType = videoType
+                pcData[ssrc] = newTrackData
+            }
+        });
     }
 
     /**

@@ -45,7 +45,7 @@
         "sessionDurationMs": 32571,
         "dumpFileSizeBytes": 123929
       },
-      "deploymentInfo": {
+        "deploymentInfo": {
         "crossRegion": 0,
         "envType": "prod",
         "environment": "meet-jit-si",
@@ -64,8 +64,8 @@
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "tracks": {
-            "receiverTracks": {},
-            "senderTracks": {}
+            "receiverTracks": [],
+            "senderTracks": []
           },
           "trackAggregates": {
             "totalSentPacketsLost": 0,

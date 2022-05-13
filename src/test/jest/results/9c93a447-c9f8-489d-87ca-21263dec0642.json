@@ -1,0 +1,173 @@
+[
+    {
+        "features": {
+            "aggregates": {
+                "PC_0": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "inboundVideoExperience": {
+                        "lowerBoundAggregates": {
+                            "meanFrameHeight": 720,
+                            "meanFramesPerSecond": 30
+                        },
+                        "upperBoundAggregates": {
+                            "meanFrameHeight": 720,
+                            "meanFramesPerSecond": 30
+                        }
+                    },
+                    "isP2P": true,
+                    "pcSessionDurationMs": 11900,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 1478,
+                        "totalPacketsSent": 1100,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": [
+                            {
+                                "mediaType": "video/camera",
+                                "packets": 1478,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 446564881
+                            }
+                        ],
+                        "senderTracks": [
+                            {
+                                "mediaType": "video",
+                                "packets": 1100,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 845973563
+                            }
+                        ]
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": false
+                },
+                "PC_1": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "inboundVideoExperience": {
+                        "lowerBoundAggregates": {
+                            "meanFrameHeight": 270,
+                            "meanFramesPerSecond": 27
+                        },
+                        "upperBoundAggregates": {
+                            "meanFrameHeight": 705,
+                            "meanFramesPerSecond": 17.5
+                        }
+                    },
+                    "isP2P": false,
+                    "pcSessionDurationMs": 37316,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 1775,
+                        "totalPacketsSent": 1730,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": [
+                            {
+                                "mediaType": "video",
+                                "packets": 147,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 1636121229
+                            },
+                            {
+                                "mediaType": "video/camera",
+                                "packets": 810,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 2511181394
+                            },
+                            {
+                                "mediaType": "video/camera",
+                                "packets": 354,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 2683469917
+                            },
+                            {
+                                "mediaType": "video/desktop",
+                                "packets": 464,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 2683469917
+                            }
+                        ],
+                        "senderTracks": [
+                            {
+                                "mediaType": "video",
+                                "packets": 1730,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 1784258627
+                            }
+                        ]
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0.03
+                    },
+                    "usesRelay": false
+                }
+            },
+            "deploymentInfo": {
+                "crossRegion": 0,
+                "envType": "dev",
+                "environment": "lonely",
+                "region": "eu-west-1",
+                "releaseNumber": "",
+                "shard": "hcv-lonely-george",
+                "userRegion": ""
+            },
+            "dominantSpeakerChanges": 0,
+            "faceExpressionTimestamps": [],
+            "metrics": {
+                "dsRequestBytes": 0,
+                "dsRequestCount": 0,
+                "dumpFileSizeBytes": 85270,
+                "otherRequestBytes": 21194,
+                "otherRequestCount": 124,
+                "sdpRequestBytes": 3450,
+                "sdpRequestCount": 36,
+                "sentimentRequestBytes": 0,
+                "sentimentRequestCount": 0,
+                "sessionDurationMs": 39488,
+                "statsRequestBytes": 131644,
+                "statsRequestCount": 6,
+                "totalProcessedBytes": 156288,
+                "totalProcessedCount": 166
+            },
+            "sentiment": {
+                "angry": 0,
+                "disgusted": 0,
+                "fearful": 0,
+                "happy": 0,
+                "neutral": 0,
+                "sad": 0,
+                "surprised": 0
+            },
+            "speakerTime": 0
+        }
+    }
+]

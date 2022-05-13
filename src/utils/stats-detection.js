@@ -9,6 +9,10 @@ const StatsFormat = Object.freeze({
     UNSUPPORTED: 'unsupported'
 });
 
+function getMediaType(report) {
+    return report.mediaType || report.kind
+}
+
 
 /**
  *
@@ -44,7 +48,7 @@ function isLegacySsrcReport(report) {
  * @param {*} report
  */
 function isLegacyVideoSsrcReport(report) {
-    return isLegacySsrcReport(report) && report.mediaType === 'video';
+    return isLegacySsrcReport(report) && getMediaType(report) === 'video';
 }
 
 /**
@@ -235,7 +239,7 @@ function getTotalSentPacketsLegacy(report) {
             packetsLost: report.packetsLost,
             packetsSent: report.packetsSent,
             ssrc: report.ssrc,
-            mediaType: report.mediaType
+            mediaType: getMediaType(report)
         };
     }
 }
@@ -252,7 +256,7 @@ function getTotalSentPacketsFirefox(report) {
             packetsLost: report.packetsLost,
             packetsSent: report.packetsSent || 0,
             ssrc: report.ssrc,
-            mediaType: report.mediaType
+            mediaType: getMediaType(report)
         };
     }
 }
@@ -272,7 +276,7 @@ function getTotalSentPacketsStandard(statsEntry, report) {
             packetsLost: statsEntry[report.remoteId].packetsLost || 0,
             packetsSent: report.packetsSent || 0,
             ssrc: report.ssrc,
-            mediaType: report.mediaType
+            mediaType: getMediaType(report)
         };
     }
 
@@ -281,7 +285,7 @@ function getTotalSentPacketsStandard(statsEntry, report) {
             packetsLost: Number(report.packetsLost) || 0,
             packetsSent: Number(report.packetsSent) || 0,
             ssrc: report.ssrc,
-            mediaType: report.mediaType
+            mediaType: getMediaType(report)
         };
     }
 }
@@ -299,7 +303,7 @@ function getTotalReceivedPacketsStandard(statsEntry, report) {
             packetsLost: Number(report.packetsLost) || 0,
             packetsReceived: Number(report.packetsReceived) || 0,
             ssrc: report.ssrc,
-            mediaType: report.mediaType
+            mediaType: getMediaType(report)
         };
     }
 }
@@ -319,7 +323,7 @@ function getInboundVideoSummaryStandard(statsEntry, report) {
         return;
     }
 
-    if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+    if (report.type === 'inbound-rtp' && getMediaType(report) === 'video') {
         // Handles google-standard-stats-*
         return {
             frameHeight: report.frameHeight,
@@ -360,7 +364,7 @@ function getInboundVideoSummaryFirefox(statsEntry, report) {
         return;
     }
 
-    if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+    if (report.type === 'inbound-rtp' && getMediaType(report) === 'video') {
         // Handles firefox-standard-stats-sfu. Unfortunately, Firefox does not report video resolution currently,
         // so having the frame rate is of little use to us.
         return {
@@ -420,7 +424,7 @@ function getUsedResolutionStandard(report, statsEntry) {
     // extract the used resolution.
     // In case of simulcast the 'track' report will show the highest sent resolution
     if (report.type === 'outbound-rtp'
-        && report.mediaType === 'video'
+        && getMediaType(report) === 'video'
         && report.contentType !== 'screenshare'
         && statsEntry[report.trackId]) {
 

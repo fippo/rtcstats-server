@@ -26,6 +26,20 @@ async function simulateConnection(dumpPath, resultPath, statsFormat) {
 
 describe('Feature extraction tests', () => {
 
+    test('jvb call with camera/desktop video type successions', async () => {
+        await simulateConnection(
+            './src/test/dumps/9c93a447-c9f8-489d-87ca-21263dec0642',
+            './src/test/jest/results/9c93a447-c9f8-489d-87ca-21263dec0642.json'
+        );
+    });
+
+    test('p2p call with video type set', async () => {
+        await simulateConnection(
+            './src/test/dumps/59c86272-03ea-42e9-a62d-1c8a272e8ab0',
+            './src/test/jest/results/59c86272-03ea-42e9-a62d-1c8a272e8ab0.json'
+        );
+    });
+
     test('Chrome PC reconnect', async () => {
         await simulateConnection(
             './src/test/dumps/chrome-standard-pc-reconnect',

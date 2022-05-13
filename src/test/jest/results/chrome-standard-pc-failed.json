@@ -28,34 +28,34 @@
                         "totalSentPacketsLost": 0
                     },
                     "tracks": {
-                        "receiverTracks": {
-                            "1744315986": {
-                                "mediaType": "video",
-                                "packets": 3985,
-                                "packetsLost": 1,
-                                "packetsLostPct": 0.03,
-                                "packetsLostVariance": 0,
-                                "ssrc": "1744315986"
-                            },
-                            "69911005": {
+                        "receiverTracks": [
+                            {
                                 "mediaType": "video",
                                 "packets": 3976,
                                 "packetsLost": 1,
                                 "packetsLostPct": 0.03,
                                 "packetsLostVariance": 0,
-                                "ssrc": "69911005"
+                                "ssrc": 69911005
+                            },
+                            {
+                                "mediaType": "video",
+                                "packets": 3985,
+                                "packetsLost": 1,
+                                "packetsLostPct": 0.03,
+                                "packetsLostVariance": 0,
+                                "ssrc": 1744315986
                             }
-                        },
-                        "senderTracks": {
-                            "2541556871": {
+                        ],
+                        "senderTracks": [
+                            {
                                 "mediaType": "audio",
                                 "packets": 3013,
                                 "packetsLost": 0,
                                 "packetsLostPct": 0,
                                 "packetsLostVariance": 0,
-                                "ssrc": "2541556871"
+                                "ssrc": 2541556871
                             }
-                        }
+                        ]
                     },
                     "transportAggregates": {
                         "meanRtt": 0.19
@@ -78,8 +78,8 @@
                         "totalSentPacketsLost": 0
                     },
                     "tracks": {
-                        "receiverTracks": {},
-                        "senderTracks": {}
+                        "receiverTracks": [],
+                        "senderTracks": []
                     },
                     "transportAggregates": {
                         "meanRtt": 0
@@ -102,8 +102,8 @@
                         "totalSentPacketsLost": 0
                     },
                     "tracks": {
-                        "receiverTracks": {},
-                        "senderTracks": {}
+                        "receiverTracks": [],
+                        "senderTracks": []
                     },
                     "transportAggregates": {
                         "meanRtt": 0

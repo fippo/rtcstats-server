@@ -291,7 +291,7 @@ class FirehoseConnector {
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);
 
             Object.keys(receiverTracks).forEach(rtrack => {
-                this._putTrackRecord(receiverTracks[rtrack], { direction: 'received',
+                this._putTrackRecord(rtrack, { direction: 'received',
                     statsSessionId,
                     isP2P,
                     pcId: id,
@@ -299,7 +299,7 @@ class FirehoseConnector {
             });
 
             Object.keys(senderTracks).forEach(strack => {
-                this._putTrackRecord(senderTracks[strack], { direction: 'send',
+                this._putTrackRecord(strack, { direction: 'send',
                     statsSessionId,
                     isP2P,
                     pcId: id,

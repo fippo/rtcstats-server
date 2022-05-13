@@ -69,106 +69,106 @@
             "totalSentPacketsLost": 0
           },
           "tracks": {
-            "receiverTracks": {
-              "1169210963": {
-                "mediaType": "audio",
-                "packets": 874,
-                "packetsLost": 0,
-                "packetsLostPct": 0,
-                "packetsLostVariance": 0,
-                "ssrc": "1169210963"
-              },
-              "1291750480": {
-                "mediaType": "audio",
-                "packets": 8360,
-                "packetsLost": 1,
-                "packetsLostPct": 0.01,
-                "packetsLostVariance": 0.015147928994082837,
-                "ssrc": "1291750480"
-              },
-              "1426121629": {
-                "mediaType": "audio",
-                "packets": 6713,
-                "packetsLost": 0,
-                "packetsLostPct": 0,
-                "packetsLostVariance": 0,
-                "ssrc": "1426121629"
-              },
-              "2403718901": {
-                "mediaType": "video",
-                "packets": 6922,
-                "packetsLost": 0,
-                "packetsLostPct": 0,
-                "packetsLostVariance": 0,
-                "ssrc": "2403718901"
-              },
-              "271883463": {
+            "receiverTracks": [
+              {
                 "mediaType": "video",
                 "packets": 4005,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": "271883463"
+                "ssrc": 271883463
               },
-              "3996408746": {
-                "mediaType": "audio",
-                "packets": 1060,
-                "packetsLost": 0,
-                "packetsLostPct": 0,
-                "packetsLostVariance": 0,
-                "ssrc": "3996408746"
-              },
-              "4051566705": {
-                "mediaType": "audio",
-                "packets": 10741,
-                "packetsLost": 1,
-                "packetsLostPct": 0.01,
-                "packetsLostVariance": 0.012193263222069844,
-                "ssrc": "4051566705"
-              },
-              "876450406": {
+              {
                 "mediaType": "audio",
                 "packets": 2013,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": "876450406"
+                "ssrc": 876450406
               },
-              "891790093": {
+              {
                 "mediaType": "video",
                 "packets": 5858,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": "891790093"
+                "ssrc": 891790093
               },
-              "972539169": {
+              {
                 "mediaType": "video",
                 "packets": 802,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": "972539169"
+                "ssrc": 972539169
+              },
+              {
+                "mediaType": "audio",
+                "packets": 874,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0,
+                "ssrc": 1169210963
+              },
+              {
+                "mediaType": "audio",
+                "packets": 8360,
+                "packetsLost": 1,
+                "packetsLostPct": 0.01,
+                "packetsLostVariance": 0.015147928994082837,
+                "ssrc": 1291750480
+              },
+              {
+                "mediaType": "audio",
+                "packets": 6713,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0,
+                "ssrc": 1426121629
+              },
+              {
+                "mediaType": "video",
+                "packets": 6922,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0,
+                "ssrc": 2403718901
+              },
+              {
+                "mediaType": "audio",
+                "packets": 1060,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0,
+                "ssrc": 3996408746
+              },
+              {
+                "mediaType": "audio",
+                "packets": 10741,
+                "packetsLost": 1,
+                "packetsLostPct": 0.01,
+                "packetsLostVariance": 0.012193263222069844,
+                "ssrc": 4051566705
               }
-            },
-            "senderTracks": {
-              "1449778799": {
+            ],
+            "senderTracks": [
+              {
                 "mediaType": "audio",
                 "packets": 9452,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": "1449778799"
+                "ssrc": 1449778799
               },
-              "2047229442": {
+              {
                 "mediaType": "video",
                 "packets": 17080,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": "2047229442"
+                "ssrc": 2047229442
               }
-            }
+            ]
           },
           "transportAggregates": {
             "meanRtt": 0.05
@@ -182,7 +182,7 @@
             }
           }
         }
-      }
+      }   
     }
   }
 ]

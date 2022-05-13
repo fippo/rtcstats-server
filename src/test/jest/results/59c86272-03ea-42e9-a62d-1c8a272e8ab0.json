@@ -1,0 +1,112 @@
+[
+    {
+        "features": {
+            "aggregates": {
+                "PC_0": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "inboundVideoExperience": {
+                        "lowerBoundAggregates": {
+                            "meanFrameHeight": 630,
+                            "meanFramesPerSecond": 29.75
+                        },
+                        "upperBoundAggregates": {
+                            "meanFrameHeight": 630,
+                            "meanFramesPerSecond": 29.75
+                        }
+                    },
+                    "isP2P": true,
+                    "pcSessionDurationMs": 41170,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 4551,
+                        "totalPacketsSent": 0,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": [
+                            {
+                                "mediaType": "video/camera",
+                                "packets": 4551,
+                                "packetsLost": 0,
+                                "packetsLostPct": 0,
+                                "packetsLostVariance": 0,
+                                "ssrc": 3155040392
+                            }
+                        ],
+                        "senderTracks": []
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0
+                    },
+                    "usesRelay": false
+                },
+                "PC_1": {
+                    "dtlsErrors": 0,
+                    "dtlsFailure": 0,
+                    "iceFailed": false,
+                    "iceReconnects": 0,
+                    "isP2P": false,
+                    "pcSessionDurationMs": 41492,
+                    "trackAggregates": {
+                        "receivedPacketsLostPct": 0,
+                        "sentPacketsLostPct": 0,
+                        "totalPacketsReceived": 0,
+                        "totalPacketsSent": 0,
+                        "totalReceivedPacketsLost": 0,
+                        "totalSentPacketsLost": 0
+                    },
+                    "tracks": {
+                        "receiverTracks": [],
+                        "senderTracks": []
+                    },
+                    "transportAggregates": {
+                        "meanRtt": 0.04
+                    },
+                    "usesRelay": false
+                }
+            },
+            "deploymentInfo": {
+                "crossRegion": 0,
+                "envType": "dev",
+                "environment": "lonely",
+                "region": "eu-west-1",
+                "releaseNumber": "",
+                "shard": "hcv-lonely-george",
+                "userRegion": ""
+            },
+            "dominantSpeakerChanges": 0,
+            "faceExpressionTimestamps": [],
+            "metrics": {
+                "dsRequestBytes": 0,
+                "dsRequestCount": 0,
+                "dumpFileSizeBytes": 68782,
+                "otherRequestBytes": 16384,
+                "otherRequestCount": 86,
+                "sdpRequestBytes": 2202,
+                "sdpRequestCount": 23,
+                "sentimentRequestBytes": 0,
+                "sentimentRequestCount": 0,
+                "sessionDurationMs": 72071,
+                "statsRequestBytes": 105808,
+                "statsRequestCount": 10,
+                "totalProcessedBytes": 124394,
+                "totalProcessedCount": 119
+            },
+            "sentiment": {
+                "angry": 0,
+                "disgusted": 0,
+                "fearful": 0,
+                "happy": 0,
+                "neutral": 0,
+                "sad": 0,
+                "surprised": 0
+            },
+            "speakerTime": 0
+        }
+    }
+]
