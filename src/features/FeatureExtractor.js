@@ -62,7 +62,7 @@ class FeatureExtractor {
                 sad: 0,
                 surprised: 0
             },
-            faceExpressionTimestamps: [],
+            faceLandmarksTimestamps: [],
             metrics: {
                 statsRequestBytes: 0,
                 statsRequestCount: 0,
@@ -87,7 +87,7 @@ class FeatureExtractor {
             createAnswerOnSuccess: this._handleSDPRequest,
             dominantSpeaker: this._handleDominantSpeaker,
             e2eRtt: this._handleE2eRtt,
-            faceExpression: this._handleFaceExpression,
+            faceLandmarks: this._handleFaceLandmarks,
             getstats: this._handleStatsRequest,
             onconnectionstatechange: this._handleConnectionStateChange,
             other: this._handleOtherRequest,
@@ -175,29 +175,29 @@ class FeatureExtractor {
         this.collector.processConnectionState(dumpLineObj);
     };
 
-    _handleFaceExpression = (dumpLineObj, requestSize) => {
+    _handleFaceLandmarks = (dumpLineObj, requestSize) => {
 
         const [ , , data ] = dumpLineObj;
 
-        const { sentiment, metrics, faceExpressionTimestamps } = this.features;
+        const { sentiment, metrics, faceLandmarksTimestamps } = this.features;
 
         metrics.sentimentRequestBytes += requestSize;
         metrics.sentimentRequestCount++;
 
-        // {\"duration\":9,\"faceExpression\":\"neutral\",\"timestamp\":12415652562}
-        // Expected data format for faceExpression:
-        // {duration: <seconds>, faceExpression: <string>, timestamp: <time>}
-        // duration is expressed in seconds and, face expression can be one of:
+        // {\"duration\":9,\"faceLandmarks\":\"neutral\",\"timestamp\":12415652562}
+        // Expected data format for faceLandmarks:
+        // {duration: <seconds>, faceLandmarks: <string>, timestamp: <time>}
+        // duration is expressed in seconds and, face landmarks can be one of:
         // angry, disgusted, fearful, happy, neutral, sad, surprised
-        const { duration, faceExpression, timestamp } = data;
+        const { duration, faceLandmarks, timestamp } = data;
 
-        faceExpressionTimestamps.push({
+        faceLandmarksTimestamps.push({
             timestamp,
-            faceExpression
+            faceLandmarks
         });
 
-        if (faceExpression in sentiment) {
-            sentiment[faceExpression] += duration;
+        if (faceLandmarks in sentiment) {
+            sentiment[faceLandmarks] += duration;
         }
     };
 

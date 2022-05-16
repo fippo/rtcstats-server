@@ -80,7 +80,7 @@
                 "userRegion": ""
             },
             "dominantSpeakerChanges": 0,
-            "faceExpressionTimestamps": [],
+            "faceLandmarksTimestamps": [],
             "metrics": {
                 "dsRequestBytes": 0,
                 "dsRequestCount": 0,
