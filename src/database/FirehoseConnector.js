@@ -247,8 +247,8 @@ class FirehoseConnector {
                     totalSentPacketsLost
                 },
                 tracks: {
-                    receiverTracks,
-                    senderTracks
+                    receiverTracks = [],
+                    senderTracks = []
                 },
                 transportAggregates: { meanRtt },
                 inboundVideoExperience: {
@@ -290,7 +290,7 @@ class FirehoseConnector {
 
             this._putRecord(aggregateSchemaObj, this._pcStatsStream);
 
-            Object.keys(receiverTracks).forEach(rtrack => {
+            receiverTracks.forEach(rtrack => {
                 this._putTrackRecord(rtrack, { direction: 'received',
                     statsSessionId,
                     isP2P,
@@ -298,7 +298,7 @@ class FirehoseConnector {
                     createDate });
             });
 
-            Object.keys(senderTracks).forEach(strack => {
+            senderTracks.forEach(strack => {
                 this._putTrackRecord(strack, { direction: 'send',
                     statsSessionId,
                     isP2P,
