@@ -39,8 +39,8 @@
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
         "dumpFileSizeBytes": 621030,
-        "otherRequestBytes": 49624,
-        "otherRequestCount": 115,
+        "otherRequestBytes": 48746,
+        "otherRequestCount": 108,
         "sdpRequestBytes": 209774,
         "sdpRequestCount": 24,
         "sentimentRequestBytes": 0,
@@ -48,17 +48,19 @@
         "sessionDurationMs": 137304,
         "statsRequestBytes": 971272,
         "statsRequestCount": 81,
-        "totalProcessedBytes": 1230670,
-        "totalProcessedCount": 220
+        "totalProcessedBytes": 1229792,
+        "totalProcessedCount": 213
       },
       "aggregates": {
         "PC_0": {
           "pcSessionDurationMs": 54513,
-          "iceFailed": false,
+          "connectionFailed": false,
           "iceReconnects": 0,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": true,
+          "lastIceDisconnect": 0,
+          "lastIceFailure": 0,
           "usesRelay": false,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
@@ -125,8 +127,10 @@
           "dtlsErrors": 0,
           "dtlsFailure": 0,
           "isP2P": false,
+          "lastIceDisconnect": 0,
+          "lastIceFailure": 0,
           "usesRelay": false,
-          "iceFailed": false,
+          "connectionFailed": false,
           "iceReconnects": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.72,

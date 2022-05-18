@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { StatsFormat } = require('../../utils/stats-detection');
-const { isObject, isConnectionSuccessful } = require('../../utils/utils');
+const { isObject, isConnectionSuccessful, isIceDisconnected, isIceFailed } = require('../../utils/utils');
 
 const FirefoxStatsExtractor = require('./FirefoxStatsExtractor');
 const StandardStatsExtractor = require('./StandardStatsExtractor');
@@ -87,6 +87,7 @@ class QualityStatsCollector {
                     rtts: []
                 },
                 connectionStates: [],
+                iceConnectionStates: [],
                 isP2P: null,
                 isCallstats: false,
                 dtlsErrors: 0,
@@ -94,7 +95,9 @@ class QualityStatsCollector {
                 usesRelay: null,
                 inboundVideoExperiences: [],
                 startTime: 0,
-                endTime: 0
+                endTime: 0,
+                lastIceDisconnect: 0,
+                lastIceFailure: 0
             };
         }
 
@@ -243,7 +246,7 @@ class QualityStatsCollector {
     }
 
     /**
-     * Handle connection state entries, calculate the session time and creates a timeline
+     * Handle PeerConnection state entries, calculate the session time and creates a timeline
      * of ice states throgout the connection's durration.
      *
      * @param {*} dumpLineObj
@@ -258,6 +261,28 @@ class QualityStatsCollector {
         }
 
         pcData.connectionStates.push({ state,
+            timestamp });
+    }
+
+    /**
+     * Handle ICE connection state entries, record last time it went to disconnected or failed.
+     *
+     * @param {*} dumpLineObj
+     */
+    processIceConnectionState(dumpLineObj) {
+        const [ , pc, state, timestamp ] = dumpLineObj;
+
+        const pcData = this._getPcData(pc);
+
+        if (isIceDisconnected(state)) {
+            pcData.lastIceDisconnect = timestamp;
+        }
+
+        if (isIceFailed(state)) {
+            pcData.lastIceFailure = timestamp;
+        }
+
+        pcData.iceConnectionStates.push({ state,
             timestamp });
     }
 

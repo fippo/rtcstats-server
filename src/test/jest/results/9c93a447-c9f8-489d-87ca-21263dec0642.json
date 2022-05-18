@@ -3,9 +3,9 @@
         "features": {
             "aggregates": {
                 "PC_0": {
+                    "connectionFailed": false,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": false,
                     "iceReconnects": 0,
                     "inboundVideoExperience": {
                         "lowerBoundAggregates": {
@@ -18,6 +18,8 @@
                         }
                     },
                     "isP2P": true,
+                    "lastIceDisconnect": 0,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 11900,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0,
@@ -55,9 +57,9 @@
                     "usesRelay": false
                 },
                 "PC_1": {
+                    "connectionFailed": false,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": false,
                     "iceReconnects": 0,
                     "inboundVideoExperience": {
                         "lowerBoundAggregates": {
@@ -70,6 +72,8 @@
                         }
                     },
                     "isP2P": false,
+                    "lastIceDisconnect": 0,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 37316,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0,
@@ -146,8 +150,8 @@
                 "dsRequestBytes": 0,
                 "dsRequestCount": 0,
                 "dumpFileSizeBytes": 85270,
-                "otherRequestBytes": 21194,
-                "otherRequestCount": 124,
+                "otherRequestBytes": 20694,
+                "otherRequestCount": 120,
                 "sdpRequestBytes": 3450,
                 "sdpRequestCount": 36,
                 "sentimentRequestBytes": 0,
@@ -155,8 +159,8 @@
                 "sessionDurationMs": 39488,
                 "statsRequestBytes": 131644,
                 "statsRequestCount": 6,
-                "totalProcessedBytes": 156288,
-                "totalProcessedCount": 166
+                "totalProcessedBytes": 155788,
+                "totalProcessedCount": 162
             },
             "sentiment": {
                 "angry": 0,

@@ -262,7 +262,8 @@ class StatsAggregator {
     }
 
     /**
-     * If multiple ice 'connected' states were pressent that generaly means there were disconnects present as well.
+     * If multiple PeerConnection 'connected' states were pressent that generaly means there were disconnects present
+     * as well.
      *
      * @param {*} pcData
      */
@@ -282,7 +283,7 @@ class StatsAggregator {
      *
      * @param {*} pcData
      */
-    _didIceConnectionFail(pcData) {
+    _didPcConnectionFail(pcData) {
         const { connectionStates = [] } = pcData;
 
         return connectionStates.filter(connectionState => connectionState.state === 'failed').length > 0;
@@ -302,7 +303,9 @@ class StatsAggregator {
             resultMap[pc] = { isP2P: pcData.isP2P,
                 usesRelay: pcData.usesRelay,
                 dtlsErrors: pcData.dtlsErrors,
-                dtlsFailure: pcData.dtlsFailure };
+                dtlsFailure: pcData.dtlsFailure,
+                lastIceFailure: pcData.lastIceFailure,
+                lastIceDisconnect: pcData.lastIceDisconnect };
 
             const pcResults = resultMap[pc];
             const pcVideoExperienceResults
@@ -313,7 +316,7 @@ class StatsAggregator {
             pcResults.transportAggregates = this._calculateTransportAggregates(pcData);
             pcResults.iceReconnects = this._calculateReconnects(pcData);
             pcResults.pcSessionDurationMs = this._calculateSessionDurationMs(pcData);
-            pcResults.iceFailed = this._didIceConnectionFail(pcData);
+            pcResults.connectionFailed = this._didPcConnectionFail(pcData);
 
             if (pcVideoExperienceResults) {
                 pcResults.inboundVideoExperience = pcVideoExperienceResults;

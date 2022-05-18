@@ -3,9 +3,9 @@
         "features": {
             "aggregates": {
                 "PC_0": {
+                    "connectionFailed": false,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": false,
                     "iceReconnects": 0,
                     "inboundVideoExperience": {
                         "lowerBoundAggregates": {
@@ -18,6 +18,8 @@
                         }
                     },
                     "isP2P": true,
+                    "lastIceDisconnect": 0,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 41170,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0,
@@ -46,11 +48,13 @@
                     "usesRelay": false
                 },
                 "PC_1": {
+                    "connectionFailed": false,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": false,
                     "iceReconnects": 0,
                     "isP2P": false,
+                    "lastIceDisconnect": 0,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 41492,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0,
@@ -85,8 +89,8 @@
                 "dsRequestBytes": 0,
                 "dsRequestCount": 0,
                 "dumpFileSizeBytes": 68782,
-                "otherRequestBytes": 16384,
-                "otherRequestCount": 86,
+                "otherRequestBytes": 15884,
+                "otherRequestCount": 82,
                 "sdpRequestBytes": 2202,
                 "sdpRequestCount": 23,
                 "sentimentRequestBytes": 0,
@@ -94,8 +98,8 @@
                 "sessionDurationMs": 72071,
                 "statsRequestBytes": 105808,
                 "statsRequestCount": 10,
-                "totalProcessedBytes": 124394,
-                "totalProcessedCount": 119
+                "totalProcessedBytes": 123894,
+                "totalProcessedCount": 115
             },
             "sentiment": {
                 "angry": 0,

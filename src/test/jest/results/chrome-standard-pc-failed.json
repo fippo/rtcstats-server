@@ -3,9 +3,9 @@
         "features": {
             "aggregates": {
                 "PC_0": {
+                    "connectionFailed": true,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": true,
                     "iceReconnects": 0,
                     "inboundVideoExperience": {
                         "lowerBoundAggregates": {
@@ -18,6 +18,8 @@
                         }
                     },
                     "isP2P": false,
+                    "lastIceDisconnect": 0,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 14211,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0.03,
@@ -63,11 +65,13 @@
                     "usesRelay": false
                 },
                 "PC_1": {
+                    "connectionFailed": true,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": true,
                     "iceReconnects": 0,
                     "isP2P": null,
+                    "lastIceDisconnect": 1647265227269,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 0,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0,
@@ -87,11 +91,13 @@
                     "usesRelay": null
                 },
                 "PC_2": {
+                    "connectionFailed": true,
                     "dtlsErrors": 0,
                     "dtlsFailure": 0,
-                    "iceFailed": true,
                     "iceReconnects": 0,
                     "isP2P": null,
+                    "lastIceDisconnect": 1647265227269,
+                    "lastIceFailure": 0,
                     "pcSessionDurationMs": 0,
                     "trackAggregates": {
                         "receivedPacketsLostPct": 0,
@@ -126,8 +132,8 @@
                 "dsRequestBytes": 198,
                 "dsRequestCount": 1,
                 "dumpFileSizeBytes": 101792,
-                "otherRequestBytes": 28056,
-                "otherRequestCount": 172,
+                "otherRequestBytes": 27294,
+                "otherRequestCount": 166,
                 "sdpRequestBytes": 1682,
                 "sdpRequestCount": 18,
                 "sentimentRequestBytes": 0,
@@ -135,8 +141,8 @@
                 "sessionDurationMs": 62840,
                 "statsRequestBytes": 160976,
                 "statsRequestCount": 19,
-                "totalProcessedBytes": 190912,
-                "totalProcessedCount": 210
+                "totalProcessedBytes": 190150,
+                "totalProcessedCount": 204
             },
             "sentiment": {
                 "angry": 0,

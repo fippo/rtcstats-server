@@ -249,6 +249,24 @@ function isConnectionSuccessful(value) {
 }
 
 /**
+ * Verify if the ICE connection state was disconnected.
+ *
+ * @param {string} value - state of the ice connection
+ */
+function isIceDisconnected(value) {
+    return [ 'disconnected' ].includes(value);
+}
+
+/**
+ * Verify if the ICE connection state was failed.
+ *
+ * @param {string} value - state of the ice connection
+ */
+function isIceFailed(value) {
+    return [ 'failed' ].includes(value);
+}
+
+/**
  *
  */
 function getEnvName() {
@@ -331,6 +349,8 @@ module.exports = {
     getEnvName,
     getIdealWorkerCount,
     isConnectionSuccessful,
+    isIceDisconnected,
+    isIceFailed,
     isProduction,
     mode,
     percentOf,
