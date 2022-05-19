@@ -384,7 +384,9 @@ class FeatureExtractor {
                 this.conferenceStartTime = timestamp;
             }
 
-            this.conferenceEndTime = timestamp;
+            if (timestamp > this.conferenceEndTime) {
+                this.conferenceEndTime = timestamp;
+            }
         }
     }
 
@@ -425,7 +427,10 @@ class FeatureExtractor {
         const { dsRequestBytes, sdpRequestBytes, statsRequestBytes, otherRequestBytes } = metrics;
         const { dsRequestCount, sdpRequestCount, statsRequestCount, otherRequestCount } = metrics;
 
-        metrics.sessionDurationMs = this.conferenceEndTime - this.conferenceStartTime;
+        metrics.sessionDurationMs = 0;
+        if (this.conferenceEndTime > this.conferenceStartTime) {
+            metrics.sessionDurationMs = this.conferenceEndTime - this.conferenceStartTime;
+        }
         metrics.totalProcessedBytes = sdpRequestBytes + dsRequestBytes + statsRequestBytes + otherRequestBytes;
         metrics.totalProcessedCount = sdpRequestCount + dsRequestCount + statsRequestCount + otherRequestCount;
         metrics.dumpFileSizeBytes = dumpFileSizeBytes;
