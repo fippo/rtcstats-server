@@ -1,4 +1,4 @@
-const { isObject, percentOf, round, standardizedMoment, average } = require('../../utils/utils');
+const { percentOf, round, standardizedMoment, average } = require('../../utils/utils');
 
 /**
  *
@@ -84,23 +84,25 @@ class StatsAggregator {
     }
 
     /**
-     * Gets all the tracks that are held in the specified peer connection. It includes the "vacuumed" tracks, if there are any.
-     * 
+     * Gets all the tracks that are held in the specified peer connection. It includes the "vacuumed" tracks, if there
+     * are any.
+     *
      * @param {Object} pcData - Data associated with a single peer connection.
      * @returns {array} - An array of all the tracks.
      */
     _getTracks(pcData) {
         // pcData is a dictionary of objects related to a specific peer connection. We store tracks by their ssrc, so
-        // the key is the ssrc and the track data is the value of the dictionary entry. We get the tracks by checking that the
-        // mediaType attribute exists. Other objects that we store in the pcData dictionary don't have the mediaType attribute.
+        // the key is the ssrc and the track data is the value of the dictionary entry. We get the tracks by checking
+        // that the mediaType attribute exists. Other objects that we store in the pcData dictionary don't have the
+        // mediaType attribute.
         let tracks = Object.keys(pcData)
             .filter(pcDataEntry => pcData[pcDataEntry] && pcData[pcDataEntry].mediaType)
             .map(trackSsrc => pcData[trackSsrc]);
 
         if (pcData.vacuumedTracks) {
-            // Only keep tracks that have their mediaType set. Normally every vacuumed track should have a mediaType but -- I guess --
-            // it's possible to receive the `setVideoType` message from the client and no stats for a track that came up and went
-            // away very quickly for example.
+            // Only keep tracks that have their mediaType set. Normally every vacuumed track should have a mediaType
+            // but -- I guess -- it's possible to receive the `setVideoType` message from the client and no stats for
+            // a track that came up and went away very quickly for example.
             tracks = tracks.concat(pcData.vacuumedTracks.filter(track => track.mediaType));
         }
 
@@ -159,7 +161,7 @@ class StatsAggregator {
         // We then add them together to get the totals for the peer connection.
         tracks.forEach(track => {
             const { packetsSentLost = [], packetsSent = [],
-                packetsReceivedLost = [], packetsReceived = [] } = track; 
+                packetsReceivedLost = [], packetsReceived = [] } = track;
 
             if (packetsSentLost.length && packetsSent.length) {
                 totalPacketsSent += packetsSent.at(-1);

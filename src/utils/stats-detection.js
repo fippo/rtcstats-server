@@ -9,8 +9,13 @@ const StatsFormat = Object.freeze({
     UNSUPPORTED: 'unsupported'
 });
 
+/**
+ *
+ * @param {*} report - rtcstats stats report
+ * @returns {string} - media type or kind
+ */
 function getMediaType(report) {
-    return report.mediaType || report.kind
+    return report.mediaType || report.kind;
 }
 
 

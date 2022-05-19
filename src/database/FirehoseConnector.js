@@ -238,7 +238,6 @@ class FirehoseConnector {
                 iceReconnects,
                 pcSessionDurationMs,
                 connectionFailed,
-                iceFailed,
                 lastIceFailure,
                 lastIceDisconnect,
                 trackAggregates: {
