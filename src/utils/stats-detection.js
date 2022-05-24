@@ -344,14 +344,6 @@ function getInboundVideoSummaryStandard(statsEntry, report) {
             framesPerSecond: report.googFrameRateOutput
         };
     }
-
-    if (report.type === 'track' && report.remoteSource === true && report.frameHeight) {
-        // Found in google-standard-stats-* and safari-standard-stats. Unfortunately it contains cumulative frames, so
-        // no rate that we can extract.
-        return {
-            frameHeight: report.frameHeight
-        };
-    }
 }
 
 

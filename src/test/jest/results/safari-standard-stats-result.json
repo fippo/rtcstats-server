@@ -174,14 +174,6 @@
           },
           "transportAggregates": {
             "meanRtt": 0.05
-          },
-          "inboundVideoExperience": {
-            "upperBoundAggregates": {
-              "meanFrameHeight": 180
-            },
-            "lowerBoundAggregates": {
-              "meanFrameHeight": 180
-            }
           }
         }
       }   
