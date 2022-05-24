@@ -1,7 +1,7 @@
 /* feature extraction utils */
 const fs = require('fs');
 const os = require('os');
-const uuid = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 const logger = require('../logging');
 
@@ -294,7 +294,7 @@ async function asyncDeleteFile(filePath) {
  * @returns {string}
  */
 function uuidV4() {
-    return uuid.v4();
+    return uuidv4();
 }
 
 /**
