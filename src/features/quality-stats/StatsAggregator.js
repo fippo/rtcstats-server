@@ -46,7 +46,7 @@ class StatsAggregator {
      * @param {String} videoType - optional parameter that indicates the video type of the track
      * @return {Object}
      */
-    _calculateSingleTrackStats(packets, packetsLost, mediaType, ssrc, videoType) {
+    _calculateSingleTrackStats(packets, packetsLost, mediaType, ssrc) {
         const stats = {
             mediaType,
             ssrc,
@@ -55,11 +55,6 @@ class StatsAggregator {
             packetsLostPct: 0,
             packetsLostVariance: 0
         };
-
-        if (videoType) {
-            // This parameter is optional and only for video tracks.
-            stats.mediaType += `/${videoType}`;
-        }
 
         if (!packets.length) {
             return stats;
@@ -125,14 +120,21 @@ class StatsAggregator {
             const { packetsSentLost = [], packetsSent = [], packetsReceivedLost = [],
                 packetsReceived = [], mediaType = '', ssrc, videoType } = track;
 
+            let mediaVideoType = mediaType;
+
+            if (videoType) {
+                // This parameter is optional and only for video tracks.
+                mediaVideoType += `/${videoType}`;
+            }
+
             if (packetsSentLost.length && packetsSent.length) {
                 senderTracks.push(this._calculateSingleTrackStats(packetsSent,
-                    packetsSentLost, mediaType, ssrc, videoType));
+                    packetsSentLost, mediaVideoType, ssrc));
             }
 
             if (packetsReceivedLost.length && packetsReceived.length) {
                 receiverTracks.push(this._calculateSingleTrackStats(packetsReceived,
-                    packetsReceivedLost, mediaType, ssrc, videoType));
+                    packetsReceivedLost, mediaVideoType, ssrc));
             }
         });
 
