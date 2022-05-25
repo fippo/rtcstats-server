@@ -198,6 +198,7 @@ class QualityStatsCollector {
             if (inboundVideoSummary.framesPerSecond === undefined) {
                 inboundVideoSummary.framesPerSecond = 0;
             }
+
             // if this report has different frame resolution, we update the principal/secondary resolution/frame rate
             if (!videoExperience.upperBound
                 || videoExperience.upperBound.frameHeight < inboundVideoSummary.frameHeight) {
