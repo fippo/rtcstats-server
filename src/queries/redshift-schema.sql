@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS rtcstats_track_metrics (
     isP2P BOOLEAN,
     direction VARCHAR(128),
     mediaType VARCHAR(128),
+    /* the ssrc is an unsigned 32 bit integer, so it can never reach 128 characters in length but we define it as such for uniformity */
+    ssrc VARCHAR(128),
     packets BIGINT,
     packetsLost BIGINT,
     packetsLostPct REAL,
