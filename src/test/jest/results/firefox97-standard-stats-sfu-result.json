@@ -73,6 +73,7 @@
           "tracks": {
             "receiverTracks": [
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 4294906587,
                 "packetsLost": 0,
@@ -81,6 +82,7 @@
                 "ssrc": 275935317
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 12076,
                 "packetsLost": 0,
@@ -89,6 +91,7 @@
                 "ssrc": 420677523
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 2089,
                 "packetsLost": 0,
@@ -97,6 +100,7 @@
                 "ssrc": 676202912
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 3366,
                 "packetsLost": 0,
@@ -105,6 +109,7 @@
                 "ssrc": 2555995057
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 11779,
                 "packetsLost": 28,
@@ -115,6 +120,7 @@
             ],
             "senderTracks": [
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 0,
                 "packetsLost": 0,
@@ -123,6 +129,7 @@
                 "ssrc": 275935317
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 0,
                 "packetsLost": 0,
@@ -131,6 +138,7 @@
                 "ssrc": 420677523
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 0,
                 "packetsLost": 0,
