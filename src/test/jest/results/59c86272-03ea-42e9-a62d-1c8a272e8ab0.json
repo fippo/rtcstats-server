@@ -86,6 +86,7 @@
             "dominantSpeakerChanges": 0,
             "faceLandmarksTimestamps": [],
             "metrics": {
+                "conferenceDurationMs": 0,
                 "dsRequestBytes": 0,
                 "dsRequestCount": 0,
                 "dumpFileSizeBytes": 68782,

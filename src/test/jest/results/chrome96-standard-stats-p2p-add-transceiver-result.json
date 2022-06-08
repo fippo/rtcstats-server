@@ -42,6 +42,7 @@
         }
       },
       "metrics": {
+        "conferenceDurationMs": 0,
         "statsRequestBytes": 69628,
         "statsRequestCount": 6,
         "otherRequestBytes": 18914,

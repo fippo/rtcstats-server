@@ -36,11 +36,12 @@
         "userRegion": ""
       },
       "metrics": {
+        "conferenceDurationMs": 20286304,
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
-        "dumpFileSizeBytes": 286562,
-        "otherRequestBytes": 11118,
-        "otherRequestCount": 38,
+        "dumpFileSizeBytes": 286624,
+        "otherRequestBytes": 11240,
+        "otherRequestCount": 39,
         "sdpRequestBytes": 19664,
         "sdpRequestCount": 3,
         "sentimentRequestBytes": 0,
@@ -48,8 +49,8 @@
         "sessionDurationMs": 77001,
         "statsRequestBytes": 532462,
         "statsRequestCount": 34,
-        "totalProcessedBytes": 563244,
-        "totalProcessedCount": 75
+        "totalProcessedBytes": 563366,
+        "totalProcessedCount": 76
       },
       "aggregates": {
         "PC_0": {

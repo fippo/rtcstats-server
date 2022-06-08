@@ -37,7 +37,8 @@ class FeatureExtractor {
             this.collector = new QualityStatsCollector(statsFormat);
         }
         this.conferenceStartTime = 0;
-        this.conferenceEndTime = 0;
+        this.sessionStartTime = 0;
+        this.sessionEndTime = 0;
 
         this.aggregator = new StatsAggregator();
 
@@ -359,7 +360,7 @@ class FeatureExtractor {
         }
 
         // Calculate how much time the last dominant speaker spent until this participant left the meeting.
-        const lastSpeakerTime = this.conferenceEndTime - dominantSpeakerStartTimeStamp;
+        const lastSpeakerTime = this.sessionEndTime - dominantSpeakerStartTimeStamp;
 
         lastSpeakerStats.speakerTime += lastSpeakerTime;
 
@@ -377,16 +378,20 @@ class FeatureExtractor {
      * @param {*} dumpLineObj
      */
     _recordSessionDuration(dumpLineObj) {
-        const [ requestType, , , timestamp ] = dumpLineObj;
+        const [ requestType, , requestObj, timestamp ] = dumpLineObj;
 
         if (requestType !== 'connectionInfo' && requestType !== 'identity') {
-            if (!this.conferenceStartTime && timestamp) {
-                this.conferenceStartTime = timestamp;
+            if (!this.sessionStartTime && timestamp) {
+                this.sessionStartTime = timestamp;
             }
 
-            if (timestamp > this.conferenceEndTime) {
-                this.conferenceEndTime = timestamp;
+            if (timestamp > this.sessionEndTime) {
+                this.sessionEndTime = timestamp;
             }
+        }
+
+        if (requestType === 'conferenceStartTimestamp' && requestObj) {
+            this.conferenceStartTime = requestObj;
         }
     }
 
@@ -427,9 +432,16 @@ class FeatureExtractor {
         const { dsRequestBytes, sdpRequestBytes, statsRequestBytes, otherRequestBytes } = metrics;
         const { dsRequestCount, sdpRequestCount, statsRequestCount, otherRequestCount } = metrics;
 
+        metrics.conferenceDurationMs = 0;
+        if (this.conferenceStartTime && (this.sessionEndTime > this.conferenceStartTime)) {
+            // The client doesn't know when the conference ended, so we can only calculate how long it
+            // was from the time the conference started till the client left.
+            metrics.conferenceDurationMs = this.sessionEndTime - this.conferenceStartTime;
+        }
+
         metrics.sessionDurationMs = 0;
-        if (this.conferenceEndTime > this.conferenceStartTime) {
-            metrics.sessionDurationMs = this.conferenceEndTime - this.conferenceStartTime;
+        if (this.sessionEndTime > this.sessionStartTime) {
+            metrics.sessionDurationMs = this.sessionEndTime - this.sessionStartTime;
         }
         metrics.totalProcessedBytes = sdpRequestBytes + dsRequestBytes + statsRequestBytes + otherRequestBytes;
         metrics.totalProcessedCount = sdpRequestCount + dsRequestCount + statsRequestCount + otherRequestCount;
