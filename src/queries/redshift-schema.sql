@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS rtcstats_track_metrics (
     packetsLost BIGINT,
     packetsLostPct REAL,
     packetsLostVariance REAL,
+    concealedPercentage REAL,
     PRIMARY KEY(id),
     FOREIGN KEY (pcId) REFERENCES rtcstats_pc_metrics(id)
 )
