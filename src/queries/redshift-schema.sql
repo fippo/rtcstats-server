@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS rtcstats (
     createdate TIMESTAMP,
     endpointid VARCHAR (256),
     sessionduration BIGINT,
+    conferenceduration BIGINT,
     dominantspeakerchanges BIGINT,
     speakertime BIGINT,
     sentimentAngry INT DEFAULT 0,
