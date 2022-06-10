@@ -82,6 +82,7 @@ class FeatureExtractor {
 
         this.extractFunctions = {
             identity: this._handleIdentity,
+            conferenceStartTimestamp: this._handleConfStartTime,
             connectionInfo: this._handleConnectionInfo,
             constraints: this._handleConstraints,
             create: this._handleCreate,
@@ -283,6 +284,12 @@ class FeatureExtractor {
         this.collector.processDtlsStateEntry(pc, state);
     };
 
+    _handleConfStartTime = dumpLineObj => {
+        const [ , , timestamp ] = dumpLineObj;
+
+        this.conferenceStartTime = timestamp;
+    };
+
     _handleE2eRtt = dumpLineObj => {
         const [ , , line ] = dumpLineObj;
 
@@ -378,7 +385,7 @@ class FeatureExtractor {
      * @param {*} dumpLineObj
      */
     _recordSessionDuration(dumpLineObj) {
-        const [ requestType, , requestObj, timestamp ] = dumpLineObj;
+        const [ requestType, , , timestamp ] = dumpLineObj;
 
         if (requestType !== 'connectionInfo' && requestType !== 'identity') {
             if (!this.sessionStartTime && timestamp) {
@@ -388,10 +395,6 @@ class FeatureExtractor {
             if (timestamp > this.sessionEndTime) {
                 this.sessionEndTime = timestamp;
             }
-        }
-
-        if (requestType === 'conferenceStartTimestamp' && requestObj) {
-            this.conferenceStartTime = requestObj;
         }
     }
 
