@@ -153,7 +153,10 @@ class FirehoseConnector {
                 userRegion
             },
             e2epings = {},
-            metrics: { sessionDurationMs: sessionDuration },
+            metrics: {
+                sessionDurationMs,
+                conferenceDurationMs
+            },
             dominantSpeakerChanges,
             speakerTime,
             sentiment: {
@@ -186,7 +189,8 @@ class FirehoseConnector {
             meetingUrl,
             meetingUniqueId,
             endpointId,
-            sessionDuration,
+            sessionDurationMs,
+            conferenceDurationMs,
             dominantSpeakerChanges,
             speakerTime,
             sentimentAngry,

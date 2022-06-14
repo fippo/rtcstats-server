@@ -30,6 +30,7 @@
         "surprised": 0
       },
       "metrics": {
+        "conferenceDurationMs": 0,
         "statsRequestBytes": 217880,
         "statsRequestCount": 3,
         "otherRequestBytes": 15674,

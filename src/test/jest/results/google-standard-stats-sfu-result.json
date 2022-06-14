@@ -36,9 +36,10 @@
         "userRegion": ""
       },
       "metrics": {
+        "conferenceDurationMs": 20286304,
         "dsRequestBytes": 0,
         "dsRequestCount": 0,
-        "dumpFileSizeBytes": 286562,
+        "dumpFileSizeBytes": 286624,
         "otherRequestBytes": 11118,
         "otherRequestCount": 38,
         "sdpRequestBytes": 19664,
