@@ -32,6 +32,7 @@
                     "tracks": {
                         "receiverTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video/camera",
                                 "packets": 1478,
                                 "packetsLost": 0,
@@ -42,6 +43,7 @@
                         ],
                         "senderTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video",
                                 "packets": 1100,
                                 "packetsLost": 0,
@@ -86,6 +88,7 @@
                     "tracks": {
                         "receiverTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video",
                                 "packets": 147,
                                 "packetsLost": 0,
@@ -94,6 +97,7 @@
                                 "ssrc": 1636121229
                             },
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video/camera",
                                 "packets": 810,
                                 "packetsLost": 0,
@@ -102,6 +106,7 @@
                                 "ssrc": 2511181394
                             },
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video/camera",
                                 "packets": 354,
                                 "packetsLost": 0,
@@ -110,6 +115,7 @@
                                 "ssrc": 2683469917
                             },
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video/desktop",
                                 "packets": 464,
                                 "packetsLost": 0,
@@ -120,6 +126,7 @@
                         ],
                         "senderTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video",
                                 "packets": 1730,
                                 "packetsLost": 0,

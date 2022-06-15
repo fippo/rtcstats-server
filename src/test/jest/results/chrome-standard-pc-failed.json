@@ -32,6 +32,7 @@
                     "tracks": {
                         "receiverTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video",
                                 "packets": 3976,
                                 "packetsLost": 1,
@@ -40,6 +41,7 @@
                                 "ssrc": 69911005
                             },
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video",
                                 "packets": 3985,
                                 "packetsLost": 1,
@@ -50,6 +52,7 @@
                         ],
                         "senderTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "audio",
                                 "packets": 3013,
                                 "packetsLost": 0,

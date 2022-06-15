@@ -17,7 +17,9 @@ function newTrack(ssrc) {
         packetsReceived: [],
         packetsReceivedLost: [],
         packetsSent: [],
-        packetsSentLost: []
+        packetsSentLost: [],
+        totalSamplesReceived: [],
+        concealedSamplesReceived: []
     };
 }
 
@@ -150,6 +152,30 @@ class QualityStatsCollector {
             trackData.mediaType = mediaType;
             trackData.packetsReceivedLost.push(packetsLost);
             trackData.packetsReceived.push(packetsReceived);
+        }
+    }
+
+    /**
+     * Get the samples received and concealed samples metrics from the current report, and push them to the
+     * track to which they belong (based on SSRC).
+     *
+     * @param {Object} pcData- Output param, collected data gets put here.
+     * @param {Object} statsEntry - The complete webrtc statistics entry which contains multiple reports.
+     * @param {Object} report - A single report from a stats entry.
+     */
+    _collectConcealedSamples(pcData, statsEntry, report) {
+        const concealedSamplesReceived = this.statsExtractor.extractConcealedSamplesReceived(statsEntry, report);
+
+        if (concealedSamplesReceived) {
+            // As the name totalSamplesReceived suggests, it is an increasing cumulative counter.
+            // But the concealedSamples is also a cumulative counter even though it doesn't have
+            // total in it is name.
+            const { ssrc, totalSamples, concealed } = concealedSamplesReceived;
+
+            const trackData = this._getTrackData(pcData, ssrc);
+
+            trackData.totalSamplesReceived.push(totalSamples);
+            trackData.concealedSamplesReceived.push(concealed);
         }
     }
 
@@ -483,6 +509,7 @@ class QualityStatsCollector {
             this._collectRttData(rtts, statsEntry, report);
             this._collectIsUsingRelayData(pcData, statsEntry, report);
             this._collectPacketLossData(pcData, statsEntry, report);
+            this._collectConcealedSamples(pcData, statsEntry, report);
             this._updateInboundVideoExperience(inboundVideoExperience, statsEntry, report);
         });
 

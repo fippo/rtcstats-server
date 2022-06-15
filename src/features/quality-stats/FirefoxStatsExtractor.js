@@ -73,6 +73,15 @@ class FirefoxStatsExtractor {
     extractInboundVideoSummary(statsEntry, report) {
         return getInboundVideoSummaryFirefox(statsEntry, report);
     }
+
+    /**
+     * Extract the concealed and received samples - so far not supported by Firefox stats :-(
+     *
+     * @returns null - As long as this stat is not supported by Firefox.
+     */
+    extractConcealedSamplesReceived() {
+        return null;
+    }
 }
 
 module.exports = FirefoxStatsExtractor;

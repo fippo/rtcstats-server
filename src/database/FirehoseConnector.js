@@ -105,7 +105,8 @@ class FirehoseConnector {
             packets,
             packetsLost,
             packetsLostPct,
-            packetsLostVariance
+            packetsLostVariance,
+            concealedPercentage
         } = track;
 
         const id = uuid.v4();
@@ -122,7 +123,8 @@ class FirehoseConnector {
             packets,
             packetsLost,
             packetsLostPct,
-            packetsLostVariance
+            packetsLostVariance,
+            concealedPercentage
         };
 
         this._putRecord(trackSchemaObj, this._trackStatsStream);

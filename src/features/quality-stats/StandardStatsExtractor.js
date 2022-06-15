@@ -1,4 +1,4 @@
-const { getRTTStandard, isUsingRelayStandard, getTotalReceivedPacketsStandard,
+const { getRTTStandard, isUsingRelayStandard, getTotalReceivedPacketsStandard, getConcealedSamplesReceivedStandard,
     getTotalSentPacketsStandard, getInboundVideoSummaryStandard } = require('../../utils/stats-detection');
 
 /**
@@ -68,6 +68,17 @@ class StandardStatsExtractor {
      */
     extractInboundVideoSummary(statsEntry, report) {
         return getInboundVideoSummaryStandard(statsEntry, report);
+    }
+
+    /**
+     * Extract statistics for totalSamplesReceived and concealedSamples.
+     *
+     * @param {Object} statsEntry - Complete rtcstats entry.
+     * @param {Object} report - Individual stat report.
+     * @returns {ConcealeadSamplesSummary}
+     */
+    extractConcealedSamplesReceived(statsEntry, report) {
+        return getConcealedSamplesReceivedStandard(statsEntry, report);
     }
 }
 module.exports = StandardStatsExtractor;

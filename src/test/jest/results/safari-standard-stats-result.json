@@ -74,6 +74,7 @@
           "tracks": {
             "receiverTracks": [
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 4005,
                 "packetsLost": 0,
@@ -82,6 +83,7 @@
                 "ssrc": 271883463
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 2013,
                 "packetsLost": 0,
@@ -90,6 +92,7 @@
                 "ssrc": 876450406
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 5858,
                 "packetsLost": 0,
@@ -98,6 +101,7 @@
                 "ssrc": 891790093
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 802,
                 "packetsLost": 0,
@@ -106,6 +110,7 @@
                 "ssrc": 972539169
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 874,
                 "packetsLost": 0,
@@ -114,6 +119,7 @@
                 "ssrc": 1169210963
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 8360,
                 "packetsLost": 1,
@@ -122,6 +128,7 @@
                 "ssrc": 1291750480
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 6713,
                 "packetsLost": 0,
@@ -130,6 +137,7 @@
                 "ssrc": 1426121629
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 6922,
                 "packetsLost": 0,
@@ -138,6 +146,7 @@
                 "ssrc": 2403718901
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 1060,
                 "packetsLost": 0,
@@ -146,6 +155,7 @@
                 "ssrc": 3996408746
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 10741,
                 "packetsLost": 1,
@@ -156,6 +166,7 @@
             ],
             "senderTracks": [
               {
+                "concealedPercentage": 0,
                 "mediaType": "audio",
                 "packets": 9452,
                 "packetsLost": 0,
@@ -164,6 +175,7 @@
                 "ssrc": 1449778799
               },
               {
+                "concealedPercentage": 0,
                 "mediaType": "video",
                 "packets": 17080,
                 "packetsLost": 0,

@@ -313,6 +313,22 @@ function getTotalReceivedPacketsStandard(statsEntry, report) {
     }
 }
 
+/**
+ * Return standard statistics for totalSamplesReceived and concealedSamples.
+ *
+ * @param {Object} statsEntry - Complete rtcstats entry.
+ * @param {Object} report - Individual stat report.
+ * @returns {ConcealeadSamplesSummary}
+ */
+function getConcealedSamplesReceivedStandard(statsEntry, report) {
+    if (report.totalSamplesReceived && report.concealedSamples && report.ssrc) {
+        return {
+            ssrc: report.ssrc,
+            totalSamples: Number(report.totalSamplesReceived) || 0,
+            concealed: Number(report.concealedSamples) || 0
+        };
+    }
+}
 
 /**
  * Return standard statistics for received and lost packets.
@@ -600,6 +616,7 @@ module.exports = {
     getTotalReceivedPacketsStandard,
     getTotalSentPacketsStandard,
     getTotalSentPacketsFirefox,
+    getConcealedSamplesReceivedStandard,
     getInboundVideoSummaryStandard,
     getInboundVideoSummaryFirefox,
     getTransportInfoFn,

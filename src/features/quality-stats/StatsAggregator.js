@@ -46,15 +46,18 @@ class StatsAggregator {
      * @param {String} videoType - optional parameter that indicates the video type of the track
      * @return {Object}
      */
-    _calculateSingleTrackStats(packets, packetsLost, mediaType, ssrc) {
+    _calculateSingleTrackStats(trackStats, mediaType, ssrc) {
         const stats = {
             mediaType,
             ssrc,
             packets: 0,
             packetsLost: 0,
             packetsLostPct: 0,
-            packetsLostVariance: 0
+            packetsLostVariance: 0,
+            concealedPercentage: 0
         };
+
+        const { packets, packetsLost, samplesReceived, concealedSamples } = trackStats;
 
         if (!packets.length) {
             return stats;
@@ -74,6 +77,13 @@ class StatsAggregator {
 
         stats.packetsLostVariance = standardizedMoment(
             this._calculateSeriesDifferences(packetsLost), 2);
+
+        if (samplesReceived.length && concealedSamples.length) {
+            const concealed = concealedSamples.at(-1);
+            const received = samplesReceived.at(-1);
+
+            stats.concealedPercentage = percentOf(concealed, received) || 0;
+        }
 
         return stats;
     }
@@ -118,7 +128,8 @@ class StatsAggregator {
 
         tracks.forEach(track => {
             const { packetsSentLost = [], packetsSent = [], packetsReceivedLost = [],
-                packetsReceived = [], mediaType = '', ssrc, videoType } = track;
+                packetsReceived = [], totalSamplesReceived = [], concealedSamplesReceived = [],
+                mediaType = '', ssrc, videoType } = track;
 
             let mediaVideoType = mediaType;
 
@@ -127,14 +138,22 @@ class StatsAggregator {
                 mediaVideoType += `/${videoType}`;
             }
 
+
+            const trackStats = { samplesReceived: totalSamplesReceived,
+                concealedSamples: concealedSamplesReceived };
+
             if (packetsSentLost.length && packetsSent.length) {
-                senderTracks.push(this._calculateSingleTrackStats(packetsSent,
-                    packetsSentLost, mediaVideoType, ssrc));
+                trackStats.packets = packetsSent;
+                trackStats.packetsLost = packetsSentLost;
+
+                senderTracks.push(this._calculateSingleTrackStats(trackStats, mediaVideoType, ssrc));
             }
 
             if (packetsReceivedLost.length && packetsReceived.length) {
-                receiverTracks.push(this._calculateSingleTrackStats(packetsReceived,
-                    packetsReceivedLost, mediaVideoType, ssrc));
+                trackStats.packets = packetsReceived;
+                trackStats.packetsLost = packetsReceivedLost;
+
+                receiverTracks.push(this._calculateSingleTrackStats(trackStats, mediaVideoType, ssrc));
             }
         });
 

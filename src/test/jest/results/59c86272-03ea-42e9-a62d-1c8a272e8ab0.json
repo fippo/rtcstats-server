@@ -32,6 +32,7 @@
                     "tracks": {
                         "receiverTracks": [
                             {
+                                "concealedPercentage": 0,
                                 "mediaType": "video/camera",
                                 "packets": 4551,
                                 "packetsLost": 0,
