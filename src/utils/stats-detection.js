@@ -1,3 +1,4 @@
+const platform = require('platform');
 const uaParser = require('ua-parser-js');
 
 
@@ -231,6 +232,34 @@ function getStatsFormat(clientMeta) {
     return statsFormat;
 }
 
+
+/**
+ * Extracts the clients browser name, version, os etc from the connectionInfo of the client.
+ *
+ * @param {Object} clientMeta
+ * @returns {browserDetails}
+ */
+function getBrowserDetails(clientMeta) {
+    if (!(clientMeta.userAgent && clientMeta.userAgent.length)) {
+        return;
+    }
+    const ua = platform.parse(clientMeta.userAgent);
+    const parts = {
+        name: ua.name || 'unknown',
+        version: ua.version || '-1',
+        os: ua.os.toString(),
+        userAgent: clientMeta.userAgent,
+        nameVersion: `${ua.name}/${ua.version}`,
+        nameOs: `${ua.name}/${ua.os.toString()}`,
+        nameVersionOs: `${ua.name}/${ua.version}/${ua.os.toString()}`
+    };
+
+    if (ua.version) {
+        parts.majorVersion = ua.version.split('.')[0];
+    }
+
+    return parts;
+}
 
 /**
  * Chrome legacy format uses a "ssrc" type report with a name ending in either "_send" or "_recv"
@@ -596,6 +625,7 @@ module.exports = {
     getRTTFirefox,
     getScreenShareDataFn,
     getStatsFormat,
+    getBrowserDetails,
     getTotalSentPacketsFn,
     getTotalReceivedPacketsStandard,
     getTotalSentPacketsStandard,
