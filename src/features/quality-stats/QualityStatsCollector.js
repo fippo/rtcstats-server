@@ -167,6 +167,9 @@ class QualityStatsCollector {
         const concealedSamplesReceived = this.statsExtractor.extractConcealedSamplesReceived(statsEntry, report);
 
         if (concealedSamplesReceived) {
+            // As the name totalSamplesReceived suggests, it is an increasing cumulative counter.
+            // But the concealedSamples is also a cumulative counter even though it doesn't have
+            // total in it is name.
             const { ssrc, totalSamples, concealed } = concealedSamplesReceived;
 
             const trackData = this._getTrackData(pcData, ssrc);
