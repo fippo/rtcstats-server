@@ -42,7 +42,6 @@ class FeatureExtractor {
 
         this.aggregator = new StatsAggregator();
 
-        this.browser = undefined;
         this.baseStats = {};
 
         this.dominantSpeakerData = {
@@ -143,9 +142,8 @@ class FeatureExtractor {
         const browserDetails = getBrowserDetails(connectionInfoJson);
 
         if (browserDetails) {
-            this.browser = browserDetails;
+            this.features.browserInfo = browserDetails;
         }
-        console.log(`browser ${JSON.stringify(this.browser)}`);
     };
 
     _handleIdentity = dumpLineObj => {
