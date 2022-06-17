@@ -144,6 +144,12 @@ class FirehoseConnector {
 
         const {
             aggregates = {},
+            browserInfo: {
+                name: browserName,
+                majorVersion: browserMajorVersion,
+                version: browserVersion,
+                os
+            },
             deploymentInfo: {
                 crossRegion,
                 environment,
@@ -199,7 +205,11 @@ class FirehoseConnector {
             sentimentHappy,
             sentimentNeutral,
             sentimentSad,
-            sentimentSurprised
+            sentimentSurprised,
+            os,
+            browserName,
+            browserMajorVersion,
+            browserVersion
         };
 
         this._putRecord(schemaObj, this._meetingStatsStream);
