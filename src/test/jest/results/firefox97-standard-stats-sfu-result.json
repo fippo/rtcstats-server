@@ -26,6 +26,16 @@
         "sad": 0,
         "surprised": 0
       },
+      "browserInfo": {
+        "majorVersion": "100",
+        "name": "Firefox",
+        "nameOs": "Firefox/OS X 10.15",
+        "nameVersion": "Firefox/100.0",
+        "nameVersionOs": "Firefox/100.0/OS X 10.15",
+        "os": "OS X 10.15",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
+        "version": "100.0"
+      },
       "deploymentInfo": {
         "crossRegion": 0,
         "envType": "dev",

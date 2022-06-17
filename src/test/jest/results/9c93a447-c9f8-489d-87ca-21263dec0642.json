@@ -135,6 +135,16 @@
                     "usesRelay": false
                 }
             },
+            "browserInfo": {
+                "majorVersion": "101",
+                "name": "Chrome",
+                "nameOs": "Chrome/OS X 10.15.7 64-bit",
+                "nameVersion": "Chrome/101.0.4951.54",
+                "nameVersionOs": "Chrome/101.0.4951.54/OS X 10.15.7 64-bit",
+                "os": "OS X 10.15.7 64-bit",
+                "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36",
+                "version": "101.0.4951.54"
+            },
             "deploymentInfo": {
                 "crossRegion": 0,
                 "envType": "dev",

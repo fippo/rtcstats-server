@@ -26,6 +26,16 @@
         "sad": 0,
         "surprised": 0
       },
+      "browserInfo": {
+        "majorVersion": "96",
+        "name": "Chrome",
+        "nameOs": "Chrome/OS X 10.15.7 64-bit",
+        "nameVersion": "Chrome/96.0.4664.110",
+        "nameVersionOs": "Chrome/96.0.4664.110/OS X 10.15.7 64-bit",
+        "os": "OS X 10.15.7 64-bit",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
+        "version": "96.0.4664.110"
+      },
       "deploymentInfo": {
         "crossRegion": 0,
         "envType": "dev",

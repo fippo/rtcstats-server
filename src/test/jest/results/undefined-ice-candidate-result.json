@@ -46,7 +46,17 @@
         "sessionDurationMs": 32571,
         "dumpFileSizeBytes": 123929
       },
-        "deploymentInfo": {
+      "browserInfo": {
+        "majorVersion": "99",
+        "name": "Chrome",
+        "nameOs": "Chrome/Windows Server 2008 R2 / 7 64-bit",
+        "nameVersion": "Chrome/99.0.4844.51",
+        "nameVersionOs": "Chrome/99.0.4844.51/Windows Server 2008 R2 / 7 64-bit",
+        "os": "Windows Server 2008 R2 / 7 64-bit",
+        "userAgent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+        "version": "99.0.4844.51"
+      },
+      "deploymentInfo": {
         "crossRegion": 0,
         "envType": "prod",
         "environment": "meet-jit-si",
