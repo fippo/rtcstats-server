@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS rtcstats (
     releaseNumber INT DEFAULT 0,
     shard VARCHAR ( 256 ),
     userRegion VARCHAR ( 256 ),
+    os VARCHAR ( 256 ),
+    browserName VARCHAR ( 100 ),
+    browserMajorVersion INT DEFAULT 0,
+    browserVersion VARCHAR ( 50 ),
     PRIMARY KEY(statssessionid)
 )
 
