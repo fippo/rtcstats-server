@@ -97,3 +97,15 @@ CREATE TABLE IF NOT EXISTS rtcstats_e2e_ping (
     PRIMARY KEY(id),
     FOREIGN KEY (statssessionid) REFERENCES rtcstats(statssessionid)
 )
+
+/**
+ * Initial schema for redshift rtcstats_face_landmarks table
+ */
+CREATE TABLE IF NOT EXISTS rtcstats_face_landmarks(
+    id VARCHAR(128) NOT NULL,
+    statssessionid VARCHAR(256),
+    timestamp      BIGINT,
+    facelandmarks   VARCHAR(256),
+    PRIMARY KEY(id),
+    FOREIGN KEY (statssessionid) REFERENCES rtcstats(statssessionid)
+)
