@@ -146,7 +146,6 @@ class FirehoseConnector {
             aggregates = {},
             browserInfo: {
                 name: browserName,
-                majorVersion: browserMajorVersion,
                 version: browserVersion,
                 os
             },
@@ -208,7 +207,6 @@ class FirehoseConnector {
             sentimentSurprised,
             os,
             browserName,
-            browserMajorVersion,
             browserVersion
         };
 
