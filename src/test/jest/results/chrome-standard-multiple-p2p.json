@@ -401,6 +401,16 @@
                     "usesRelay": null
                 }
             },
+            "browserInfo": {
+                "majorVersion": "99",
+                "name": "Chrome",
+                "nameOs": "Chrome/Windows 10 64-bit",
+                "nameVersion": "Chrome/99.0.4844.51",
+                "nameVersionOs": "Chrome/99.0.4844.51/Windows 10 64-bit",
+                "os": "Windows 10 64-bit",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+                "version": "99.0.4844.51"
+            },
             "deploymentInfo": {
                 "crossRegion": 0,
                 "envType": "dev",

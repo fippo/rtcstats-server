@@ -7,7 +7,7 @@ const readline = require('readline');
 
 const logger = require('../logging');
 const statsDecompressor = require('../utils//getstats-deltacompression').decompress;
-const { getStatsFormat } = require('../utils/stats-detection');
+const { getStatsFormat, getBrowserDetails } = require('../utils/stats-detection');
 
 const QualityStatsCollector = require('./quality-stats/QualityStatsCollector');
 const StatsAggregator = require('./quality-stats/StatsAggregator');
@@ -41,7 +41,6 @@ class FeatureExtractor {
         this.sessionEndTime = 0;
 
         this.aggregator = new StatsAggregator();
-
 
         this.baseStats = {};
 
@@ -133,9 +132,17 @@ class FeatureExtractor {
     _handleConnectionInfo = dumpLineObj => {
         const [ , , connectionInfo ] = dumpLineObj;
 
+        const connectionInfoJson = JSON.parse(connectionInfo);
+
         if (!this.statsFormat) {
-            this.statsFormat = getStatsFormat(JSON.parse(connectionInfo));
+            this.statsFormat = getStatsFormat(connectionInfoJson);
             this.collector = new QualityStatsCollector(this.statsFormat);
+        }
+
+        const browserDetails = getBrowserDetails(connectionInfoJson);
+
+        if (browserDetails) {
+            this.features.browserInfo = browserDetails;
         }
     };
 
