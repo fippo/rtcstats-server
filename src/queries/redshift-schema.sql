@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS rtcstats (
     userRegion VARCHAR ( 256 ),
     os VARCHAR ( 256 ),
     browserName VARCHAR ( 100 ),
-    browserMajorVersion INT DEFAULT 0,
     browserVersion VARCHAR ( 50 ),
     PRIMARY KEY(statssessionid)
 )
