@@ -1,0 +1,75 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>rtcstats query editor</title>
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/styles/default.min.css">
+	<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/highlight.min.js"></script>
+</head>
+<script>Highcharts.setOptions({global: {useUTC: false}});</script>
+<body>
+    <details open="true">
+        <summary>Query editor and graphs</summary>
+        <form id="queryForm" action="">
+            <!--input for title-->
+            <textarea id="input" rows="20" cols="160" name="q">SELECT count(*) FROM features</textarea>
+            <button type="submit">query</button>
+        </form>
+        <pre><code class="postgresql" id="rendered"></code></pre>
+        <div id="error"></div>
+        <div id="container"></div>
+    </details>
+</body>
+<script>
+function graph(data, options = {}) {
+    const series = [];
+    Object.keys(data).forEach(function(key) {
+        series.push({
+            name: key,
+            data: data[key]
+        });
+    });
+    const graph = new Highcharts.Chart({
+        title: { text: (options.title || '') },
+        xAxis: { type: 'datetime' },
+        chart: { zoomType: 'x', renderTo : 'container' },
+        //"    plotOptions: {series:{stacking:'percent'}},\n" +
+        series,
+    });
+}
+
+document.getElementById('queryForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const rendered = document.getElementById('rendered');
+    rendered.innerText = document.getElementById('input').value;
+    hljs.highlightBlock(rendered);
+    document.getElementById('error').innerText = '';
+
+    const response = await fetch('/q', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain',
+        },
+        body: document.getElementById('input').value,
+    })
+    .then(async (response) => {
+        const res = await response.json();
+        if (res.error) {
+            document.getElementById('error').innerText = res.error;
+        } else {
+            // TODO: detect timeseries vs tabular graphs.
+            const series = {}
+            res.rows.forEach((row) => {
+                const key = Object.keys(row)
+                    .filter(k => !['count', 'hour', 'day', 'week', 'month'].includes(k))
+                    .map(k => k + '-' + row[k]).join('/');
+                if (!series[key]) series[key] = [];
+                series[key].push([new Date(row.hour || row.day || row.week || row.month).getTime(), parseInt(row.count, 10)]);
+            });
+            graph(series)
+        }
+    });
+});
+</script>
