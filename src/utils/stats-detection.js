@@ -204,7 +204,9 @@ function isStatisticEntry(entryType) {
  */
 function getStatsFormat(clientMeta) {
 
-    const { browser: { name: browserName = 'Unsupported' } } = uaParser(clientMeta.userAgent);
+    const { browser: { name: browserName = 'Unsupported' } } = clientMeta.userAgent.startsWith('react-native')
+        ? { browser: { name: 'ReactNative' } }
+        : uaParser(clientMeta.userAgent);
     const { clientProtocol } = clientMeta;
 
     let statsFormat = StatsFormat.UNSUPPORTED;
@@ -226,6 +228,8 @@ function getStatsFormat(clientMeta) {
         statsFormat = StatsFormat.FIREFOX;
     } else if (browserName.startsWith('Safari')) {
         statsFormat = StatsFormat.SAFARI;
+    } else if (browserName.startsWith('ReactNative')) {
+        statsFormat = StatsFormat.CHROME_STANDARD;
     }
 
     return statsFormat;
