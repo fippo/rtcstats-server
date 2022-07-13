@@ -288,7 +288,9 @@ class FeatureExtractor {
     _handleDtlsStateChange = dumpLineObj => {
         const [ , pc, state ] = dumpLineObj;
 
-        this.collector.processDtlsStateEntry(pc, state);
+        const isFirefox = this.statsFormat === 'firefox';
+
+        this.collector.processDtlsStateEntry(pc, state, isFirefox);
     };
 
     _handleConfStartTime = dumpLineObj => {

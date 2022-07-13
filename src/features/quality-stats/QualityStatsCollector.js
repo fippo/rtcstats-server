@@ -381,11 +381,18 @@ class QualityStatsCollector {
      * @param {string} pc - Associated PeerConnection
      * @param {string} state - The name of the new Dtls connection state
      */
-    processDtlsStateEntry(pc, state) {
+    processDtlsStateEntry(pc, state, isFirefox) {
         const pcData = this._getPcData(pc);
 
         // Possible states are: new, connecting, connected, closed, failed
         if (state === 'failed') {
+            /* When Firefox looses its transport it first signals that ICE
+               got disconnected. But right before signaling that ICE is
+               failed it signals the DTLS failed as well. Let's ignore this quirk.
+            */
+            if (isFirefox && pcData.lastIceDisconnect !== 0) {
+                return;
+            }
             pcData.dtlsFailure += 1;
         }
     }
