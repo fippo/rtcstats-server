@@ -294,7 +294,9 @@ class FeatureExtractor {
     _handleConfStartTime = dumpLineObj => {
         const [ , , timestamp ] = dumpLineObj;
 
-        this.conferenceStartTime = timestamp;
+        // At the end of a conference jitsi-meet sends another `conferenceStartTime` event
+        // with 0 as the start time, so we ignore it.
+        timestamp && (this.conferenceStartTime = timestamp);
     };
 
     _handleE2eRtt = dumpLineObj => {
