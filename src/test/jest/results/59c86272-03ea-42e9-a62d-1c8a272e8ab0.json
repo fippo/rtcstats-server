@@ -33,12 +33,14 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": "2022-04-28 11:12:18",
                 "mediaType": "video/camera",
                 "packets": 4551,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 3155040392
+                "ssrc": 3155040392,
+                "startTime": "2022-04-28 11:11:43"
               }
             ],
             "senderTracks": []

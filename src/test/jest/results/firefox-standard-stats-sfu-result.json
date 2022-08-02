@@ -36,113 +36,137 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "video",
                 "packets": 4580,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 271883463
+                "ssrc": 271883463,
+                "startTime": "2020-11-12 16:42:40"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "audio",
                 "packets": 3229,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 876450406
+                "ssrc": 876450406,
+                "startTime": "2020-11-12 16:42:40"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "video",
                 "packets": 8408,
                 "packetsLost": 1,
                 "packetsLostPct": 0.01,
                 "packetsLostVariance": 0.012818350480688152,
-                "ssrc": 891790093
+                "ssrc": 891790093,
+                "startTime": "2020-11-12 16:42:40"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "video",
                 "packets": 2417,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 972539169
+                "ssrc": 972539169,
+                "startTime": "2020-11-12 16:42:40"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "audio",
                 "packets": 6778,
                 "packetsLost": 3,
                 "packetsLostPct": 0.04,
                 "packetsLostVariance": 0.0399305555555556,
-                "ssrc": 1291750480
+                "ssrc": 1291750480,
+                "startTime": "2020-11-12 16:42:50"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "audio",
                 "packets": 7683,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1426121629
+                "ssrc": 1426121629,
+                "startTime": "2020-11-12 16:42:40"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "audio",
                 "packets": 6065,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1449778799
+                "ssrc": 1449778799,
+                "startTime": "2020-11-12 16:43:02"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "video",
                 "packets": 7177,
                 "packetsLost": 1,
                 "packetsLostPct": 0.01,
                 "packetsLostVariance": 0.014921946740128528,
-                "ssrc": 2047229442
+                "ssrc": 2047229442,
+                "startTime": "2020-11-12 16:43:02"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "video",
                 "packets": 8352,
                 "packetsLost": 2,
                 "packetsLostPct": 0.02,
                 "packetsLostVariance": 0.027006172839506123,
-                "ssrc": 2403718901
+                "ssrc": 2403718901,
+                "startTime": "2020-11-12 16:42:50"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "audio",
                 "packets": 7770,
                 "packetsLost": 1,
                 "packetsLostPct": 0.01,
                 "packetsLostVariance": 0.012818350480688152,
-                "ssrc": 4051566705
+                "ssrc": 4051566705,
+                "startTime": "2020-11-12 16:42:40"
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "video",
                 "packets": 0,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 271883463
+                "ssrc": 271883463,
+                "startTime": "2020-11-12 16:42:40"
               },
               {
                 "concealedPercentage": 0,
+                "endTime": "2020-11-12 16:45:14",
                 "mediaType": "audio",
                 "packets": 0,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1426121629
+                "ssrc": 1426121629,
+                "startTime": "2020-11-12 16:42:40"
               }
             ]
           },
