@@ -1,68 +1,29 @@
 [
   {
     "dumpInfo": {
+      "ampDeviceId": "60cba6ea-790a-4ec3-bf1c-b0d4f486c739",
+      "ampSessionId": 1641600699795,
       "app": "Integration Test",
       "clientId": "9195e361-2a5b-4749-923d-7f4d5d111c36",
       "conferenceUrl": "192.168.1.1/conf-9195e361-2a5b-4749-923d-7f4d5d111c36",
       "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/9195e361-2a5b-4749-923d-7f4d5d111c36",
       "endDate": 1641600699878,
-      "startDate": 1641600699825,
       "sessionId": "d4fe59fa-d0ca-4984-9e8d-0ac8fd6780ed",
-      "userId": "test-9195e361-2a5b-4749-923d-7f4d5d111c36",
-      "ampSessionId": 1641600699795,
-      "ampDeviceId": "60cba6ea-790a-4ec3-bf1c-b0d4f486c739",
-      "statsFormat": "firefox"
+      "startDate": 1641600699825,
+      "statsFormat": "firefox",
+      "userId": "test-9195e361-2a5b-4749-923d-7f4d5d111c36"
     },
     "features": {
-      "dominantSpeakerChanges": 0,
-      "faceLandmarksTimestamps": [],
-      "speakerTime": 0,
-      "sentiment": {
-        "angry": 0,
-        "disgusted": 0,
-        "fearful": 0,
-        "happy": 0,
-        "neutral": 0,
-        "sad": 0,
-        "surprised": 0
-      },
-      "deploymentInfo": {
-        "crossRegion": 0,
-        "envType": "dev",
-        "environment": "lonely",
-        "region": "eu-west-1",
-        "releaseNumber": "",
-        "shard": "hcv-lonely-andreig2",
-        "userRegion": ""
-      },
-      "metrics": {
-        "conferenceDurationMs": 0,
-        "dsRequestBytes": 0,
-        "dsRequestCount": 0,
-        "dumpFileSizeBytes": 352003,
-        "otherRequestBytes": 12572,
-        "otherRequestCount": 55,
-        "sdpRequestBytes": 185530,
-        "sdpRequestCount": 12,
-        "sentimentRequestBytes": 0,
-        "sentimentRequestCount": 0,
-        "sessionDurationMs": 161480,
-        "statsRequestBytes": 496382,
-        "statsRequestCount": 79,
-        "totalProcessedBytes": 694484,
-        "totalProcessedCount": 146
-      },
       "aggregates": {
         "PC_0": {
-          "pcSessionDurationMs": 155540,
           "connectionFailed": false,
-          "iceReconnects": 0,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
+          "iceReconnects": 0,
           "isP2P": false,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
+          "pcSessionDurationMs": 155540,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.01,
             "sentPacketsLostPct": 0,
@@ -187,9 +148,48 @@
           },
           "transportAggregates": {
             "meanRtt": 0.05
-          }
+          },
+          "usesRelay": false
         }
-      } 
+      },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-andreig2",
+        "userRegion": ""
+      },
+      "dominantSpeakerChanges": 0,
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 0,
+        "dsRequestBytes": 0,
+        "dsRequestCount": 0,
+        "dumpFileSizeBytes": 352003,
+        "otherRequestBytes": 12572,
+        "otherRequestCount": 55,
+        "sdpRequestBytes": 185530,
+        "sdpRequestCount": 12,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 161480,
+        "statsRequestBytes": 496382,
+        "statsRequestCount": 79,
+        "totalProcessedBytes": 694484,
+        "totalProcessedCount": 146
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 0
     }
   }
 ]

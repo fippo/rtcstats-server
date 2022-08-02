@@ -1,91 +1,46 @@
 [
   {
     "dumpInfo": {
+      "ampDeviceId": "8520fd54-ab35-4a4c-9454-45e17605914e",
+      "ampSessionId": 1641601089490,
       "app": "Integration Test",
       "clientId": "bac9ca22-8c8f-45a4-92a2-a3411cfe398a",
       "conferenceUrl": "192.168.1.1/conf-bac9ca22-8c8f-45a4-92a2-a3411cfe398a",
       "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/bac9ca22-8c8f-45a4-92a2-a3411cfe398a",
       "endDate": 1641601089568,
-      "startDate": 1641601089525,
       "sessionId": "b2ff55e1-c57e-4fc0-a003-54418278fa92",
-      "userId": "test-bac9ca22-8c8f-45a4-92a2-a3411cfe398a",
-      "ampSessionId": 1641601089490,
-      "ampDeviceId": "8520fd54-ab35-4a4c-9454-45e17605914e",
-      "statsFormat": "chrome_standard"
+      "startDate": 1641601089525,
+      "statsFormat": "chrome_standard",
+      "userId": "test-bac9ca22-8c8f-45a4-92a2-a3411cfe398a"
     },
     "features": {
-      "dominantSpeakerChanges": 1,
-      "faceLandmarksTimestamps": [],
-      "speakerTime": 3017,
-      "sentiment": {
-        "angry": 0,
-        "disgusted": 0,
-        "fearful": 0,
-        "happy": 0,
-        "neutral": 0,
-        "sad": 0,
-        "surprised": 0
-      },
-      "browserInfo": {
-        "majorVersion": "96",
-        "name": "Chrome",
-        "nameOs": "Chrome/OS X 10.15.7 64-bit",
-        "nameVersion": "Chrome/96.0.4664.110",
-        "nameVersionOs": "Chrome/96.0.4664.110/OS X 10.15.7 64-bit",
-        "os": "OS X 10.15.7 64-bit",
-        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
-        "version": "96.0.4664.110"
-      },
-      "deploymentInfo": {
-        "crossRegion": 0,
-        "envType": "dev",
-        "environment": "lonely",
-        "region": "us-west-2",
-        "releaseNumber": "",
-        "shard": "hcv-lonely-drno",
-        "userRegion": ""
-      },
-      "e2epings": {
-        "as458df9": {
-          "remoteRegion": "us-west-1",
-          "rtt": 223
-        }
-      },
-      "metrics": {
-        "conferenceDurationMs": 0,
-        "statsRequestBytes": 69628,
-        "statsRequestCount": 6,
-        "otherRequestBytes": 18914,
-        "otherRequestCount": 104,
-        "sdpRequestBytes": 2104,
-        "sdpRequestCount": 22,
-        "dsRequestBytes": 506,
-        "dsRequestCount": 3,
-        "totalProcessedBytes": 91152,
-        "totalProcessedCount": 135,
-        "sentimentRequestBytes": 0,
-        "sentimentRequestCount": 0,
-        "sessionDurationMs": 23040,
-        "dumpFileSizeBytes": 52090
-      },
       "aggregates": {
         "PC_0": {
-          "pcSessionDurationMs": 21036,
+          "connectionFailed": false,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
-          "connectionFailed": false,
           "iceReconnects": 0,
+          "inboundVideoExperience": {
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 30
+            },
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 30
+            }
+          },
           "isP2P": true,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
+          "pcSessionDurationMs": 21036,
           "trackAggregates": {
-            "totalSentPacketsLost": 0,
-            "totalPacketsSent": 3947,
+            "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
-            "totalReceivedPacketsLost": 0,
             "totalPacketsReceived": 4008,
-            "receivedPacketsLostPct": 0
+            "totalPacketsSent": 3947,
+            "totalReceivedPacketsLost": 0,
+            "totalSentPacketsLost": 0
           },
           "tracks": {
             "receiverTracks": [
@@ -132,34 +87,34 @@
           "transportAggregates": {
             "meanRtt": 0
           },
-          "inboundVideoExperience": {
-            "upperBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 30
-            },
-            "lowerBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 30
-            }
-          }
+          "usesRelay": false
         },
         "PC_1": {
-          "pcSessionDurationMs": 21254,
           "connectionFailed": false,
-          "iceReconnects": 0,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "inboundVideoExperience": {
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 27
+            },
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 27
+            }
+          },
           "isP2P": false,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
+          "pcSessionDurationMs": 21254,
           "trackAggregates": {
-            "totalSentPacketsLost": 0,
-            "totalPacketsSent": 83,
+            "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
-            "totalReceivedPacketsLost": 0,
             "totalPacketsReceived": 51,
-            "receivedPacketsLostPct": 0
+            "totalPacketsSent": 83,
+            "totalReceivedPacketsLost": 0,
+            "totalSentPacketsLost": 0
           },
           "tracks": {
             "receiverTracks": [
@@ -224,18 +179,63 @@
           "transportAggregates": {
             "meanRtt": 40.33
           },
-          "inboundVideoExperience": {
-            "upperBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 27
-            },
-            "lowerBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 27
-            }
-          }
+          "usesRelay": false
         }
-      } 
+      },
+      "browserInfo": {
+        "majorVersion": "96",
+        "name": "Chrome",
+        "nameOs": "Chrome/OS X 10.15.7 64-bit",
+        "nameVersion": "Chrome/96.0.4664.110",
+        "nameVersionOs": "Chrome/96.0.4664.110/OS X 10.15.7 64-bit",
+        "os": "OS X 10.15.7 64-bit",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
+        "version": "96.0.4664.110"
+      },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "us-west-2",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-drno",
+        "userRegion": ""
+      },
+      "dominantSpeakerChanges": 1,
+      "e2epings": {
+        "as458df9": {
+          "remoteRegion": "us-west-1",
+          "rtt": 223
+        }
+      },
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 0,
+        "dsRequestBytes": 506,
+        "dsRequestCount": 3,
+        "dumpFileSizeBytes": 52090,
+        "otherRequestBytes": 18914,
+        "otherRequestCount": 104,
+        "sdpRequestBytes": 2104,
+        "sdpRequestCount": 22,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 23040,
+        "statsRequestBytes": 69628,
+        "statsRequestCount": 6,
+        "totalProcessedBytes": 91152,
+        "totalProcessedCount": 135
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 3017
     }
   }
 ]

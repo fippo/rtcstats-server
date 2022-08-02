@@ -1,68 +1,39 @@
 [
   {
     "dumpInfo": {
+      "ampDeviceId": "4982d7c4-01ae-4570-8599-09283b42766a",
+      "ampSessionId": 1641600611831,
       "app": "Integration Test",
       "clientId": "d0667072-0689-43bd-b34a-89e147cbf9ce",
       "conferenceUrl": "192.168.1.1/conf-d0667072-0689-43bd-b34a-89e147cbf9ce",
       "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/d0667072-0689-43bd-b34a-89e147cbf9ce",
       "endDate": 1641600611905,
-      "startDate": 1641600611868,
       "sessionId": "4755c766-a069-4316-b1f1-54829dbc7a69",
-      "userId": "test-d0667072-0689-43bd-b34a-89e147cbf9ce",
-      "ampSessionId": 1641600611831,
-      "ampDeviceId": "4982d7c4-01ae-4570-8599-09283b42766a",
-      "statsFormat": "chrome_standard"
+      "startDate": 1641600611868,
+      "statsFormat": "chrome_standard",
+      "userId": "test-d0667072-0689-43bd-b34a-89e147cbf9ce"
     },
     "features": {
-      "dominantSpeakerChanges": 0,
-      "faceLandmarksTimestamps": [],
-      "speakerTime": 0,
-      "sentiment": {
-        "angry": 0,
-        "disgusted": 0,
-        "fearful": 0,
-        "happy": 0,
-        "neutral": 0,
-        "sad": 0,
-        "surprised": 0
-      },
-      "deploymentInfo": {
-        "crossRegion": 0,
-        "envType": "dev",
-        "environment": "lonely",
-        "region": "eu-west-1",
-        "releaseNumber": "",
-        "shard": "hcv-lonely-andreig2",
-        "userRegion": ""
-      },
-      "metrics": {
-        "conferenceDurationMs": 20286304,
-        "dsRequestBytes": 0,
-        "dsRequestCount": 0,
-        "dumpFileSizeBytes": 286674,
-        "otherRequestBytes": 11118,
-        "otherRequestCount": 38,
-        "sdpRequestBytes": 19664,
-        "sdpRequestCount": 3,
-        "sentimentRequestBytes": 0,
-        "sentimentRequestCount": 0,
-        "sessionDurationMs": 77001,
-        "statsRequestBytes": 532462,
-        "statsRequestCount": 34,
-        "totalProcessedBytes": 563244,
-        "totalProcessedCount": 75
-      },
       "aggregates": {
         "PC_0": {
-          "pcSessionDurationMs": 65094,
+          "connectionFailed": false,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "inboundVideoExperience": {
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 180,
+              "meanFramesPerSecond": 28.85
+            },
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 27.82
+            }
+          },
           "isP2P": false,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
-          "connectionFailed": false,
-          "iceReconnects": 0,
+          "pcSessionDurationMs": 65094,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.05,
             "sentPacketsLostPct": 0,
@@ -152,18 +123,47 @@
           "transportAggregates": {
             "meanRtt": 0.05
           },
-          "inboundVideoExperience": {
-            "upperBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 27.82
-            },
-            "lowerBoundAggregates": {
-              "meanFrameHeight": 180,
-              "meanFramesPerSecond": 28.85
-            }
-          }
+          "usesRelay": false
         }
-      }
+      },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-andreig2",
+        "userRegion": ""
+      },
+      "dominantSpeakerChanges": 0,
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 20286304,
+        "dsRequestBytes": 0,
+        "dsRequestCount": 0,
+        "dumpFileSizeBytes": 286674,
+        "otherRequestBytes": 11118,
+        "otherRequestCount": 38,
+        "sdpRequestBytes": 19664,
+        "sdpRequestCount": 3,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 77001,
+        "statsRequestBytes": 532462,
+        "statsRequestCount": 34,
+        "totalProcessedBytes": 563244,
+        "totalProcessedCount": 75
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 0
     }
   }
 ]

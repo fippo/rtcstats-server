@@ -1,128 +1,128 @@
 [
-    {
-        "features": {
-            "aggregates": {
-                "PC_0": {
-                    "connectionFailed": false,
-                    "dtlsErrors": 0,
-                    "dtlsFailure": 0,
-                    "iceReconnects": 0,
-                    "inboundVideoExperience": {
-                        "lowerBoundAggregates": {
-                            "meanFrameHeight": 630,
-                            "meanFramesPerSecond": 29.75
-                        },
-                        "upperBoundAggregates": {
-                            "meanFrameHeight": 630,
-                            "meanFramesPerSecond": 29.75
-                        }
-                    },
-                    "isP2P": true,
-                    "lastIceDisconnect": 0,
-                    "lastIceFailure": 0,
-                    "pcSessionDurationMs": 41170,
-                    "trackAggregates": {
-                        "receivedPacketsLostPct": 0,
-                        "sentPacketsLostPct": 0,
-                        "totalPacketsReceived": 4551,
-                        "totalPacketsSent": 0,
-                        "totalReceivedPacketsLost": 0,
-                        "totalSentPacketsLost": 0
-                    },
-                    "tracks": {
-                        "receiverTracks": [
-                            {
-                                "concealedPercentage": 0,
-                                "mediaType": "video/camera",
-                                "packets": 4551,
-                                "packetsLost": 0,
-                                "packetsLostPct": 0,
-                                "packetsLostVariance": 0,
-                                "ssrc": 3155040392
-                            }
-                        ],
-                        "senderTracks": []
-                    },
-                    "transportAggregates": {
-                        "meanRtt": 0
-                    },
-                    "usesRelay": false
-                },
-                "PC_1": {
-                    "connectionFailed": false,
-                    "dtlsErrors": 0,
-                    "dtlsFailure": 0,
-                    "iceReconnects": 0,
-                    "isP2P": false,
-                    "lastIceDisconnect": 0,
-                    "lastIceFailure": 0,
-                    "pcSessionDurationMs": 41492,
-                    "trackAggregates": {
-                        "receivedPacketsLostPct": 0,
-                        "sentPacketsLostPct": 0,
-                        "totalPacketsReceived": 0,
-                        "totalPacketsSent": 0,
-                        "totalReceivedPacketsLost": 0,
-                        "totalSentPacketsLost": 0
-                    },
-                    "tracks": {
-                        "receiverTracks": [],
-                        "senderTracks": []
-                    },
-                    "transportAggregates": {
-                        "meanRtt": 0.04
-                    },
-                    "usesRelay": false
-                }
+  {
+    "features": {
+      "aggregates": {
+        "PC_0": {
+          "connectionFailed": false,
+          "dtlsErrors": 0,
+          "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "inboundVideoExperience": {
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 630,
+              "meanFramesPerSecond": 29.75
             },
-            "browserInfo": {
-                "majorVersion": "100",
-                "name": "Chrome",
-                "nameOs": "Chrome/Windows 10 64-bit",
-                "nameVersion": "Chrome/100.0.4896.127",
-                "nameVersionOs": "Chrome/100.0.4896.127/Windows 10 64-bit",
-                "os": "Windows 10 64-bit",
-                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36",
-                "version": "100.0.4896.127"
-            },
-            "deploymentInfo": {
-                "crossRegion": 0,
-                "envType": "dev",
-                "environment": "lonely",
-                "region": "eu-west-1",
-                "releaseNumber": "",
-                "shard": "hcv-lonely-george",
-                "userRegion": ""
-            },
-            "dominantSpeakerChanges": 0,
-            "faceLandmarksTimestamps": [],
-            "metrics": {
-                "conferenceDurationMs": 0,
-                "dsRequestBytes": 0,
-                "dsRequestCount": 0,
-                "dumpFileSizeBytes": 68782,
-                "otherRequestBytes": 15884,
-                "otherRequestCount": 82,
-                "sdpRequestBytes": 2202,
-                "sdpRequestCount": 23,
-                "sentimentRequestBytes": 0,
-                "sentimentRequestCount": 0,
-                "sessionDurationMs": 72071,
-                "statsRequestBytes": 105808,
-                "statsRequestCount": 10,
-                "totalProcessedBytes": 123894,
-                "totalProcessedCount": 115
-            },
-            "sentiment": {
-                "angry": 0,
-                "disgusted": 0,
-                "fearful": 0,
-                "happy": 0,
-                "neutral": 0,
-                "sad": 0,
-                "surprised": 0
-            },
-            "speakerTime": 0
+            "upperBoundAggregates": {
+              "meanFrameHeight": 630,
+              "meanFramesPerSecond": 29.75
+            }
+          },
+          "isP2P": true,
+          "lastIceDisconnect": 0,
+          "lastIceFailure": 0,
+          "pcSessionDurationMs": 41170,
+          "trackAggregates": {
+            "receivedPacketsLostPct": 0,
+            "sentPacketsLostPct": 0,
+            "totalPacketsReceived": 4551,
+            "totalPacketsSent": 0,
+            "totalReceivedPacketsLost": 0,
+            "totalSentPacketsLost": 0
+          },
+          "tracks": {
+            "receiverTracks": [
+              {
+                "concealedPercentage": 0,
+                "mediaType": "video/camera",
+                "packets": 4551,
+                "packetsLost": 0,
+                "packetsLostPct": 0,
+                "packetsLostVariance": 0,
+                "ssrc": 3155040392
+              }
+            ],
+            "senderTracks": []
+          },
+          "transportAggregates": {
+            "meanRtt": 0
+          },
+          "usesRelay": false
+        },
+        "PC_1": {
+          "connectionFailed": false,
+          "dtlsErrors": 0,
+          "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "isP2P": false,
+          "lastIceDisconnect": 0,
+          "lastIceFailure": 0,
+          "pcSessionDurationMs": 41492,
+          "trackAggregates": {
+            "receivedPacketsLostPct": 0,
+            "sentPacketsLostPct": 0,
+            "totalPacketsReceived": 0,
+            "totalPacketsSent": 0,
+            "totalReceivedPacketsLost": 0,
+            "totalSentPacketsLost": 0
+          },
+          "tracks": {
+            "receiverTracks": [],
+            "senderTracks": []
+          },
+          "transportAggregates": {
+            "meanRtt": 0.04
+          },
+          "usesRelay": false
         }
+      },
+      "browserInfo": {
+        "majorVersion": "100",
+        "name": "Chrome",
+        "nameOs": "Chrome/Windows 10 64-bit",
+        "nameVersion": "Chrome/100.0.4896.127",
+        "nameVersionOs": "Chrome/100.0.4896.127/Windows 10 64-bit",
+        "os": "Windows 10 64-bit",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36",
+        "version": "100.0.4896.127"
+      },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-george",
+        "userRegion": ""
+      },
+      "dominantSpeakerChanges": 0,
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 0,
+        "dsRequestBytes": 0,
+        "dsRequestCount": 0,
+        "dumpFileSizeBytes": 68782,
+        "otherRequestBytes": 15884,
+        "otherRequestCount": 82,
+        "sdpRequestBytes": 2202,
+        "sdpRequestCount": 23,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 72071,
+        "statsRequestBytes": 105808,
+        "statsRequestCount": 10,
+        "totalProcessedBytes": 123894,
+        "totalProcessedCount": 115
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 0
     }
+  }
 ]

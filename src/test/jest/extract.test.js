@@ -7,7 +7,13 @@ const { StatsFormat } = require('../../utils/stats-detection');
 const { strict: assert } = require('assert');
 const fs = require('fs');
 
-async function simulateConnection(dumpPath, resultPath, statsFormat) {
+// The JSON.stringify spec does not garantee the sort order of the object keys (i.e. different objects with the same
+// properties can have different string serialization). This replacer can be used to sort the object keys for a stable
+// JSON serialization, even across different objects.
+const replacer = (key, val) => val instanceof Object && !(val instanceof Array)
+    ? Object.keys(val).sort().reduce((sorted, key) => { sorted[key] = val[key]; return sorted }, {}) : val;
+
+async function simulateConnection(dumpPath, expectedResultPath, statsFormat) {
 
     const dumpMeta = {
         dumpPath: dumpPath,
@@ -15,13 +21,23 @@ async function simulateConnection(dumpPath, resultPath, statsFormat) {
     };
 
     const featExtractor = new FeatureExtractor(dumpMeta);
-    const results = await featExtractor.extract();
+    const actualFeatures = await featExtractor.extract();
 
-    const resultString = fs.readFileSync(resultPath);
-    const resultList = JSON.parse(resultString);
-    const resultTemplate = resultList.shift();
+    const expectedResultString = fs.readFileSync(expectedResultPath);
+    const expectedResultList = JSON.parse(expectedResultString);
 
-    assert.deepStrictEqual(results, resultTemplate.features);
+    const fix = process.argv.filter((x) => x.startsWith('--fix'))[0]
+    if (fix) {
+        expectedResultList[0].features = actualFeatures;
+
+        fs.writeFile(expectedResultPath, JSON.stringify(expectedResultList, replacer, 2), err => {
+            if (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    assert.deepStrictEqual(actualFeatures, expectedResultList[0].features);
 }
 
 describe('Feature extraction tests', () => {

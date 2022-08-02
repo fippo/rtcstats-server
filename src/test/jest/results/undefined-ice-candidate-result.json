@@ -1,6 +1,9 @@
 [
   {
     "dumpInfo": {
+      "ampDeviceId": "7b84dd7e-7c68-4e52-8e69-b0d2833ebdaaR",
+      "ampSessionId": 1646895708035,
+      "ampUserId": null,
       "app": "Jitsi Meet",
       "clientId": "050bf1c4-8d52-43dd-ba94-8b58089f0020",
       "conferenceId": "xxxxxxxxxxzu2pFGyp7mBrP7RdvzNcsEPXj7pmGDcNGw",
@@ -8,43 +11,39 @@
       "dumpPath": "/rtcstats-server/temp/050bf1c4-8d52-43dd-ba94-8b58089f0020",
       "endDate": 1646901926175,
       "endpointId": "cced643e",
-      "startDate": 1646901906018,
       "sessionId": "41c8f2f2-eab3-49c7-b568-6d7d4e51fb81",
-      "userId": "Lyda-hGl",
-      "ampSessionId": 1646895708035,
-      "ampUserId": null,
-      "ampDeviceId": "7b84dd7e-7c68-4e52-8e69-b0d2833ebdaaR",
-      "statsFormat": "chrome_standard"
+      "startDate": 1646901906018,
+      "statsFormat": "chrome_standard",
+      "userId": "Lyda-hGl"
     },
     "features": {
-      "dominantSpeakerChanges": 0,
-      "faceLandmarksTimestamps": [],
-      "speakerTime": 0,
-      "sentiment": {
-        "angry": 0,
-        "disgusted": 0,
-        "fearful": 0,
-        "happy": 0,
-        "neutral": 0,
-        "sad": 0,
-        "surprised": 0
-      },
-      "metrics": {
-        "conferenceDurationMs": 0,
-        "statsRequestBytes": 217880,
-        "statsRequestCount": 3,
-        "otherRequestBytes": 15674,
-        "otherRequestCount": 74,
-        "sdpRequestBytes": 576,
-        "sdpRequestCount": 6,
-        "dsRequestBytes": 218,
-        "dsRequestCount": 1,
-        "totalProcessedBytes": 234348,
-        "totalProcessedCount": 84,
-        "sentimentRequestBytes": 0,
-        "sentimentRequestCount": 0,
-        "sessionDurationMs": 32571,
-        "dumpFileSizeBytes": 123929
+      "aggregates": {
+        "PC_0": {
+          "connectionFailed": true,
+          "dtlsErrors": 0,
+          "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "isP2P": false,
+          "lastIceDisconnect": 1646901911025,
+          "lastIceFailure": 0,
+          "pcSessionDurationMs": 0,
+          "trackAggregates": {
+            "receivedPacketsLostPct": 0,
+            "sentPacketsLostPct": 0,
+            "totalPacketsReceived": 0,
+            "totalPacketsSent": 0,
+            "totalReceivedPacketsLost": 0,
+            "totalSentPacketsLost": 0
+          },
+          "tracks": {
+            "receiverTracks": [],
+            "senderTracks": []
+          },
+          "transportAggregates": {
+            "meanRtt": 0.08
+          },
+          "usesRelay": false
+        }
       },
       "browserInfo": {
         "majorVersion": "99",
@@ -65,34 +64,35 @@
         "shard": "meet-jit-si-eu-central-1a-s40",
         "userRegion": "eu-central-1"
       },
-      "aggregates": {
-        "PC_0": {
-          "pcSessionDurationMs": 0,
-          "connectionFailed": true,
-          "iceReconnects": 0,
-          "isP2P": false,
-          "lastIceDisconnect": 1646901911025,
-          "lastIceFailure": 0,
-          "usesRelay": false,
-          "dtlsErrors": 0,
-          "dtlsFailure": 0,
-          "tracks": {
-            "receiverTracks": [],
-            "senderTracks": []
-          },
-          "trackAggregates": {
-            "totalSentPacketsLost": 0,
-            "totalPacketsSent": 0,
-            "sentPacketsLostPct": 0,
-            "totalReceivedPacketsLost": 0,
-            "totalPacketsReceived": 0,
-            "receivedPacketsLostPct": 0
-          },
-          "transportAggregates": {
-            "meanRtt": 0.08
-          }
-        }
-      }
+      "dominantSpeakerChanges": 0,
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 0,
+        "dsRequestBytes": 218,
+        "dsRequestCount": 1,
+        "dumpFileSizeBytes": 123929,
+        "otherRequestBytes": 15674,
+        "otherRequestCount": 74,
+        "sdpRequestBytes": 576,
+        "sdpRequestCount": 6,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 32571,
+        "statsRequestBytes": 217880,
+        "statsRequestCount": 3,
+        "totalProcessedBytes": 234348,
+        "totalProcessedCount": 84
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 0
     }
   }
 ]

@@ -1,85 +1,36 @@
 [
   {
     "dumpInfo": {
+      "ampDeviceId": "d5f91167-4d2e-445b-a48d-492edcd3b3b9",
+      "ampSessionId": 1641864713012,
       "app": "Integration Test",
       "clientId": "9eb2f1a0-af02-443f-b97c-e415ecc857e7",
       "conferenceUrl": "192.168.1.1/conf-9eb2f1a0-af02-443f-b97c-e415ecc857e7",
       "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/9eb2f1a0-af02-443f-b97c-e415ecc857e7",
       "endDate": 1641864713064,
-      "startDate": 1641864713041,
       "sessionId": "1e501074-10e3-48ec-99bd-9c402d53513c",
-      "userId": "test-9eb2f1a0-af02-443f-b97c-e415ecc857e7",
-      "ampSessionId": 1641864713012,
-      "ampDeviceId": "d5f91167-4d2e-445b-a48d-492edcd3b3b9",
-      "statsFormat": "firefox"
+      "startDate": 1641864713041,
+      "statsFormat": "firefox",
+      "userId": "test-9eb2f1a0-af02-443f-b97c-e415ecc857e7"
     },
     "features": {
-      "dominantSpeakerChanges": 2,
-      "faceLandmarksTimestamps": [],
-      "speakerTime": 19149,
-      "sentiment": {
-        "angry": 0,
-        "disgusted": 0,
-        "fearful": 0,
-        "happy": 0,
-        "neutral": 0,
-        "sad": 0,
-        "surprised": 0
-      },
-      "browserInfo": {
-        "majorVersion": "100",
-        "name": "Firefox",
-        "nameOs": "Firefox/OS X 10.15",
-        "nameVersion": "Firefox/100.0",
-        "nameVersionOs": "Firefox/100.0/OS X 10.15",
-        "os": "OS X 10.15",
-        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
-        "version": "100.0"
-      },
-      "deploymentInfo": {
-        "crossRegion": 0,
-        "envType": "dev",
-        "environment": "lonely",
-        "region": "us-west-2",
-        "releaseNumber": "",
-        "shard": "hcv-lonely-drno",
-        "userRegion": ""
-      },
-      "metrics": {
-        "conferenceDurationMs": 0,
-        "statsRequestBytes": 36596,
-        "statsRequestCount": 8,
-        "otherRequestBytes": 7806,
-        "otherRequestCount": 37,
-        "sdpRequestBytes": 864,
-        "sdpRequestCount": 9,
-        "dsRequestBytes": 614,
-        "dsRequestCount": 3,
-        "totalProcessedBytes": 45880,
-        "totalProcessedCount": 57,
-        "sentimentRequestBytes": 0,
-        "sentimentRequestCount": 0,
-        "sessionDurationMs": 90460,
-        "dumpFileSizeBytes": 28534
-      },
       "aggregates": {
         "PC_0": {
-          "pcSessionDurationMs": 70587,
           "connectionFailed": false,
-          "iceReconnects": 0,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
+          "iceReconnects": 0,
           "isP2P": false,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
+          "pcSessionDurationMs": 70587,
           "trackAggregates": {
-            "totalSentPacketsLost": 0,
-            "totalPacketsSent": 0,
+            "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
-            "totalReceivedPacketsLost": 28,
             "totalPacketsReceived": 4294935897,
-            "receivedPacketsLostPct": 0
+            "totalPacketsSent": 0,
+            "totalReceivedPacketsLost": 28,
+            "totalSentPacketsLost": 0
           },
           "tracks": {
             "receiverTracks": [
@@ -161,9 +112,58 @@
           },
           "transportAggregates": {
             "meanRtt": 0.04
-          }
+          },
+          "usesRelay": false
         }
-      }
+      },
+      "browserInfo": {
+        "majorVersion": "100",
+        "name": "Firefox",
+        "nameOs": "Firefox/OS X 10.15",
+        "nameVersion": "Firefox/100.0",
+        "nameVersionOs": "Firefox/100.0/OS X 10.15",
+        "os": "OS X 10.15",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
+        "version": "100.0"
+      },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "us-west-2",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-drno",
+        "userRegion": ""
+      },
+      "dominantSpeakerChanges": 2,
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 0,
+        "dsRequestBytes": 614,
+        "dsRequestCount": 3,
+        "dumpFileSizeBytes": 28534,
+        "otherRequestBytes": 7806,
+        "otherRequestCount": 37,
+        "sdpRequestBytes": 864,
+        "sdpRequestCount": 9,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 90460,
+        "statsRequestBytes": 36596,
+        "statsRequestCount": 8,
+        "totalProcessedBytes": 45880,
+        "totalProcessedCount": 57
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 19149
     }
   }
 ]

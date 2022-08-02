@@ -1,68 +1,39 @@
 [
   {
     "dumpInfo": {
+      "ampDeviceId": "38e672be-5e96-4d19-905e-1692a81eb09c",
+      "ampSessionId": 1641600326907,
       "app": "Integration Test",
       "clientId": "83072254-e24b-4f8d-8162-23e94958ccb3",
       "conferenceUrl": "192.168.1.1/conf-83072254-e24b-4f8d-8162-23e94958ccb3",
       "dumpPath": "/Users/nohlmeier/src/rtcstats-server/temp/83072254-e24b-4f8d-8162-23e94958ccb3",
       "endDate": 1641600327015,
-      "startDate": 1641600326943,
       "sessionId": "bd918844-47a7-4985-a01d-22042108742a",
-      "userId": "test-83072254-e24b-4f8d-8162-23e94958ccb3",
-      "ampSessionId": 1641600326907,
-      "ampDeviceId": "38e672be-5e96-4d19-905e-1692a81eb09c",
-      "statsFormat": "chrome_standard"
+      "startDate": 1641600326943,
+      "statsFormat": "chrome_standard",
+      "userId": "test-83072254-e24b-4f8d-8162-23e94958ccb3"
     },
     "features": {
-      "dominantSpeakerChanges": 0,
-      "faceLandmarksTimestamps": [],
-      "speakerTime": 0,
-      "sentiment": {
-        "angry": 0,
-        "disgusted": 0,
-        "fearful": 0,
-        "happy": 0,
-        "neutral": 0,
-        "sad": 0,
-        "surprised": 0
-      },
-      "deploymentInfo": {
-        "crossRegion": 0,
-        "envType": "dev",
-        "environment": "lonely",
-        "region": "eu-west-1",
-        "releaseNumber": "",
-        "shard": "hcv-lonely-andreig2",
-        "userRegion": ""
-      },
-      "metrics": {
-        "conferenceDurationMs": 0,
-        "dsRequestBytes": 0,
-        "dsRequestCount": 0,
-        "dumpFileSizeBytes": 621030,
-        "otherRequestBytes": 48746,
-        "otherRequestCount": 108,
-        "sdpRequestBytes": 209774,
-        "sdpRequestCount": 24,
-        "sentimentRequestBytes": 0,
-        "sentimentRequestCount": 0,
-        "sessionDurationMs": 137304,
-        "statsRequestBytes": 971272,
-        "statsRequestCount": 81,
-        "totalProcessedBytes": 1229792,
-        "totalProcessedCount": 213
-      },
       "aggregates": {
         "PC_0": {
-          "pcSessionDurationMs": 54513,
           "connectionFailed": false,
-          "iceReconnects": 0,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "inboundVideoExperience": {
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 23.36
+            },
+            "upperBoundAggregates": {
+              "meanFrameHeight": 720,
+              "meanFramesPerSecond": 23.36
+            }
+          },
           "isP2P": true,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
+          "pcSessionDurationMs": 54513,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -116,27 +87,27 @@
           "transportAggregates": {
             "meanRtt": 0
           },
-          "inboundVideoExperience": {
-            "upperBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 23.36
-            },
-            "lowerBoundAggregates": {
-              "meanFrameHeight": 720,
-              "meanFramesPerSecond": 23.36
-            }
-          }
+          "usesRelay": false
         },
         "PC_1": {
-          "pcSessionDurationMs": 101282,
+          "connectionFailed": false,
           "dtlsErrors": 0,
           "dtlsFailure": 0,
+          "iceReconnects": 0,
+          "inboundVideoExperience": {
+            "lowerBoundAggregates": {
+              "meanFrameHeight": 469.41,
+              "meanFramesPerSecond": 19.1
+            },
+            "upperBoundAggregates": {
+              "meanFrameHeight": 504.71,
+              "meanFramesPerSecond": 19.71
+            }
+          },
           "isP2P": false,
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
-          "usesRelay": false,
-          "connectionFailed": false,
-          "iceReconnects": 0,
+          "pcSessionDurationMs": 101282,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.72,
             "sentPacketsLostPct": 0.17,
@@ -262,18 +233,47 @@
           "transportAggregates": {
             "meanRtt": 0.05
           },
-          "inboundVideoExperience": {
-            "upperBoundAggregates": {
-              "meanFrameHeight": 504.71,
-              "meanFramesPerSecond": 19.71
-            },
-            "lowerBoundAggregates": {
-              "meanFrameHeight": 469.41,
-              "meanFramesPerSecond": 19.1
-            }
-          }
+          "usesRelay": false
         }
-      }
+      },
+      "deploymentInfo": {
+        "crossRegion": 0,
+        "envType": "dev",
+        "environment": "lonely",
+        "region": "eu-west-1",
+        "releaseNumber": "",
+        "shard": "hcv-lonely-andreig2",
+        "userRegion": ""
+      },
+      "dominantSpeakerChanges": 0,
+      "faceLandmarksTimestamps": [],
+      "metrics": {
+        "conferenceDurationMs": 0,
+        "dsRequestBytes": 0,
+        "dsRequestCount": 0,
+        "dumpFileSizeBytes": 621030,
+        "otherRequestBytes": 48746,
+        "otherRequestCount": 108,
+        "sdpRequestBytes": 209774,
+        "sdpRequestCount": 24,
+        "sentimentRequestBytes": 0,
+        "sentimentRequestCount": 0,
+        "sessionDurationMs": 137304,
+        "statsRequestBytes": 971272,
+        "statsRequestCount": 81,
+        "totalProcessedBytes": 1229792,
+        "totalProcessedCount": 213
+      },
+      "sentiment": {
+        "angry": 0,
+        "disgusted": 0,
+        "fearful": 0,
+        "happy": 0,
+        "neutral": 0,
+        "sad": 0,
+        "surprised": 0
+      },
+      "speakerTime": 0
     }
   }
 ]

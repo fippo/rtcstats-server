@@ -9,6 +9,7 @@
     "lint": "eslint ./src/",
     "integration": "node ./src/test/client.js",
     "test": "jest",
+    "test:fix": "jest ./src/test/jest/extract.test.js -- --fix",
     "start": "NODE_ENV=production node ./src/app.js",
     "watch:dev": "nodemon --exec 'NODE_ENV=debug node ./src/app.js'",
     "debug": "NODE_ENV=debug node ./src/app.js",
