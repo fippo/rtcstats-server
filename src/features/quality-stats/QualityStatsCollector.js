@@ -119,8 +119,10 @@ class QualityStatsCollector {
      */
     _getTrackData(pcData, ssrc, timestamp) {
         if (pcData[ssrc]) {
-            // TODO what if endTime < startTime (client clock update)
-            pcData[ssrc].endTime = timestamp;
+            if (timestamp) {
+                // avoid storing endTimes where endTime < startTime (e.g. due to a bad client clock)
+                pcData[ssrc].endTime = Math.max(pcData[ssrc].startTime, timestamp);
+            }
         } else {
             // At this point track data for a PC just contain packet information, additional data points will
             // be added.
