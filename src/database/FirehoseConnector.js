@@ -106,6 +106,8 @@ class FirehoseConnector {
             packetsLost,
             packetsLostPct,
             packetsLostVariance,
+            startTime,
+            endTime,
             concealedPercentage
         } = track;
 
@@ -114,6 +116,8 @@ class FirehoseConnector {
         const trackSchemaObj = {
             id,
             createDate,
+            startTime: getSQLTimestamp(startTime),
+            endTime: getSQLTimestamp(endTime),
             pcId,
             statsSessionId,
             isP2P,
