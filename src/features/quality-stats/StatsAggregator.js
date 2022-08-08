@@ -1,4 +1,4 @@
-const { percentOf, round, standardizedMoment, average, getSQLTimestamp } = require('../../utils/utils');
+const { percentOf, round, standardizedMoment, average } = require('../../utils/utils');
 
 /**
  *
@@ -62,8 +62,8 @@ class StatsAggregator {
         if (!packets.length) {
             return stats;
         }
-        stats.startTime = getSQLTimestamp(startTime);
-        stats.endTime = getSQLTimestamp(endTime);
+        stats.startTime = startTime;
+        stats.endTime = endTime;
         const pcts = packets.at(-1);
 
         stats.packets = pcts;

@@ -33,27 +33,27 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:23",
+                "endTime": 1652352443435,
                 "mediaType": "video/camera",
                 "packets": 1478,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 446564881,
-                "startTime": "2022-05-12 10:47:14"
+                "startTime": 1652352434037
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:23",
+                "endTime": 1652352443435,
                 "mediaType": "video",
                 "packets": 1100,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 845973563,
-                "startTime": "2022-05-12 10:47:23"
+                "startTime": 1652352443435
               }
             ]
           },
@@ -93,60 +93,60 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:43",
+                "endTime": 1652352463470,
                 "mediaType": "video",
                 "packets": 147,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 1636121229,
-                "startTime": "2022-05-12 10:47:33"
+                "startTime": 1652352453457
               },
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:43",
+                "endTime": 1652352463470,
                 "mediaType": "video/camera",
                 "packets": 810,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 2511181394,
-                "startTime": "2022-05-12 10:47:13"
+                "startTime": 1652352433749
               },
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:34",
+                "endTime": 1652352454007,
                 "mediaType": "video/camera",
                 "packets": 354,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 2683469917,
-                "startTime": "2022-05-12 10:47:26"
+                "startTime": 1652352446472
               },
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:45",
+                "endTime": 1652352465360,
                 "mediaType": "video/desktop",
                 "packets": 464,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 2683469917,
-                "startTime": "2022-05-12 10:47:34"
+                "startTime": 1652352454007
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-05-12 10:47:43",
+                "endTime": 1652352463470,
                 "mediaType": "video",
                 "packets": 1730,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 1784258627,
-                "startTime": "2022-05-12 10:47:23"
+                "startTime": 1652352443481
               }
             ]
           },

@@ -33,38 +33,38 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-03-14 13:43:41",
+                "endTime": 1647265421362,
                 "mediaType": "video",
                 "packets": 1277,
                 "packetsLost": 1,
                 "packetsLostPct": 0.08,
                 "packetsLostVariance": 0,
                 "ssrc": 69911005,
-                "startTime": "2022-03-14 13:43:31"
+                "startTime": 1647265411363
               },
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-03-14 13:43:41",
+                "endTime": 1647265421362,
                 "mediaType": "video",
                 "packets": 1276,
                 "packetsLost": 1,
                 "packetsLostPct": 0.08,
                 "packetsLostVariance": 0,
                 "ssrc": 1744315986,
-                "startTime": "2022-03-14 13:43:31"
+                "startTime": 1647265411363
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
-                "endTime": "2022-03-14 13:43:41",
+                "endTime": 1647265421362,
                 "mediaType": "audio",
                 "packets": 935,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
                 "ssrc": 935896327,
-                "startTime": "2022-03-14 13:43:31"
+                "startTime": 1647265411363
               }
             ]
           },
