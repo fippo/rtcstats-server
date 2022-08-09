@@ -116,8 +116,6 @@ class FirehoseConnector {
         const trackSchemaObj = {
             id,
             createDate,
-            startTime: getSQLTimestamp(startTime),
-            endTime: getSQLTimestamp(endTime),
             pcId,
             statsSessionId,
             isP2P,
@@ -130,6 +128,14 @@ class FirehoseConnector {
             packetsLostVariance,
             concealedPercentage
         };
+
+        if (startTime) {
+            trackSchemaObj.startTime = getSQLTimestamp(startTime);
+        }
+
+        if (endTime) {
+            trackSchemaObj.endTime = getSQLTimestamp(endTime);
+        }
 
         this._putRecord(trackSchemaObj, this._trackStatsStream);
     };

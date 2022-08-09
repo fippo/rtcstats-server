@@ -318,8 +318,9 @@ function getIdealWorkerCount() {
  * @returns a datetime (in the UTC timezone) that is suitable for use in SQL/Firehose.
  */
 function getSQLTimestamp(value) {
+    const date = (value) ? new Date(value) : new Date();
     // the timezone is always zero UTC offset, as denoted by the suffix Z (that we slice)
-    return new Date(value).toISOString()
+    return date.toISOString()
         .slice(0, 19)
         .replace('T', ' ');
 }
