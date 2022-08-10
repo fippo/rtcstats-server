@@ -46,41 +46,49 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0.03,
+                "endTime": 1605197654361,
                 "mediaType": "audio",
                 "packets": 2645,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 250981789
+                "ssrc": 250981789,
+                "startTime": 1605197601722
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197654361,
                 "mediaType": "video",
                 "packets": 9585,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 2864088180
+                "ssrc": 2864088180,
+                "startTime": 1605197601866
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197654361,
                 "mediaType": "video",
                 "packets": 8421,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 9891702
+                "ssrc": 9891702,
+                "startTime": 1605197601866
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197654361,
                 "mediaType": "audio",
                 "packets": 2642,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 2364213263
+                "ssrc": 2364213263,
+                "startTime": 1605197601866
               }
             ]
           },
@@ -120,113 +128,137 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 1.01,
+                "endTime": 1605197701752,
                 "mediaType": "audio",
                 "packets": 1267,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 757648711
+                "ssrc": 757648711,
+                "startTime": 1605197677751
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 738,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1030784244
+                "ssrc": 1030784244,
+                "startTime": 1605197657752
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 1031,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1052990334
+                "ssrc": 1052990334,
+                "startTime": 1605197659754
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 334,
                 "packetsLost": 36,
                 "packetsLostPct": 10.78,
                 "packetsLostVariance": 25.401599999999995,
-                "ssrc": 1527498116
+                "ssrc": 1527498116,
+                "startTime": 1605197601950
               },
               {
                 "concealedPercentage": 2.42,
+                "endTime": 1605197701752,
                 "mediaType": "audio",
                 "packets": 354,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1661050740
+                "ssrc": 1661050740,
+                "startTime": 1605197695756
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 39,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1845975655
+                "ssrc": 1845975655,
+                "startTime": 1605197697755
               },
               {
                 "concealedPercentage": 96.87,
+                "endTime": 1605197701752,
                 "mediaType": "audio",
                 "packets": 82,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 2566963332
+                "ssrc": 2566963332,
+                "startTime": 1605197601950
               },
               {
                 "concealedPercentage": 47.09,
+                "endTime": 1605197701752,
                 "mediaType": "audio",
                 "packets": 1163,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 3489317734
+                "ssrc": 3489317734,
+                "startTime": 1605197657752
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 163,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1191903134
+                "ssrc": 1191903134,
+                "startTime": 1605197601950
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 2905,
                 "packetsLost": 7,
                 "packetsLostPct": 0.24,
                 "packetsLostVariance": 0.9603999999999988,
-                "ssrc": 1409401962
+                "ssrc": 1409401962,
+                "startTime": 1605197601950
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "audio",
                 "packets": 2334,
                 "packetsLost": 2,
                 "packetsLostPct": 0.09,
                 "packetsLostVariance": 0.07839999999999991,
-                "ssrc": 2545347749
+                "ssrc": 2545347749,
+                "startTime": 1605197601950
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1605197701752,
                 "mediaType": "video",
                 "packets": 915,
                 "packetsLost": 2,
                 "packetsLostPct": 0.22,
                 "packetsLostVariance": 0.07839999999999991,
-                "ssrc": 3077306155
+                "ssrc": 3077306155,
+                "startTime": 1605197601950
               }
             ]
           },

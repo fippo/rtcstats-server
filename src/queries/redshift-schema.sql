@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS rtcstats_track_metrics (
     id VARCHAR(128) NOT NULL,
     pcId VARCHAR(128),
     createdate TIMESTAMP,
+    starttime TIMESTAMP,
+    endtime TIMESTAMP,
     statssessionid VARCHAR ( 256 ),
     isP2P BOOLEAN,
     direction VARCHAR(128),

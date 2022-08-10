@@ -312,10 +312,17 @@ function getIdealWorkerCount() {
 
 /**
  * Get a SQL compliant timestamp (MDY DateStyle)
- * @returns
+ * Time value or timestamp number
+ * @param {number} value - An integer value representing the number of milliseconds since January 1, 1970, 00:00:00 UTC
+ * (the ECMAScript epoch, equivalent to the UNIX epoch), with leap seconds ignored.
+ * @returns a datetime (in the UTC timezone) that is suitable for use in SQL/Firehose.
  */
-function getSQLTimestamp() {
-    return new Date().toISOString()
+function getSQLTimestamp(value) {
+    const date = value ? new Date(value) : new Date();
+
+
+    // the timezone is always zero UTC offset, as denoted by the suffix Z (that we slice)
+    return date.toISOString()
         .slice(0, 19)
         .replace('T', ' ');
 }

@@ -106,6 +106,8 @@ class FirehoseConnector {
             packetsLost,
             packetsLostPct,
             packetsLostVariance,
+            startTime,
+            endTime,
             concealedPercentage
         } = track;
 
@@ -126,6 +128,14 @@ class FirehoseConnector {
             packetsLostVariance,
             concealedPercentage
         };
+
+        if (startTime) {
+            trackSchemaObj.startTime = getSQLTimestamp(startTime);
+        }
+
+        if (endTime) {
+            trackSchemaObj.endTime = getSQLTimestamp(endTime);
+        }
 
         this._putRecord(trackSchemaObj, this._trackStatsStream);
     };

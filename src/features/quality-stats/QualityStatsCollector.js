@@ -9,11 +9,14 @@ const StandardStatsExtractor = require('./StandardStatsExtractor');
  * Creates a new track data structure with the specified ssrc preset.
  *
  * @param {string} ssrc - the ssrc of the new track data structure.
+ * @param {number} timestamp - the UNIX timestamp of when this track was first observed on the client.
  * @returns the newly created track data structure.
  */
-function newTrack(ssrc) {
+function newTrack(ssrc, timestamp) {
     return {
         ssrc,
+        startTime: timestamp,
+        endTime: timestamp, // this can be the last time we observe this track (single data point)
         packetsReceived: [],
         packetsReceivedLost: [],
         packetsSent: [],
@@ -111,13 +114,19 @@ class QualityStatsCollector {
      * the initial object structure will be created.
      * @param {Object} pcData - Object containing PC collected data, including multiple ssrc data
      * @param {string} ssrc - ssrc of the track from which we want to obtain collected data
+     * @param {number} timestamp - the UNIX timestamp of when this stats entry was observed on the client endpoint.
      * @returns {Object}`- Track collected data.
      */
-    _getTrackData(pcData, ssrc) {
-        if (!pcData[ssrc]) {
+    _getTrackData(pcData, ssrc, timestamp) {
+        if (pcData[ssrc]) {
+            if (timestamp) {
+                // avoid storing endTimes where endTime < startTime (e.g. due to a bad client clock)
+                pcData[ssrc].endTime = Math.max(pcData[ssrc].startTime, timestamp);
+            }
+        } else {
             // At this point track data for a PC just contain packet information, additional data points will
             // be added.
-            pcData[ssrc] = newTrack(ssrc);
+            pcData[ssrc] = newTrack(ssrc, timestamp);
         }
 
         return pcData[ssrc];
@@ -129,15 +138,16 @@ class QualityStatsCollector {
      * @param {Object} pcData- Output param, collected data gets put here.
      * @param {Object} statsEntry - The complete webrtc statistics entry which contains multiple reports.
      * @param {Object} report - A single report from a stats entry.
+     * @param {number} timestamp - the UNIX timestamp of when this stats entry was observed on the client endpoint.
      */
-    _collectPacketLossData(pcData, statsEntry, report) {
+    _collectPacketLossData(pcData, statsEntry, report, timestamp) {
         const outboundPacketLossData = this.statsExtractor.extractOutboundPacketLoss(statsEntry, report);
         const inboundPacketLossData = this.statsExtractor.extractInboundPacketLoss(statsEntry, report);
 
         if (outboundPacketLossData) {
             const { ssrc, mediaType, packetsLost, packetsSent } = outboundPacketLossData;
 
-            const trackData = this._getTrackData(pcData, ssrc);
+            const trackData = this._getTrackData(pcData, ssrc, timestamp);
 
             trackData.mediaType = mediaType;
             trackData.packetsSentLost.push(packetsLost);
@@ -147,7 +157,7 @@ class QualityStatsCollector {
         if (inboundPacketLossData) {
             const { ssrc, mediaType, packetsLost, packetsReceived } = inboundPacketLossData;
 
-            const trackData = this._getTrackData(pcData, ssrc);
+            const trackData = this._getTrackData(pcData, ssrc, timestamp);
 
             trackData.mediaType = mediaType;
             trackData.packetsReceivedLost.push(packetsLost);
@@ -162,8 +172,9 @@ class QualityStatsCollector {
      * @param {Object} pcData- Output param, collected data gets put here.
      * @param {Object} statsEntry - The complete webrtc statistics entry which contains multiple reports.
      * @param {Object} report - A single report from a stats entry.
+     * @param {number} timestamp - the UNIX timestamp of when this stats entry was observed on the client endpoint.
      */
-    _collectConcealedSamples(pcData, statsEntry, report) {
+    _collectConcealedSamples(pcData, statsEntry, report, timestamp) {
         const concealedSamplesReceived = this.statsExtractor.extractConcealedSamplesReceived(statsEntry, report);
 
         if (concealedSamplesReceived) {
@@ -172,7 +183,7 @@ class QualityStatsCollector {
             // total in it is name.
             const { ssrc, totalSamples, concealed } = concealedSamplesReceived;
 
-            const trackData = this._getTrackData(pcData, ssrc);
+            const trackData = this._getTrackData(pcData, ssrc, timestamp);
 
             trackData.totalSamplesReceived.push(totalSamples);
             trackData.concealedSamplesReceived.push(concealed);
@@ -408,8 +419,9 @@ class QualityStatsCollector {
      * Handles the video type information signaled by the client.
      *
      * @param {Object} videoTypeData - the video metadata.
+     * @param {number} timestamp - the UNIX timestamp of when this message was generated on the client endpoint.
      */
-    processVideoTypeEntry(videoTypeData) {
+    processVideoTypeEntry(videoTypeData, timestamp) {
         const { ssrc, videoType } = videoTypeData;
 
         // The `setVideoType` message does not carry the peer connection id, so we
@@ -461,11 +473,14 @@ class QualityStatsCollector {
                     if (!pcData.vacuumedTracks) {
                         pcData.vacuumedTracks = [];
                     }
+
+                    // TODO what if endTime < startTime (client clock update)
+                    currentTrackData.endTime = timestamp;
                     pcData.vacuumedTracks.push(currentTrackData);
                     delete pcData[ssrc];
                 }
 
-                const newTrackData = newTrack(ssrc);
+                const newTrackData = newTrack(ssrc, timestamp);
 
                 newTrackData.videoType = videoType;
                 pcData[ssrc] = newTrackData;
@@ -478,8 +493,9 @@ class QualityStatsCollector {
      *
      * @param {string} pc - Associated PeerConnection.
      * @param {Object} statsEntry - Complete stats entry.
+     * @param {number} timestamp - the UNIX timestamp of when this stats entry was observed on the client endpoint.
      */
-    processStatsEntry(pc, statsEntry) {
+    processStatsEntry(pc, statsEntry, timestamp) {
         // If no collector was present simply skip.
         // TODO at this point we should avoid this call altogether.
         if (!this.statsExtractor) {
@@ -515,8 +531,8 @@ class QualityStatsCollector {
 
             this._collectRttData(rtts, statsEntry, report);
             this._collectIsUsingRelayData(pcData, statsEntry, report);
-            this._collectPacketLossData(pcData, statsEntry, report);
-            this._collectConcealedSamples(pcData, statsEntry, report);
+            this._collectPacketLossData(pcData, statsEntry, report, timestamp);
+            this._collectConcealedSamples(pcData, statsEntry, report, timestamp);
             this._updateInboundVideoExperience(inboundVideoExperience, statsEntry, report);
         });
 

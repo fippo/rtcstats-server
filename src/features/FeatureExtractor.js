@@ -112,9 +112,9 @@ class FeatureExtractor {
     }
 
     _handleVideoType = dumpLineObj => {
-        const [ , , videoTypeData ] = dumpLineObj;
+        const [ , , videoTypeData, timestamp ] = dumpLineObj;
 
-        this.collector.processVideoTypeEntry(videoTypeData);
+        this.collector.processVideoTypeEntry(videoTypeData, timestamp);
     };
 
     _handleCreate = dumpLineObj => {
@@ -325,7 +325,7 @@ class FeatureExtractor {
     _handleStatsRequest = (dumpLineObj, requestSize) => {
         const { metrics } = this.features;
 
-        const [ , pc, statsReport ] = dumpLineObj;
+        const [ , pc, statsReport, timestamp ] = dumpLineObj;
 
         // The rtcstats client applies a delta compression for sent stats entries, i.e. it only sends the difference
         // from the prior stat entry, so we need to decompress them.
@@ -337,7 +337,7 @@ class FeatureExtractor {
 
         // this.decompressFile.write(JSON.stringify([ pc, null, this.baseStats[pc] ]));
 
-        this.collector.processStatsEntry(pc, this.baseStats[pc]);
+        this.collector.processStatsEntry(pc, this.baseStats[pc], timestamp);
 
         metrics.statsRequestBytes += requestSize;
         metrics.statsRequestCount++;

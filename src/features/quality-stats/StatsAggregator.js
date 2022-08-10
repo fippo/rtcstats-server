@@ -57,11 +57,13 @@ class StatsAggregator {
             concealedPercentage: 0
         };
 
-        const { packets, packetsLost, samplesReceived, concealedSamples } = trackStats;
+        const { packets, packetsLost, samplesReceived, concealedSamples, startTime, endTime } = trackStats;
 
         if (!packets.length) {
             return stats;
         }
+        stats.startTime = startTime;
+        stats.endTime = endTime;
         const pcts = packets.at(-1);
 
         stats.packets = pcts;
@@ -129,7 +131,7 @@ class StatsAggregator {
         tracks.forEach(track => {
             const { packetsSentLost = [], packetsSent = [], packetsReceivedLost = [],
                 packetsReceived = [], totalSamplesReceived = [], concealedSamplesReceived = [],
-                mediaType = '', ssrc, videoType } = track;
+                mediaType = '', ssrc, videoType, startTime, endTime } = track;
 
             let mediaVideoType = mediaType;
 
@@ -140,7 +142,9 @@ class StatsAggregator {
 
 
             const trackStats = { samplesReceived: totalSamplesReceived,
-                concealedSamples: concealedSamplesReceived };
+                concealedSamples: concealedSamplesReceived,
+                startTime,
+                endTime };
 
             if (packetsSentLost.length && packetsSent.length) {
                 trackStats.packets = packetsSent;

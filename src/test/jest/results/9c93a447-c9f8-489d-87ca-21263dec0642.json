@@ -33,23 +33,27 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352443435,
                 "mediaType": "video/camera",
                 "packets": 1478,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 446564881
+                "ssrc": 446564881,
+                "startTime": 1652352434037
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352443435,
                 "mediaType": "video",
                 "packets": 1100,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 845973563
+                "ssrc": 845973563,
+                "startTime": 1652352443435
               }
             ]
           },
@@ -89,50 +93,60 @@
             "receiverTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352463470,
                 "mediaType": "video",
                 "packets": 147,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1636121229
+                "ssrc": 1636121229,
+                "startTime": 1652352453457
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352463470,
                 "mediaType": "video/camera",
                 "packets": 810,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 2511181394
+                "ssrc": 2511181394,
+                "startTime": 1652352433749
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352454007,
                 "mediaType": "video/camera",
                 "packets": 354,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 2683469917
+                "ssrc": 2683469917,
+                "startTime": 1652352446472
               },
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352465360,
                 "mediaType": "video/desktop",
                 "packets": 464,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 2683469917
+                "ssrc": 2683469917,
+                "startTime": 1652352454007
               }
             ],
             "senderTracks": [
               {
                 "concealedPercentage": 0,
+                "endTime": 1652352463470,
                 "mediaType": "video",
                 "packets": 1730,
                 "packetsLost": 0,
                 "packetsLostPct": 0,
                 "packetsLostVariance": 0,
-                "ssrc": 1784258627
+                "ssrc": 1784258627,
+                "startTime": 1652352443481
               }
             ]
           },
