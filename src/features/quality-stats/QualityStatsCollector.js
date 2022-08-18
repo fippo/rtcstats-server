@@ -97,6 +97,8 @@ class QualityStatsCollector {
                 isCallstats: false,
                 dtlsErrors: 0,
                 dtlsFailure: 0,
+                sdpCreateFailure: 0,
+                sdpSetFailure: 0,
                 usesRelay: null,
                 inboundVideoExperiences: [],
                 startTime: 0,
@@ -370,6 +372,28 @@ class QualityStatsCollector {
             if (optional[i].hasOwnProperty('rtcStatsSFUP2P')) {
                 pcData.isP2P = optional[i].rtcStatsSFUP2P;
             }
+        }
+    }
+
+    /**
+     * Failures when creating or setting SDP should not happen. Let's just count them if they occur.
+     *
+     * @param {string} type - The request type which caused the failure on the endpoint.
+     * @param {string} pc - Associated PeerConnection.
+     * @param {string} errormsg - The error message from the client (ignored for now).
+     */
+    processSdpFailure(type, pc, errormsg) {
+        const pcData = this._getPcData(pc);
+
+        switch (type) {
+        case 'createAnswerOnFailure':
+        case 'createOfferOnFailure':
+            pcData.sdpCreateFailure += 1;
+            break;
+        case 'setLocalDescriptionOnFailure':
+        case 'setRemoteDescriptionOnFailure':
+            pcData.sdpSetFailure += 1;
+            break;
         }
     }
 
