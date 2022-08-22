@@ -256,6 +256,8 @@ class FirehoseConnector {
             const {
                 dtlsErrors,
                 dtlsFailure,
+                sdpCreateFailure,
+                sdpSetFailure,
                 isP2P,
                 usesRelay,
                 isCallstats,
@@ -296,6 +298,8 @@ class FirehoseConnector {
                 statsSessionId,
                 dtlsErrors,
                 dtlsFailure,
+                sdpCreateFailure,
+                sdpSetFailure,
                 isP2P,
                 usesRelay,
                 iceReconnects,

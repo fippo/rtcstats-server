@@ -331,6 +331,8 @@ class StatsAggregator {
                 usesRelay: pcData.usesRelay,
                 dtlsErrors: pcData.dtlsErrors,
                 dtlsFailure: pcData.dtlsFailure,
+                sdpCreateFailure: pcData.sdpCreateFailure,
+                sdpSetFailure: pcData.sdpSetFailure,
                 lastIceFailure: pcData.lastIceFailure,
                 lastIceDisconnect: pcData.lastIceDisconnect };
 

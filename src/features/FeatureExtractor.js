@@ -86,6 +86,9 @@ class FeatureExtractor {
             constraints: this._handleConstraints,
             create: this._handleCreate,
             createAnswerOnSuccess: this._handleSDPRequest,
+            createAnswerOnFailure: this._handleSDPFailure,
+            createOfferOnSuccess: this._handleSDPRequest,
+            createOfferOnFailure: this._handleSDPFailure,
             dominantSpeaker: this._handleDominantSpeaker,
             e2eRtt: this._handleE2eRtt,
             faceLandmarks: this._handleFaceLandmarks,
@@ -96,7 +99,9 @@ class FeatureExtractor {
             ondtlserror: this._handleDtlsError,
             ondtlsstatechange: this._handleDtlsStateChange,
             setLocalDescription: this._handleSDPRequest,
+            setLocalDescriptionOnFailure: this._handleSDPFailure,
             setRemoteDescription: this._handleSDPRequest,
+            setRemoteDescriptionOnFailure: this._handleSDPFailure,
             setVideoType: this._handleVideoType
         };
 
@@ -277,6 +282,12 @@ class FeatureExtractor {
 
         metrics.sdpRequestBytes += requestSize;
         metrics.sdpRequestCount++;
+    };
+
+    _handleSDPFailure = dumpLineObj => {
+        const [ requestType, pc, errormsg ] = dumpLineObj;
+
+        this.collector.processSdpFailure(requestType, pc, errormsg);
     };
 
     _handleDtlsError = dumpLineObj => {

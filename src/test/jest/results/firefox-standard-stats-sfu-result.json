@@ -24,6 +24,8 @@
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 155540,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0.01,
             "sentPacketsLostPct": 0,

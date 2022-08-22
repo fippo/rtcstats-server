@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS rtcstats_pc_metrics (
     statssessionid VARCHAR ( 256 ),
     dtlsErrors INT,
     dtlsFailure INT,
+    sdpCreateFailure INT,
+    sdpSetFailure INT,
     pcname VARCHAR(128),
     pcSessionDurationMs: BIGINT,
     connectionFailed: BOOLEAN,

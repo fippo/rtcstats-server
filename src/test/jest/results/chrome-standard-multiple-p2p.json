@@ -21,6 +21,8 @@
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 181770,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -104,6 +106,8 @@
           "lastIceDisconnect": 1647251307091,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 0,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -130,6 +134,8 @@
           "lastIceDisconnect": 1647251307091,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 0,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -166,6 +172,8 @@
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 323712,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -314,6 +322,8 @@
           "lastIceDisconnect": 0,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 40658,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -397,6 +407,8 @@
           "lastIceDisconnect": 1647251589613,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 0,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -423,6 +435,8 @@
           "lastIceDisconnect": 1647251589613,
           "lastIceFailure": 0,
           "pcSessionDurationMs": 0,
+          "sdpCreateFailure": 0,
+          "sdpSetFailure": 0,
           "trackAggregates": {
             "receivedPacketsLostPct": 0,
             "sentPacketsLostPct": 0,
@@ -467,10 +481,10 @@
         "dsRequestBytes": 198,
         "dsRequestCount": 1,
         "dumpFileSizeBytes": 535931,
-        "otherRequestBytes": 68956,
-        "otherRequestCount": 410,
-        "sdpRequestBytes": 6660,
-        "sdpRequestCount": 70,
+        "otherRequestBytes": 68004,
+        "otherRequestCount": 400,
+        "sdpRequestBytes": 7612,
+        "sdpRequestCount": 80,
         "sentimentRequestBytes": 0,
         "sentimentRequestCount": 0,
         "sessionDurationMs": 325201,
