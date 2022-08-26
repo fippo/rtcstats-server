@@ -23,6 +23,7 @@ gcp:
     table:
     maxFlushTime:
     bufferSize:
+    streaming: true
 
 github:
     client_id: GITHUB_CLIENT_ID
