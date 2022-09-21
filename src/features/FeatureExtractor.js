@@ -36,9 +36,6 @@ class FeatureExtractor {
             this.statsFormat = statsFormat;
             this.collector = new QualityStatsCollector(statsFormat);
         }
-        this.conferenceStartTime = 0;
-        this.sessionStartTime = 0;
-        this.sessionEndTime = 0;
 
         this.aggregator = new StatsAggregator();
 
@@ -51,6 +48,9 @@ class FeatureExtractor {
         };
 
         this.features = {
+            conferenceStartTime: 0,
+            sessionStartTime: 0,
+            sessionEndTime: 0,
             dominantSpeakerChanges: 0,
             speakerTime: 0,
             sentiment: {
@@ -309,7 +309,7 @@ class FeatureExtractor {
 
         // At the end of a conference jitsi-meet sends another `conferenceStartTime` event
         // with 0 as the start time, so we ignore it.
-        timestamp && (this.conferenceStartTime = timestamp);
+        timestamp && (this.features.conferenceStartTime = timestamp);
     };
 
     _handleE2eRtt = dumpLineObj => {
@@ -389,7 +389,7 @@ class FeatureExtractor {
         }
 
         // Calculate how much time the last dominant speaker spent until this participant left the meeting.
-        const lastSpeakerTime = this.sessionEndTime - dominantSpeakerStartTimeStamp;
+        const lastSpeakerTime = this.features.sessionEndTime - dominantSpeakerStartTimeStamp;
 
         lastSpeakerStats.speakerTime += lastSpeakerTime;
 
@@ -410,12 +410,12 @@ class FeatureExtractor {
         const [ requestType, , , timestamp ] = dumpLineObj;
 
         if (requestType !== 'connectionInfo' && requestType !== 'identity') {
-            if (!this.sessionStartTime && timestamp) {
-                this.sessionStartTime = timestamp;
+            if (!this.features.sessionStartTime && timestamp) {
+                this.features.sessionStartTime = timestamp;
             }
 
-            if (timestamp > this.sessionEndTime) {
-                this.sessionEndTime = timestamp;
+            if (timestamp > this.features.sessionEndTime) {
+                this.features.sessionEndTime = timestamp;
             }
         }
     }
@@ -453,20 +453,20 @@ class FeatureExtractor {
 
         this.extractDominantSpeakerFeatures();
 
-        const { metrics } = this.features;
+        const { metrics, sessionStartTime, sessionEndTime, conferenceStartTime } = this.features;
         const { dsRequestBytes, sdpRequestBytes, statsRequestBytes, otherRequestBytes } = metrics;
         const { dsRequestCount, sdpRequestCount, statsRequestCount, otherRequestCount } = metrics;
 
         metrics.conferenceDurationMs = 0;
-        if (this.conferenceStartTime && (this.sessionEndTime > this.conferenceStartTime)) {
+        if (conferenceStartTime && (sessionEndTime > conferenceStartTime)) {
             // The client doesn't know when the conference ended, so we can only calculate how long it
             // was from the time the conference started till the client left.
-            metrics.conferenceDurationMs = this.sessionEndTime - this.conferenceStartTime;
+            metrics.conferenceDurationMs = sessionEndTime - conferenceStartTime;
         }
 
         metrics.sessionDurationMs = 0;
-        if (this.sessionEndTime > this.sessionStartTime) {
-            metrics.sessionDurationMs = this.sessionEndTime - this.sessionStartTime;
+        if (sessionEndTime > sessionStartTime) {
+            metrics.sessionDurationMs = sessionEndTime - sessionStartTime;
         }
         metrics.totalProcessedBytes = sdpRequestBytes + dsRequestBytes + statsRequestBytes + otherRequestBytes;
         metrics.totalProcessedCount = sdpRequestCount + dsRequestCount + statsRequestCount + otherRequestCount;

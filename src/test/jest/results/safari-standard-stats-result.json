@@ -178,6 +178,7 @@
           "usesRelay": false
         }
       },
+      "conferenceStartTime": 0,
       "deploymentInfo": {
         "crossRegion": 0,
         "envType": "dev",
@@ -215,6 +216,8 @@
         "sad": 0,
         "surprised": 0
       },
+      "sessionEndTime": 1605199607729,
+      "sessionStartTime": 1605199373960,
       "speakerTime": 0
     }
   }

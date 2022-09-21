@@ -91,6 +91,7 @@
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36",
         "version": "100.0.4896.127"
       },
+      "conferenceStartTime": 0,
       "deploymentInfo": {
         "crossRegion": 0,
         "envType": "dev",
@@ -128,6 +129,8 @@
         "sad": 0,
         "surprised": 0
       },
+      "sessionEndTime": 1651144340062,
+      "sessionStartTime": 1651144267991,
       "speakerTime": 0
     }
   }

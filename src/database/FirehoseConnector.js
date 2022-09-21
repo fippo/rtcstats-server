@@ -174,6 +174,9 @@ class FirehoseConnector {
                 sessionDurationMs,
                 conferenceDurationMs
             },
+            conferenceStartTime: conferenceStartTimestamp,
+            sessionStartTime: sessionStartTimestamp,
+            sessionEndTime: sessionEndTimestamp,
             dominantSpeakerChanges,
             speakerTime,
             sentiment: {
@@ -189,6 +192,9 @@ class FirehoseConnector {
         } = features;
 
         const createDate = getSQLTimestamp();
+        const conferenceStartTime = conferenceStartTimestamp ? getSQLTimestamp(conferenceStartTimestamp) : null;
+        const sessionStartTime = sessionStartTimestamp ? getSQLTimestamp(sessionStartTimestamp) : null;
+        const sessionEndTime = sessionEndTimestamp ? getSQLTimestamp(sessionEndTimestamp) : null;
 
         // The schemaObj needs to match the redshift table schema.
         const schemaObj = {
@@ -206,6 +212,9 @@ class FirehoseConnector {
             meetingUrl,
             meetingUniqueId,
             endpointId,
+            conferenceStartTime,
+            sessionStartTime,
+            sessionEndTime,
             sessionDurationMs,
             conferenceDurationMs,
             dominantSpeakerChanges,
