@@ -244,30 +244,29 @@ class FeatureExtractor {
         // Expected data format for dominant speaker:
         // {"dominantSpeakerEndpoint": "1a404b1b","previousSpeakers": ["bb211808","1a4dqdb",
         //  "1adqwdqw", "312f4b1b"], "endpointId": "1a404b1b"}
-        const { dominantSpeakerEndpoint } = data;
-
-        assert(dominantSpeakerEndpoint, 'dominantSpeakerEndpoint field missing from dominantSpeaker data');
-
-        const { speakerStats, dominantSpeakerStartTimeStamp } = this.dominantSpeakerData;
+        // `dominantSpeakerEndpoint` can also be null, which means that the current dominantSpeaker
+        // is no longer speaking.
+        const { dominantSpeakerEndpoint: newDominantSpeaker } = data;
+        const { speakerStats, currentDominantSpeaker, dominantSpeakerStartTimeStamp } = this.dominantSpeakerData;
 
         // Initialize speakerStats for endpoint if not present.
-        if (!speakerStats[dominantSpeakerEndpoint]) {
-            speakerStats[dominantSpeakerEndpoint] = { speakerTime: 0,
-                dominantSpeakerChanges: 0 };
-        }
+        speakerStats[newDominantSpeaker] ??= { speakerTime: 0,
+            dominantSpeakerChanges: 0 };
 
-        const { [dominantSpeakerEndpoint]: endpointSpeakerStats } = speakerStats;
+        const { [newDominantSpeaker]: newDominantSpeakerStats } = speakerStats;
 
-        endpointSpeakerStats.dominantSpeakerChanges++;
+        newDominantSpeakerStats.dominantSpeakerChanges++;
 
         // Calculate speaker time for the previous dominant speaker
-        if (this.dominantSpeakerData.currentDominantSpeaker) {
+        if (currentDominantSpeaker) {
+            const { [currentDominantSpeaker]: currentSpeakerStats } = speakerStats;
+
             const speakerTime = timestamp - dominantSpeakerStartTimeStamp;
 
-            endpointSpeakerStats.speakerTime += speakerTime;
+            currentSpeakerStats.speakerTime += speakerTime;
         }
 
-        this.dominantSpeakerData.currentDominantSpeaker = dominantSpeakerEndpoint;
+        this.dominantSpeakerData.currentDominantSpeaker = newDominantSpeaker;
         this.dominantSpeakerData.dominantSpeakerStartTimeStamp = timestamp;
     };
 

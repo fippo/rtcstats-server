@@ -226,7 +226,7 @@
         "shard": "hcv-lonely-drno",
         "userRegion": ""
       },
-      "dominantSpeakerChanges": 1,
+      "dominantSpeakerChanges": 2,
       "e2epings": {
         "as458df9": {
           "remoteRegion": "us-west-1",
@@ -236,9 +236,9 @@
       "faceLandmarksTimestamps": [],
       "metrics": {
         "conferenceDurationMs": 0,
-        "dsRequestBytes": 506,
-        "dsRequestCount": 3,
-        "dumpFileSizeBytes": 52090,
+        "dsRequestBytes": 952,
+        "dsRequestCount": 6,
+        "dumpFileSizeBytes": 52316,
         "otherRequestBytes": 18530,
         "otherRequestCount": 100,
         "sdpRequestBytes": 2488,
@@ -248,8 +248,8 @@
         "sessionDurationMs": 23040,
         "statsRequestBytes": 69628,
         "statsRequestCount": 6,
-        "totalProcessedBytes": 91152,
-        "totalProcessedCount": 135
+        "totalProcessedBytes": 91598,
+        "totalProcessedCount": 138
       },
       "sentiment": {
         "angry": 0,
@@ -262,7 +262,7 @@
       },
       "sessionEndTime": 1640046736482,
       "sessionStartTime": 1640046713442,
-      "speakerTime": 3017
+      "speakerTime": 2100
     }
   }
 ]
