@@ -163,7 +163,7 @@ class FirehoseConnector {
                 name: browserName,
                 version: browserVersion,
                 os
-            },
+            } = {},
             deploymentInfo: {
                 crossRegion,
                 environment,
@@ -171,12 +171,12 @@ class FirehoseConnector {
                 releaseNumber,
                 shard,
                 userRegion
-            },
+            } = {},
             e2epings = {},
             metrics: {
                 sessionDurationMs,
                 conferenceDurationMs
-            },
+            } = {},
             conferenceStartTime: conferenceStartTimestamp,
             sessionStartTime: sessionStartTimestamp,
             sessionEndTime: sessionEndTimestamp,
@@ -190,7 +190,7 @@ class FirehoseConnector {
                 neutral: sentimentNeutral,
                 sad: sentimentSad,
                 surprised: sentimentSurprised
-            },
+            } = {},
             faceLandmarksTimestamps
         } = features;
 

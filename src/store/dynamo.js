@@ -39,13 +39,28 @@ const getDumpId = ({ clientId }) => `${clientId}.gz`;
  *
  * @param {*} data
  */
-async function saveEntry({ ...data }) {
+async function saveEntry(data) {
     try {
-        const entry = Object.assign(data, {
-            dumpId: getDumpId(data),
-            conferenceId: data.conferenceId.toLowerCase(),
-            conferenceUrl: data.conferenceUrl?.toLowerCase()
-        });
+        const { conferenceId = 'undefined',
+            conferenceUrl = 'undefined',
+            userId = 'undefined',
+            app = 'undefined',
+            baseDumpId,
+            sessionId,
+            startDate,
+            endDate
+        } = data;
+
+        const entry = { dumpId: getDumpId(data),
+            conferenceId: conferenceId.toLowerCase(),
+            conferenceUrl: conferenceUrl.toLowerCase(),
+            userId,
+            baseDumpId,
+            app,
+            sessionId,
+            startDate,
+            endDate
+        };
 
         const document = new Document(entry);
 
