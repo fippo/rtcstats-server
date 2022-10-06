@@ -45,8 +45,10 @@ async function saveEntry(data) {
             conferenceUrl = 'undefined',
             userId = 'undefined',
             app = 'undefined',
+
+            // sessionId naming here might be confusing, this actually refers to the meeting unique id
+            sessionId = 'undefined',
             baseDumpId,
-            sessionId,
             startDate,
             endDate
         } = data;
