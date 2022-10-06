@@ -313,6 +313,8 @@ function simulateConnection(dumpPath, resultPath, ua, protocolV) {
             // 'connectionInfo' entry, thus metrics won't match.
             delete parsedBody.features?.metrics;
             delete resultTemplate.features?.metrics;
+            delete parsedBody.features?.browserInfo;
+            delete resultTemplate.features?.browserInfo;
 
             assert.deepStrictEqual(parsedBody, resultTemplate);
         },
