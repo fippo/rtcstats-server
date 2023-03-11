@@ -30,10 +30,6 @@ function getPeerConnectionConstraints(peerConnectionLog) {
 function determineBrowserFromOLine(sdp) {
     if (sdp.indexOf('v=0\r\no=mozilla...THIS_IS_SDPARTA') === 0) {
         return 'moz';
-    } else if (sdp.indexOf('v=0\r\no=thisisadapterortc') === 0) {
-        return 'edge';
-    } else if (sdp.indexOf('a=msid-semantic: WMS APPEAR\r\n') === 0) {
-        return 'appear.in mobile';
     } else {
         return 'webrtc.org'; // maybe?
     }

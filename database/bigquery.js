@@ -6,25 +6,32 @@ const logger = require('../logging');
 
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
+const TEMP_FOLDER = 'temp/bigquery';
+
 class RecordBuffer extends EventEmitter {
     constructor({ maxFlushTime, bufferSize }) {
         super();
 
         this.maxFlushTime = maxFlushTime;
-        this.nextFlush = setTimeout(this.flush.bind(this), this.maxFlushTime);
 
         this.bufferSize = bufferSize;
         this.fileCount = 0;
         this.bufferedItems = 0;
-        this.currentFile = fs.createWriteStream('bigquery-' + this.fileCount);
+
+        this.currentFile = fs.createWriteStream(`${TEMP_FOLDER}/features-${this.fileCount}`);
+
+        this.nextFlush = setTimeout(this.flush.bind(this), this.maxFlushTime);
     }
+
     put(record) {
+        logger.debug('new record added');
         this.currentFile.write(JSON.stringify(record) + '\n');
         this.bufferedItems++;
         if (this.bufferedItems >= this.bufferSize) {
             this.flush();
         }
     }
+
     flush() {
         clearTimeout(this.nextFlush);
         this.nextFlush = setTimeout(this.flush.bind(this), this.maxFlushTime);
@@ -36,22 +43,40 @@ class RecordBuffer extends EventEmitter {
 
         this.bufferedItems = 0;
         this.fileCount++;
-        this.currentFile = fs.createWriteStream('bigquery-' + this.fileCount);
-        pendingFile.end();
+        this.currentFile = fs.createWriteStream(`${TEMP_FOLDER}/features-${this.fileCount}`);
         pendingFile.on('finish', () => {
             logger.debug(`Flushing file ${pendingFile.path}`);
             this.emit('flush', pendingFile.path);
         });
+        pendingFile.end();
     }
-
 }
 
 module.exports = function (config) {
     if (!config) {
-        console.warn('No GCP/Bigquery configuration present. Skipping Bigquery database.')
+        logger.warn('No GCP/Bigquery configuration present. Skipping Bigquery database.')
         return;
     }
 
+    try {
+        if (fs.existsSync(TEMP_FOLDER)) {
+            fs.readdirSync(TEMP_FOLDER).forEach(fname => {
+                try {
+                    const file = TEMP_FOLDER + '/' + fname;
+                    logger.debug(`Removing file ${file}`)
+                    fs.unlinkSync(file);
+                } catch (e) {
+                    logger.error(`Error while unlinking file ${fname} - ${e.message}`);
+                }
+            });
+        } else {
+            logger.debug(`Creating working dir ${TEMP_FOLDER}`)
+            fs.mkdirSync(TEMP_FOLDER, { recursive: true });
+        }
+    } catch (e) {
+        logger.error(`Error while accessing working dir ${TEMP_FOLDER} - ${e.message}`);
+    }
+    
     const bigquery = new BigQuery();
     const recordBuffer = new RecordBuffer({
         maxFlushTime: config.maxFlushTime || 5 * 60 * 1000,
@@ -67,7 +92,12 @@ module.exports = function (config) {
                     fs.unlink(filename, () => { });
                 }
             })
-            .catch(e => console.error('error loading into bigquery', e));
+            .catch(e => {
+                if (isProduction) {
+                    fs.unlink(filename, () => { });
+                } 
+                logger.error('Error loading into bigquery', e);
+            });
     });
     return {
         put: function (pageUrl, clientId, connectionId, clientFeatures, connectionFeatures, streamFeatures) {

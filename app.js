@@ -5,6 +5,9 @@ const uuid = require('uuid');
 const os = require('os');
 const child_process = require('child_process');
 const http = require('http');
+const https = require('https');
+
+const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
 
 const WebSocketServer = require('ws').Server;
 
@@ -13,10 +16,9 @@ const obfuscate = require('./obfuscator');
 
 // Configure database, fall back to redshift-firehose.
 let database;
-if (config.gcp && (config.gcp.dataset && config.gcp.table)) {
+if (config.gcp && config.gcp.dataset && config.gcp.table) {
     database = require('./database/bigquery.js')(config.gcp);
-}
-if (!database) {
+} else {
     database = require('./database/redshift-firehose.js')(config.firehose);
 }
 
@@ -24,13 +26,12 @@ if (!database) {
 let store;
 if (config.gcp && config.gcp.bucket) {
     store = require('./store/gcp.js')(config.gcp);
-}
-if (!store) {
+} else {
     store = require('./store/s3.js')(config.s3);
 }
 
 let server;
-const tempPath = 'temp';
+const TEMP_FOLDER = 'temp/raw';
 
 const prom = require('prom-client');
 
@@ -81,14 +82,18 @@ class ProcessQueue {
             if (this.numProc < this.maxProc) {
                 process.nextTick(this.process.bind(this));
             }
-            const path = tempPath + '/' + clientid;
+            const path = TEMP_FOLDER + '/' + clientid;
             store.put(clientid, path)
                 .then(() => {
-                    fs.unlink(path, () => { });
+                    if (isProduction) {
+                        fs.unlink(path, () => { });
+                    }
                 })
                 .catch((err) => {
                     logger.error('Error storing: %s - %s', path, err);
-                    fs.unlink(path, () => { });
+                    if (isProduction) {
+                        fs.unlink(path, () => { });
+                    }
                 })
         });
         p.on('message', (msg) => {
@@ -111,32 +116,33 @@ const q = new ProcessQueue();
 
 function setupWorkDirectory() {
     try {
-        if (fs.existsSync(tempPath)) {
-            fs.readdirSync(tempPath).forEach(fname => {
+        if (fs.existsSync(TEMP_FOLDER)) {
+            fs.readdirSync(TEMP_FOLDER).forEach(fname => {
                 try {
-                    logger.debug(`Removing file ${tempPath + '/' + fname}`)
-                    fs.unlinkSync(tempPath + '/' + fname);
+                    const file = TEMP_FOLDER + '/' + fname;
+                    logger.debug(`Removing file ${file}`)
+                    fs.unlinkSync(file);
                 } catch (e) {
                     logger.error(`Error while unlinking file ${fname} - ${e.message}`);
                 }
             });
         } else {
-            logger.debug(`Creating working dir ${tempPath}`)
-            fs.mkdirSync(tempPath);
+            logger.debug(`Creating working dir ${TEMP_FOLDER}`)
+            fs.mkdirSync(TEMP_FOLDER, { recursive: true });
         }
     } catch (e) {
-        logger.error(`Error while accessing working dir ${tempPath} - ${e.message}`);
+        logger.error(`Error while accessing working dir ${TEMP_FOLDER} - ${e.message}`);
     }
 }
 
-function setupHttpServer(port, keys) {
-    const options = keys ? {
-        key: keys.serviceKey,
-        cert: keys.certificate,
+function setupHttpServer(port, config) {
+    const tls = config && config.key && config.cert;
+    const options = tls ? {
+        key: fs.readFileSync(config.key),
+        cert: fs.readFileSync(config.cert),
     } : {}
 
-    const server = http.Server(options, () => { })
-        .on('request', (request, response) => {
+    const server = (tls ? https : http).createServer(options, (request, response) => {
             switch (request.url) {
                 case '/healthcheck':
                     response.writeHead(200);
@@ -179,12 +185,14 @@ function setupWebSocketsServer(server) {
 
         const ua = upgradeReq.headers['user-agent'];
         const clientid = uuid.v4();
-        let tempStream = fs.createWriteStream(tempPath + '/' + clientid);
+        const file = TEMP_FOLDER + '/' + clientid;
+        const tempStream = fs.createWriteStream(file);
         tempStream.on('finish', () => {
+            logger.debug('stream finished');
             if (numberOfEvents > 0) {
                 q.enqueue(clientid);
             } else {
-                fs.unlink(tempPath + '/' + clientid, () => {
+                fs.unlink(file, () => {
                     // we're good...
                 });
             }
@@ -229,10 +237,6 @@ function setupWebSocketsServer(server) {
 
                 numberOfEvents++;
 
-                if (data[0].endsWith('OnError')) {
-                    // monkey-patch java/swift sdk bugs.
-                    data[0] = data[0].replace(/OnError$/, 'OnFailure');
-                }
                 switch (data[0]) {
                     case 'getUserMedia':
                     case 'getUserMediaOnSuccess':
@@ -277,18 +281,18 @@ function setupWebSocketsServer(server) {
             connected.dec();
             tempStream.write(JSON.stringify(['close', null, null, Date.now()]));
             tempStream.end();
-            tempStream = null;
         });
     });
 }
 
-function run(keys) {
+function run() {
     setupWorkDirectory();
 
-    server = setupHttpServer(config.get('server').port, keys);
+    const { port, cert, key, metrics } = config.get('server')
+    server = setupHttpServer(port, { cert, key });
 
-    if (config.get('server').metrics) {
-        setupMetricsServer(config.get('server').metrics);
+    if (metrics) {
+        setupMetricsServer(metrics);
     }
 
     setupWebSocketsServer(server);

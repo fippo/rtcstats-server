@@ -6,18 +6,18 @@
   "scripts": {
     "test": "eslint *.js database/*.js store/*.js && node test/client.js",
     "start": "NODE_ENV=production node app.js",
-    "watch:dev": "nodemon --exec 'NODE_ENV=production node app.js'"
+    "dev": "nodemon --exec 'NODE_ENV=development DEBUG=1 node app.js'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/opentok/rtcstats-server.git"
+    "url": "git+https://github.com/fippo/rtcstats-server.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/opentok/rtcstats-server/issues"
+    "url": "https://github.com/fippo/rtcstats-server/issues"
   },
-  "homepage": "https://github.com/opentok/rtcstats-server#readme",
+  "homepage": "https://github.com/fippo/rtcstats-server#readme",
   "dependencies": {
     "@google-cloud/bigquery": "^4.5.0",
     "@google-cloud/storage": "^4.1.3",

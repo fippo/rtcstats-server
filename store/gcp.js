@@ -9,15 +9,13 @@ module.exports = function (config) {
   const storage = new Storage();
 
   return {
-    put: function (key, filename) {
-      return new Promise((resolve) => {
-        if (!configured) {
-          logger.warn('no bucket configured for storage');
-          return resolve(); // not an error.
-        }
-        logger.debug(`Adding file: ${filename} to GCP bucket`);
-        return storage.bucket(bucket).upload(filename, { gzip: true });
-      });
+    put: async function (key, filename) {
+      if (!configured) {
+        logger.warn('no bucket configured for gcp storage');
+        throw new Error('no bucket configured for gcp storage')
+      }
+      logger.debug(`Adding file: ${filename} to GCP bucket`);
+      await storage.bucket(bucket).upload(filename, { gzip: true });
     },
   };
 }

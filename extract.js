@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const canUseProcessSend = !!process.send;
 const isProduction = process.env.NODE_ENV && process.env.NODE_ENV === 'production';
+const TEMP_FOLDER = 'temp/raw';
 
 function capitalize(str) {
     return str[0].toUpperCase() + str.substr(1);
@@ -35,7 +36,6 @@ function dump(url, client) {
             total += client.peerConnections[id].length;
         });
         console.log('DUMP', client.getUserMedia.length, Object.keys(client.peerConnections).length, total);
-        return;
     }
 }
 
@@ -69,7 +69,7 @@ function generateFeatures(url, client, clientid) {
     });
     if (Object.keys(client.peerConnections).length === 0) {
         // we only have GUM and potentially GUM errors.
-        if (canUseProcessSend && isProduction) {
+        if (canUseProcessSend) {
             process.send({url, clientid, connid: '', clientFeatures});
         }
     }
@@ -126,7 +126,7 @@ function generateFeatures(url, client, clientid) {
                     }
                 });
             }
-            if (canUseProcessSend && isProduction) {
+            if (canUseProcessSend) {
                 process.send({url, clientid, connid, clientFeatures, connectionFeatures, streamFeatures});
             }
         }
@@ -135,7 +135,7 @@ function generateFeatures(url, client, clientid) {
 }
 
 const clientid = process.argv[2];
-const path = 'temp/' + clientid;
+const path = TEMP_FOLDER + '/' + clientid;
 fs.readFile(path, {encoding: 'utf-8'}, (err, data) => {
     if (err) {
         console.error(err, path);
