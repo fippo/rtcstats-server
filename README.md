@@ -1,3 +1,6 @@
+This repository is no longer maintained. See [here](https://github.com/rtcstats/rtcstats)
+for the current version.
+
 # rtcstats-server
 server for https://github.com/opentok/rtcstats
 
