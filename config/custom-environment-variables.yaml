@@ -1,0 +1,6 @@
+server:
+    port: PORT
+
+s3:
+    region: AWS_REGION
+    bucket: STORAGE_BUCKET
